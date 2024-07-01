@@ -18,6 +18,7 @@ Create repository
 - Took roughly 20 mins
 - Only took so long due to setting up a new GitHub account for professional work
 - Also due to MacOS being weird about removing extensions from files
+- Selected Apache 2.0 license since it seemed to be the most suitable for the project
 
 Create wireframe in Keynote
 - Took roughy 1.5 hours
