@@ -12,7 +12,7 @@ Get llama.cpp running stably and connected to MikuPad
 Investigate and reverse engineer Mikupad
 - Took roughly 2 hours
 - Took a while to figure out where exactly the probabilities and tokens where stored and how they were used due to the general lack of comments and that it was all in one file
-- Turns out the functionality was much simpler than anticipated, wrote up an explanation. See [Reverse Engineering MikuPad](docs/research/Reverse%20Engineering%20MikuPad)
+- Turns out the functionality was much simpler than anticipated, wrote up an explanation. See [Reverse Engineering MikuPad](docs/research/Reverse%20Engineering%20MikuPad.md)
 
 Create repository
 - Took roughly 20 mins
