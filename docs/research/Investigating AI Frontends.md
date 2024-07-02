@@ -12,7 +12,7 @@ Open WebUI is a locally hosted UI interface that looks almost identical to ChatG
 - It is relatively simple to set up using docker, although this could be better
 - It has the second largest user base with 29.8k stars and 3.2k forks
 
-Developers can add functionality to the front end using the [pipelines](https://github.com/open-webui/pipelines)system. However, this only seems to add non-UI functionality, only being able to filter content and pipe input/outputs to the AI to other programs. As far as I can tell there isn't any options for creating custom UI elements using this system. 
+Developers can add functionality to the front end using the [pipelines](https://github.com/open-webui/pipelines) system. However, this only seems to add non-UI functionality, only being able to filter content and pipe input/outputs to the AI to other programs. As far as I can tell there isn't any options for creating custom UI elements using this system. 
 
 ## [Text-Generation-WebUI](https://github.com/oobabooga/text-generation-webui)
 Text-Generation-WebUI is an AI front end designed specifically for LLMs.
