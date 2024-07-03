@@ -3,18 +3,12 @@ html, body {
     font-family: 'Ubuntu', sans-serif;
 }
 
-.gfg {
-    height: 50px;
-    width: 50px;
-
-}
-
 .mynav {
-    color: #fff;
+    color: #ffffff;
 }
 
 .mynav li a {
-    color: #fff;
+    color: #ffffff;
     text-decoration: none;
     width: 100%;
     display: block;
@@ -23,11 +17,11 @@ html, body {
 }
 
 .mynav li a.active {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgb(26, 78, 219);
 }
 
 .mynav li a:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgb(255, 0, 0);
 }
 
 .mynav li a i {
@@ -36,7 +30,7 @@ html, body {
 }
 
 .notification-badge {
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 0, 0, 0.7);
     float: right;
     color: #222;
     font-size: 14px;
