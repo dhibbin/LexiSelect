@@ -12,137 +12,85 @@
 </head>
 <body>
 
-<div class="container-fluid p-0 d-flex h-100">
-    <div id="bdSidebar" 
-            class="d-flex flex-column 
+<div class="container-fluid p-0 d-flex" style="height: 100%; flex-wrap: nowrap;">
+    <div class="row flex-nowrap" style="width: 100%; margin: 0;">
+        <div class="col-3 p-0" style="min-width: 300px; max-width: 300px;">
+            <div id="bdSidebar" 
+                class="d-flex flex-column 
                 flex-shrink-0
                 p-3 bg-dark
-                text-white offcanvas-md offcanvas-start">
-        <ul class="mynav nav nav-pills flex-column mb-auto">
-            <li class="mb-3 ">
-                <label class="form-label mb-1">Prompt:</label>
-                <div class="input-group">
-                    <textarea class="form-control" placeholder="Type your prompt here" id="TextPrompt"></textarea>
-                  </div>
-            </li>
-            <li class="mb-3">
-                <div class="input-group">
-                    <span class="input-group-text">n_log</span>
-                    <input type="number" class="form-control" value="10" aria-label="Username" aria-describedby="basic-addon1">
-                </div>
-            </li>
-            <li class="nav-item mb-3">
-                <div class="input-group">
-                    <span class="input-group-text">Step</span>
-                    <input type="number" class="form-control" value="10" aria-label="Username" aria-describedby="basic-addon1">
-                </div>
-            </li>
-            <li class="nav-item mb-3">
-                <label class="form-label mb-1">LLM Server:</label>
-                <div class="input-group">
-                    <input type="text" class="form-control" value="localhost:8080" aria-label="Username" aria-describedby="basic-addon1">
-                </div>
-            </li>
-            <li>
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary w-100" type="button" id="GenerateButton">Generate Text</button>
-                </div>
-            </li>
-        </ul>
-    </div>
-
-    <div class="bg-light flex-fill flex-shrink-0">
-        <div class="p-3 d-flex text-white bg-dark">
-            <a href="#" class="text-white" 
-                data-bs-toggle="offcanvas"
-                data-bs-target="#bdSidebar">
-                <i class="fa-solid fa-bars"></i>
-            </a>
-            <span class="ms-3">LexiSelect</span>
-        </div>
-        <div class="p-3">
-            <div class="row">
-                <div class="col">
-                    <p id="output1"></p>
-                </div>
+                text-white offcanvas-md offcanvas-start" style="height: 100%;">
+                <ul class="mynav nav nav-pills flex-column mb-auto">
+                    <li class="mb-3 ">
+                        <label class="form-label mb-1">Prompt:</label>
+                        <div class="input-group">
+                            <textarea class="form-control" placeholder="Type your prompt here" id="TextPrompt"></textarea>
+                        </div>
+                    </li>
+                    <li class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text">n_log</span>
+                            <input type="number" class="form-control" value="10" aria-label="Username" aria-describedby="basic-addon1">
+                        </div>
+                    </li>
+                    <li class="nav-item mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text">Step</span>
+                            <input type="number" class="form-control" value="10" aria-label="Username" aria-describedby="basic-addon1">
+                        </div>
+                    </li>
+                    <li class="nav-item mb-3">
+                        <label class="form-label mb-1">LLM Server:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" value="localhost:8080" aria-label="Username" aria-describedby="basic-addon1">
+                        </div>
+                    </li>
+                    <li>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary w-100" type="button" id="GenerateButton">Generate Text</button>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
-
-        <ul class="list-group list-group-horizontal">
-            <div class="d-flex align-items-center">
-                <a href="#" class="list-group-item list-group-item-action p-0">Word1</a>
+        <div class="col-9 p-0 flex-fill">
+            <div class="p-3 d-flex text-white bg-dark" style="margin: 0;">
+                <a href="#" class="text-white" 
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#bdSidebar">
+                    <i class="fa-solid fa-bars"></i>
+                </a>
+                <span class="ms-3">LexiSelect</span>
             </div>
-            <li class="list-group-item">A second itjhhkjhklh1jdlafjldsjflsadjfldasjfljdsfjdas1jdlafjldsjflsadjfldasjfljdsfjdas1jdlafjldsjflsadjfldasjfljdsfjdas1jdlafjldsjflsadjfldasjfljdsfjdas1jdlafjldsjflsadjfldasjfljdsfjdas1jdlafjldsjflsadjfldasjfljdsfjdas1jdlafjldsjflsadjfldasjfljdsfjdas1jdlafjldsjflsadjfldasjfl1jdlafjldsjflsadjfldasjfljdsfjdas1jdlafjldsjflsadjfldasjfljdsfjdas1jdlafjldsjflsadjfldasjfljdsfjdas1jdlafjldsjflsadjfldasjfljdsfjdas1jdlafjldsjflsadjfldasjfljdsfjdasjdsfjdas1jdlafjldsjflsadjfldasjfljdsfjdaskhkhkhjkhlkhem</li>
-            <li class="list-group-item">A third item</li>
-          </ul>
-       
-        <hr>
-        <div class="row">
-            <div class="col">
-                <div class="container p-0 w-100%" style="width: 100%; overflow-x: scroll; margin: 0; margin-right: 0; box-sizing: border-box;">
-                    <div class="d-flex flex-fill">
-                        <div class="p-2">Item 1jdlafjldsjflsadjfldasjfljdsfjdas;ljf;dlsdasfjlsdajfldksajfsadj;fladsj;fsadj;fjasdljfasl;fdsafjsdaljf;adlsjf;djfl;ksj;lkfjd;kslajfd;klsajf;kldsjf;lkdsjafl;fjdajlksfjjfl;dsjafl;jdslfjsdaljfjlds;jfkl;sjf;lajf;lsdjfl;kdsajf;lksjf;ldsajf;ldksjf;lkdsfj;ldskjf;lksajfl;sdjf;ajfskldfj;las;jfdkfja;dsf</div>
-                        <div class="p-2">Item 2</div>
-                        <div class="p-2">Item 3</div>
-                        <div class="p-2">Item 1</div>
-                        <div class="p-2">Item 2</div>
-                        <div class="p-2">Item 3</div>
-                        <div class="p-2">Item 1</div>
-                        <div class="p-2">Item 2</div>
-                        <div class="p-2">Item 3</div>
-                        <div class="p-2">Item 1</div>
-                        <div class="p-2">Item 2</div>
-                        <div class="p-2">Item 3</div>
-                        <div class="p-2">Item 1</div>
-                        <div class="p-2">Item 2</div>
-                        <div class="p-2">Item 3</div>
-                        <div class="p-2">Item 1</div>
-                        <div class="p-2">Item 2</div>
-                        <div class="p-2">Item 3</div>
-                        <div class="p-2">Item 1</div>
-                        <div class="p-2">Item 2</div>
-                        <div class="p-2">Item 3</div>
-                        <div class="p-2">Item 1</div>
-                        <div class="p-2">Item 2</div>
-                        <div class="p-2">Item 3</div>
-                        <!-- Add more items as needed -->
+            
+            <div class="p-3">
+                <div class="row">
+                    <div class="col">
+                        <p id="output1"></p>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="container p-0 w-100%" style="width: 100%; overflow-x: scroll; margin: 0; margin-right: 0; box-sizing: border-box;">
-            <div class="d-flex flex-fill">
-                <div class="p-2">Item 1jdlafjldsjflsadjfldasjfljdsfjdas;ljf;dlsdasfjlsdajfldksajfsadj;fladsj;fsadj;fjasdljfasl;fdsafjsdaljf;adlsjf;djfl;ksj;lkfjd;kslajfd;klsajf;kldsjf;lkdsjafl;fjdajlksfjjfl;dsjafl;jdslfjsdaljfjlds;jfkl;sjf;lajf;lsdjfl;kdsajf;lksjf;ldsajf;ldksjf;lkdsfj;ldskjf;lksajfl;sdjf;ajfskldfj;las;jfdkfja;dsf</div>
-                <div class="p-2">Item 2</div>
-                <div class="p-2">Item 3</div>
-                <div class="p-2">Item 1</div>
-                <div class="p-2">Item 2</div>
-                <div class="p-2">Item 3</div>
-                <div class="p-2">Item 1</div>
-                <div class="p-2">Item 2</div>
-                <div class="p-2">Item 3</div>
-                <div class="p-2">Item 1</div>
-                <div class="p-2">Item 2</div>
-                <div class="p-2">Item 3</div>
-                <div class="p-2">Item 1</div>
-                <div class="p-2">Item 2</div>
-                <div class="p-2">Item 3</div>
-                <div class="p-2">Item 1</div>
-                <div class="p-2">Item 2</div>
-                <div class="p-2">Item 3</div>
-                <div class="p-2">Item 1</div>
-                <div class="p-2">Item 2</div>
-                <div class="p-2">Item 3</div>
-                <div class="p-2">Item 1</div>
-                <div class="p-2">Item 2</div>
-                <div class="p-2">Item 3</div>
-                <!-- Add more items as needed -->
+
+            
+            <div class="d-flex flex-column flex-nowrap p-0" style="width: 100%; height: 300px; overflow-x: scroll;">
+                <ul class="list-group list-group-horizontal">
+                    <button type="button" class="btn btn-primary mb-2">ButtonButtonButtonButtonButtonButton</button>
+                    <button type="button" class="btn btn-secondary mb-2">ButtonButtonButtonButtonButtonButton</button>
+                    <button type="button" class="btn btn-success mb-2">ButtonButtonButtonButtonButtonButton</button>
+                    <button type="button" class="btn btn-danger mb-2">ButtonButtonButtonButtonButtonButton</button>
+                    <button type="button" class="btn btn-warning mb-2">ButtonButtonButtonButtonButtonButton</button>
+                    <button type="button" class="btn btn-warning mb-2">ButtonButtonButtonButtonButtonButton</button>
+                </ul>
             </div>
         </div>
-        
-
     </div>
-</div>
+    
+    
+
+
+
+    
+
 
 <script src="script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

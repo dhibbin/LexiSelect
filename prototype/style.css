@@ -4,6 +4,10 @@ html, body {
     font-family: 'Ubuntu', sans-serif;
 }
 
+body {
+    overflow: hidden; /* Add scrollbar if necessary */
+}
+
 .mynav {
     color: #ffffff;
 }
