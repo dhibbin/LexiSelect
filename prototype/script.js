@@ -28,6 +28,9 @@ function typeWriter(text, speed, elementId) {
 document.addEventListener("DOMContentLoaded", function() {
     // Your code here will run once the DOM is fully loaded
     console.log("Document Object loaded");
+    let temp = document.getElementById("head");
+    let clon = temp.content.cloneNode(true);
+    document.getElementById("mainContent").appendChild(clon);
 });
 
 document.getElementById("GenerateButton").addEventListener("click", async function() {
