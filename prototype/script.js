@@ -5,7 +5,7 @@ async function SendPrompt(prompt) {
         method: 'POST',
         body: JSON.stringify({
             prompt,
-            n_predict: 50,
+            n_predict: 500,
             n_probs : 10
         })
     })
@@ -83,20 +83,19 @@ function ShowProbabilities(tokenProbs) {
 }
 
 function GenerateWithNewToken(newToken, oldToken) {
-    
+
 }
 
 var tokenList = [];
 var currentPrompt = "";
 
-document.addEventListener("DOMContentLoaded", function() {
-    // Your code here will run once the DOM is fully loaded
-    console.log("Document Object loaded");
+
+document.getElementById("GenerateButton").addEventListener("click", function() {
+    var input = document.getElementById("TextPrompt").value;
+    GenerateOutput(input);
 });
 
-document.getElementById("GenerateButton").addEventListener("click", async function() {
-    var input = document.getElementById("TextPrompt").value;
-
+async function GenerateOutput(input) {
     try {
         var output = await SendPrompt(input);
       } catch (error) {
@@ -104,6 +103,5 @@ document.getElementById("GenerateButton").addEventListener("click", async functi
       }
 
     OutputPrompt(await output);
-    //typeWriter((await output), 50, "output1")
-});
+}
 
