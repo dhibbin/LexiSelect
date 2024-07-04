@@ -73,9 +73,20 @@
 
             
             <div class="d-flex flex-column flex-nowrap p-0" style="width: 100%; height: 300px; overflow-x: scroll;" id="outputBox">
-                <ul class="list-group list-group-horizontal" id="outputBoxList">
-                    <button type="button" class="btn btn-primary mb-2">ButtonButtonButtonButtonButtonButton</button>
-                    
+                <ul class="list-group list-group-horizontal" id="outputBoxList">     
+                    <!--button type="button" class="outputButton btn btn-primary">Word</button-->
+                </ul>
+            </div>
+
+            <div class="d-flex flex-column flex-nowrap p-0" style="width: 100%; height: 300px; overflow-x: scroll;" id="outputBox">
+                <ul class="list-group list-group-horizontal flex-nowrap" id="outputProbList">     
+                    <!--button type="button" class="outputButton btn btn-primary">Word</button-->
+                    <li>
+                        <div class="input-group m-1 flex-nowrap">
+                            <span class="input-group-text p-1">99%</span>
+                            <button type="button" class="btn btn-primary">Word</button>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -86,8 +97,16 @@
 
 
     
-<template id="head">
-    <button type="button" class="btn btn-primary mb-2"></button>
+<template id="textButton">
+    <button type="button" class="outputButton btn btn-primary mb-2"></button>
+</template>
+<template id="tokenOptionButton">
+    <li>
+        <div class="input-group m-1">
+            <span class="input-group-text p-1">99%</span>
+            <button type="button" class="btn btn-primary">Word</button>
+        </div>
+    </li>
 </template>
 
 <script src="script.js"></script>

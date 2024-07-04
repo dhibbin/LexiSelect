@@ -23,7 +23,12 @@ async function typeWriter(text, speed, element) {
     return new Promise((resolve) => {
         function helper() {
             if (i < text.length) {
-                element.innerHTML += text.charAt(i);
+                if (text.charAt(i) == " ") {
+                    element.innerHTML += '&nbsp';
+                }
+                else { 
+                    element.innerHTML += text.charAt(i);
+                }
                 i++;
                 setTimeout(helper, speed);
             }
@@ -36,18 +41,42 @@ async function typeWriter(text, speed, element) {
 }
 
 async function OutputPrompt(response) {
+    console.log(response);
     for (let i = 0; i < response.completion_probabilities.length; i++) {
-        let temp = document.getElementById("head");
+        let temp = document.getElementById("textButton");
         let clone = temp.content.cloneNode(true);   
         let button = clone.querySelector('button');
         document.getElementById("outputBoxList").appendChild(clone);
-        console.log(clone);
         await typeWriter(response.completion_probabilities[i].content, 10, button);
-        console.log(i);
+
+        tokenList.push(response.completion_probabilities[i])
+        button.addEventListener("click", () => ShowProbabilities(response.completion_probabilities[i]) )
     }
 }
 
+function ShowProbabilities(tokenProbs) {
+    console.log(tokenProbs);
 
+    //document.getElementById("outputProbList").children.forEach(element => {
+    //    element.remove()
+    //});
+
+    tokenProbs.probs.forEach(element => {
+        let clone = document.getElementById("tokenOptionButton").content.cloneNode(true);
+        let button = clone.querySelector("button");
+        let label = clone.querySelector("span");
+        label.innerHTML = element["prob"];
+        button.innerHTML = element["tok_str"];
+        if (element["tok_str"] == tokenProbs.content) {
+            button.disabled = true;
+        }
+        document.getElementById("outputProbList").appendChild(clone);
+    });
+    
+    
+}
+
+var tokenList = [];
 
 document.addEventListener("DOMContentLoaded", function() {
     // Your code here will run once the DOM is fully loaded

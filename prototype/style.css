@@ -42,3 +42,10 @@ body {
     padding: 0px 8px;
     border-radius: 2px;
 }
+
+.outputButton {
+    margin: 0px;
+    margin-right: -1.5px;
+    padding: 0px;
+    border-radius: 1px;
+}
