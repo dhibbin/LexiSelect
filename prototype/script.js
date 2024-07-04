@@ -5,37 +5,65 @@ async function SendPrompt(prompt) {
         method: 'POST',
         body: JSON.stringify({
             prompt,
-            n_predict: 500,
-            n_log : 10
+            n_predict: 50,
+            n_probs : 10
         })
     })
-    return (await response.json()).content
+
+    if(!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return (await response.json())
 }
 
-function typeWriter(text, speed, elementId) {
+async function typeWriter(text, speed, element) {
     var i = 0;
-    function helper() {
-        if (i < text.length) {
-            document.getElementById(elementId).innerHTML += text.charAt(i);
-            i++;
-            setTimeout(helper, speed);
+
+    return new Promise((resolve) => {
+        function helper() {
+            if (i < text.length) {
+                element.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(helper, speed);
+            }
+            else {
+                resolve();
+            }
         }
-    }
-    helper();
+        helper();
+    });
 }
+
+async function OutputPrompt(response) {
+    for (let i = 0; i < response.completion_probabilities.length; i++) {
+        let temp = document.getElementById("head");
+        let clone = temp.content.cloneNode(true);   
+        let button = clone.querySelector('button');
+        document.getElementById("outputBoxList").appendChild(clone);
+        console.log(clone);
+        await typeWriter(response.completion_probabilities[i].content, 10, button);
+        console.log(i);
+    }
+}
+
 
 
 document.addEventListener("DOMContentLoaded", function() {
     // Your code here will run once the DOM is fully loaded
     console.log("Document Object loaded");
-    let temp = document.getElementById("head");
-    let clon = temp.content.cloneNode(true);
-    document.getElementById("mainContent").appendChild(clon);
 });
 
 document.getElementById("GenerateButton").addEventListener("click", async function() {
     var input = document.getElementById("TextPrompt").value;
-    var output = await SendPrompt(input);
-    console.log(output);
-    typeWriter((await output), 50, "output1")
+
+    try {
+        var output = await SendPrompt(input);
+      } catch (error) {
+        console.error('An error occurred:', error);
+      }
+
+    OutputPrompt(await output);
+    //typeWriter((await output), 50, "output1")
 });
+
