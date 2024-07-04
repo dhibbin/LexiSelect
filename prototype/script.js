@@ -42,41 +42,52 @@ async function typeWriter(text, speed, element) {
 
 async function OutputPrompt(response) {
     console.log(response);
+
+    currentPrompt = response.content.replace("<|assistant|>", "");
+
     for (let i = 0; i < response.completion_probabilities.length; i++) {
+        if (response.completion_probabilities[i].content == "<|assistant|>") {
+            continue;
+        }
+        
         let temp = document.getElementById("textButton");
         let clone = temp.content.cloneNode(true);   
         let button = clone.querySelector('button');
         document.getElementById("outputBoxList").appendChild(clone);
         await typeWriter(response.completion_probabilities[i].content, 10, button);
 
-        tokenList.push(response.completion_probabilities[i])
-        button.addEventListener("click", () => ShowProbabilities(response.completion_probabilities[i]) )
+        tokenList.push(response.completion_probabilities[i]);
+        button.addEventListener("click", () => ShowProbabilities(response.completion_probabilities[i]) );
     }
 }
 
 function ShowProbabilities(tokenProbs) {
     console.log(tokenProbs);
 
-    //document.getElementById("outputProbList").children.forEach(element => {
-    //    element.remove()
-    //});
+    document.getElementById("outputProbList").innerHTML = "";
+
+    tokenProbs.probs.sort((a, b) => b.prob - a.prob);
 
     tokenProbs.probs.forEach(element => {
         let clone = document.getElementById("tokenOptionButton").content.cloneNode(true);
         let button = clone.querySelector("button");
         let label = clone.querySelector("span");
-        label.innerHTML = element["prob"];
+        label.innerHTML = element["prob"].toString().substring(0, 5);
         button.innerHTML = element["tok_str"];
         if (element["tok_str"] == tokenProbs.content) {
             button.disabled = true;
         }
         document.getElementById("outputProbList").appendChild(clone);
-    });
-    
+        button.addEventListener("click", () => GenerateWithNewToken(element["tok_str"], tokenProbs.content))
+    }); 
+}
+
+function GenerateWithNewToken(newToken, oldToken) {
     
 }
 
 var tokenList = [];
+var currentPrompt = "";
 
 document.addEventListener("DOMContentLoaded", function() {
     // Your code here will run once the DOM is fully loaded
