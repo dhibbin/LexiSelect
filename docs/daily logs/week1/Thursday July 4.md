@@ -2,7 +2,7 @@
 
 Fixed the HTML UI layout
 - Took roughly over 1.5 hours
-- The page was going off screen and was caused by code I copied from examples
+- The page was going off screen, this was caused by code I copied from examples
 - Re wrote the layout myself to use bootstrap's rows and columns, now it works as expected and I understood it
 
 Added interactive scrolling text system
