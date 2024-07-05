@@ -3,12 +3,15 @@ async function SendPrompt(userPrompt, systemPrompt, currentOutput) {
     userPrompt = "<|system|>" + systemPrompt + "<|end|>";
     const prompt = systemPrompt + userPrompt + currentOutput;
     
+    //console.log(document.getElementById("n_probs").value);
+
     let response = await fetch("http://127.0.0.1:8080/completion", {
         method: 'POST',
         body: JSON.stringify({
             prompt,
-            n_predict: 500,
-            n_probs : 10
+            n_predict: 10,
+            n_probs : 10,
+            seed : document.getElementById("seed").value
         })
     })
 
@@ -42,25 +45,39 @@ async function typeWriter(text, speed, element) {
     });
 }
 
-async function OutputPrompt(response, newLine = false) {
-    console.log(response);
 
+async function UpdateContent(response, newPath = false) {
+    console.log(response);
     currentPrompt += response.content.replace("<|assistant|>", "");
 
     var currentList;
 
-    if (newLine || outputLists.length == 0) {
+    if (newPath || outputLists.length == 0) {
         newList = document.getElementById("textOutputList").content.cloneNode(true);
         currentList = newList.querySelector("ul");
         outputLists.push(currentList);
         document.getElementById("outputBox").appendChild(newList);
+        
+        if (tokenLists.length == 0) {
+            tokenLists.push(response.completion_probabilities)
+        }
+        else {
+            tokenLists[currentIndex] = tokenLists[currentIndex].concat(response.completion_probabilities);
+        }
+        OutputPrompt(tokenLists[tokenLists.length - 1], currentList);
     }
     else {
-        currentList = outputLists[outputLists.length - 1];
+        tokenLists[currentIndex].concat(response.completion_probabilities);
+        currentList = outputLists[currentIndex];
+        OutputPrompt(response.completion_probabilities, currentList);
     }
+    console.log(tokenLists)
+}
 
-    for (let i = 0; i < response.completion_probabilities.length; i++) {
-        if (response.completion_probabilities[i].content == "<|assistant|>") {
+async function OutputPrompt(probTokens, currentList) {
+
+    for (let i = 0; i < probTokens.length; i++) {
+        if (probTokens[i].content == "<|assistant|>") {
             continue;
         }
         
@@ -68,14 +85,14 @@ async function OutputPrompt(response, newLine = false) {
         let clone = temp.content.cloneNode(true);   
         let button = clone.querySelector('button');
         currentList.appendChild(clone);
-        await typeWriter(response.completion_probabilities[i].content, 10, button);
+        await typeWriter(probTokens[i].content, 10, button);
 
-        tokenList.push(response.completion_probabilities[i]);
-        button.addEventListener("click", () => ShowProbabilities(response.completion_probabilities[i]) );
+        //tokenLists.push(response.completion_probabilities[i]);
+        button.addEventListener("click", () => ShowProbabilities(probTokens[i], currentIndex) );
     }
 }
 
-function ShowProbabilities(tokenProbs) {
+function ShowProbabilities(tokenProbs, tokenListIndex) {
     console.log(tokenProbs);
 
     document.getElementById("outputProbList").innerHTML = "";
@@ -92,22 +109,70 @@ function ShowProbabilities(tokenProbs) {
             button.disabled = true;
         }
         document.getElementById("outputProbList").appendChild(clone);
-        button.addEventListener("click", () => GenerateWithNewToken(element["tok_str"], tokenProbs))
+        button.addEventListener("click", () => GenerateWithNewToken(element["tok_str"], tokenProbs, tokenListIndex))
     }); 
 }
 
-function GenerateWithNewToken(newToken, oldToken) {
+async function GenerateWithNewToken(newToken, oldToken, tokenListIndex) {
     //TODO: Empty current prompt and add all tokens up until this token to the string add newtoken
+    var newPrompt;
+    
+    var currentTokens = JSON.parse(JSON.stringify(tokenLists[tokenListIndex])); 
+    //console.log(currentTokens);
+
+    for (let index = 0; index < currentTokens.length; index++) {
+        
+        console.log(oldToken);
+        console.log(currentTokens[index]);
+
+        if (currentTokens[index] != oldToken) {
+            newPrompt += currentTokens[index].content;
+        }
+        else {
+            //console.log(element);
+            //console.log(oldToken);
+            newPrompt += newToken;
+            currentTokens[index].content = newToken;
+            currentTokens.splice(index);
+
+            
+            tokenLists.push(currentTokens);
+            
+            /*
+            if (index + 1 < currentTokens.length - 1) {
+                tokenLists[tokenLists.length - 1].splice(index + 1);
+                tokenLists[tokenLists.length - 1][currentTokens.length - 1].content = newToken;
+            }
+            else {
+                tokenLists[tokenLists.length - 1].splice(index);
+                let newElement = element;
+                newElement.content = newToken;
+                tokenLists[tokenLists.length - 1].push(newElement);
+            }
+            */
+            
+            break;
+        }
+        
+    }
+    //console.log(currentTokens);
+    currentPrompt = newPrompt;
+
+    var input = document.getElementById("UserPrompt").value;
+    tokenLists.push(currentTokens);
+    currentIndex = tokenLists.length - 1;
+    UpdateContent(await GenerateOutput(input), true);
 }
 
-var tokenList = [];
+var currentIndex = 0;
+var tokenLists = [];
 var currentPrompt = "";
 var outputLists = [];
 
 
 document.getElementById("GenerateButton").addEventListener("click", async function() {
     var input = document.getElementById("UserPrompt").value;
-    OutputPrompt(await GenerateOutput(input));
+    UpdateContent(await GenerateOutput(input));
 });
 
 async function GenerateOutput(input) {
