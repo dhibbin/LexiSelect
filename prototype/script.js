@@ -9,8 +9,8 @@ async function SendPrompt(userPrompt, systemPrompt, currentOutput) {
         method: 'POST',
         body: JSON.stringify({
             prompt,
-            n_predict: 10,
-            n_probs : 10,
+            n_predict: 50,
+            n_probs : 5,
             seed : document.getElementById("seed").value
         })
     })
@@ -93,13 +93,18 @@ async function OutputPrompt(probTokens, currentList) {
 }
 
 function ShowProbabilities(tokenProbs, tokenListIndex) {
-    console.log(tokenProbs);
+    //console.log(tokenProbs);
 
     document.getElementById("outputProbList").innerHTML = "";
 
     tokenProbs.probs.sort((a, b) => b.prob - a.prob);
 
-    tokenProbs.probs.forEach(element => {
+    for (let index = 0; index < tokenProbs.probs.length; index++) {
+        const element = tokenProbs.probs[index];
+        if (element["prob"] <= 0.0) {
+            continue;
+        }
+
         let clone = document.getElementById("tokenOptionButton").content.cloneNode(true);
         let button = clone.querySelector("button");
         let label = clone.querySelector("span");
@@ -109,53 +114,28 @@ function ShowProbabilities(tokenProbs, tokenListIndex) {
             button.disabled = true;
         }
         document.getElementById("outputProbList").appendChild(clone);
-        button.addEventListener("click", () => GenerateWithNewToken(element["tok_str"], tokenProbs, tokenListIndex))
-    }); 
+        button.addEventListener("click", () => GenerateWithNewToken(element["tok_str"], tokenListIndex, index));
+    }
 }
 
-async function GenerateWithNewToken(newToken, oldToken, tokenListIndex) {
+async function GenerateWithNewToken(newToken, listIndex, tokenIndex) {
     //TODO: Empty current prompt and add all tokens up until this token to the string add newtoken
-    var newPrompt;
+    var newPrompt = "";
     
-    var currentTokens = JSON.parse(JSON.stringify(tokenLists[tokenListIndex])); 
-    //console.log(currentTokens);
+    var currentTokens = JSON.parse(JSON.stringify(tokenLists[listIndex])); 
+    console.log(currentTokens);
+    currentTokens[tokenIndex].content = newToken;
+    if(listIndex < currentTokens.length - 1) {
+        currentTokens.splice(tokenIndex + 1);
+    }
 
     for (let index = 0; index < currentTokens.length; index++) {
-        
-        console.log(oldToken);
-        console.log(currentTokens[index]);
-
-        if (currentTokens[index] != oldToken) {
-            newPrompt += currentTokens[index].content;
-        }
-        else {
-            //console.log(element);
-            //console.log(oldToken);
-            newPrompt += newToken;
-            currentTokens[index].content = newToken;
-            currentTokens.splice(index);
-
-            
-            tokenLists.push(currentTokens);
-            
-            /*
-            if (index + 1 < currentTokens.length - 1) {
-                tokenLists[tokenLists.length - 1].splice(index + 1);
-                tokenLists[tokenLists.length - 1][currentTokens.length - 1].content = newToken;
-            }
-            else {
-                tokenLists[tokenLists.length - 1].splice(index);
-                let newElement = element;
-                newElement.content = newToken;
-                tokenLists[tokenLists.length - 1].push(newElement);
-            }
-            */
-            
-            break;
-        }
-        
+        newPrompt += currentTokens[index];
     }
+    
+
     //console.log(currentTokens);
+    //console.log(newPrompt);
     currentPrompt = newPrompt;
 
     var input = document.getElementById("UserPrompt").value;
