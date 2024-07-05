@@ -1,5 +1,7 @@
-async function SendPrompt(prompt) {
-    prompt = "<|user|>" + prompt + "<|end|>"
+async function SendPrompt(userPrompt, systemPrompt, currentOutput) {
+    userPrompt = "<|user|>" + userPrompt + "<|end|>";
+    userPrompt = "<|system|>" + systemPrompt + "<|end|>";
+    const prompt = systemPrompt + userPrompt + currentOutput;
     
     let response = await fetch("http://127.0.0.1:8080/completion", {
         method: 'POST',
@@ -14,7 +16,7 @@ async function SendPrompt(prompt) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return (await response.json())
+    return (await response.json());
 }
 
 async function typeWriter(text, speed, element) {
@@ -97,17 +99,17 @@ var outputLists = [];
 
 
 document.getElementById("GenerateButton").addEventListener("click", function() {
-    var input = document.getElementById("TextPrompt").value;
+    var input = document.getElementById("UserPrompt").value;
     GenerateOutput(input);
 });
 
 async function GenerateOutput(input) {
     //prompt = "<|user|>" + prompt + "<|end|>"
 
-    
-    console.log(input + currentPrompt);
+    let sysPrompt = document.getElementById("SystemPrompt").value;
+
     try {
-        var output = await SendPrompt(input + currentPrompt);
+        var output = await SendPrompt(input, sysPrompt, currentPrompt);
     } catch (error) {
         console.error('An error occurred:', error);
     }
