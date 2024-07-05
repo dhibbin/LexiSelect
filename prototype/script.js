@@ -42,15 +42,22 @@ async function typeWriter(text, speed, element) {
     });
 }
 
-async function OutputPrompt(response) {
+async function OutputPrompt(response, newLine = false) {
     console.log(response);
 
     currentPrompt += response.content.replace("<|assistant|>", "");
 
-    var newList = document.getElementById("textOutputList").content.cloneNode(true);
-    var currentList = newList.querySelector("ul");
-    document.getElementById("outputBox").appendChild(newList);
-    //newList = newList.querySelector("ul");
+    var currentList;
+
+    if (newLine || outputLists.length == 0) {
+        newList = document.getElementById("textOutputList").content.cloneNode(true);
+        currentList = newList.querySelector("ul");
+        outputLists.push(currentList);
+        document.getElementById("outputBox").appendChild(newList);
+    }
+    else {
+        currentList = outputLists[outputLists.length - 1];
+    }
 
     for (let i = 0; i < response.completion_probabilities.length; i++) {
         if (response.completion_probabilities[i].content == "<|assistant|>") {
@@ -85,12 +92,12 @@ function ShowProbabilities(tokenProbs) {
             button.disabled = true;
         }
         document.getElementById("outputProbList").appendChild(clone);
-        button.addEventListener("click", () => GenerateWithNewToken(element["tok_str"], tokenProbs.content))
+        button.addEventListener("click", () => GenerateWithNewToken(element["tok_str"], tokenProbs))
     }); 
 }
 
 function GenerateWithNewToken(newToken, oldToken) {
-
+    //TODO: Empty current prompt and add all tokens up until this token to the string add newtoken
 }
 
 var tokenList = [];
@@ -98,14 +105,12 @@ var currentPrompt = "";
 var outputLists = [];
 
 
-document.getElementById("GenerateButton").addEventListener("click", function() {
+document.getElementById("GenerateButton").addEventListener("click", async function() {
     var input = document.getElementById("UserPrompt").value;
-    GenerateOutput(input);
+    OutputPrompt(await GenerateOutput(input));
 });
 
 async function GenerateOutput(input) {
-    //prompt = "<|user|>" + prompt + "<|end|>"
-
     let sysPrompt = document.getElementById("SystemPrompt").value;
 
     try {
@@ -113,7 +118,7 @@ async function GenerateOutput(input) {
     } catch (error) {
         console.error('An error occurred:', error);
     }
-
-    OutputPrompt(await output);
+    
+    return (await output);
 }
 
