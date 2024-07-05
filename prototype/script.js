@@ -43,7 +43,12 @@ async function typeWriter(text, speed, element) {
 async function OutputPrompt(response) {
     console.log(response);
 
-    currentPrompt = response.content.replace("<|assistant|>", "");
+    currentPrompt += response.content.replace("<|assistant|>", "");
+
+    var newList = document.getElementById("textOutputList").content.cloneNode(true);
+    var currentList = newList.querySelector("ul");
+    document.getElementById("outputBox").appendChild(newList);
+    //newList = newList.querySelector("ul");
 
     for (let i = 0; i < response.completion_probabilities.length; i++) {
         if (response.completion_probabilities[i].content == "<|assistant|>") {
@@ -53,7 +58,7 @@ async function OutputPrompt(response) {
         let temp = document.getElementById("textButton");
         let clone = temp.content.cloneNode(true);   
         let button = clone.querySelector('button');
-        document.getElementById("outputBoxList").appendChild(clone);
+        currentList.appendChild(clone);
         await typeWriter(response.completion_probabilities[i].content, 10, button);
 
         tokenList.push(response.completion_probabilities[i]);
@@ -88,6 +93,7 @@ function GenerateWithNewToken(newToken, oldToken) {
 
 var tokenList = [];
 var currentPrompt = "";
+var outputLists = [];
 
 
 document.getElementById("GenerateButton").addEventListener("click", function() {
@@ -96,11 +102,15 @@ document.getElementById("GenerateButton").addEventListener("click", function() {
 });
 
 async function GenerateOutput(input) {
+    //prompt = "<|user|>" + prompt + "<|end|>"
+
+    
+    console.log(input + currentPrompt);
     try {
-        var output = await SendPrompt(input);
-      } catch (error) {
+        var output = await SendPrompt(input + currentPrompt);
+    } catch (error) {
         console.error('An error occurred:', error);
-      }
+    }
 
     OutputPrompt(await output);
 }

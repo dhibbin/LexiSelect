@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,9 +23,16 @@
                 text-white offcanvas-md offcanvas-start" style="height: 100%;">
                 <ul class="mynav nav nav-pills flex-column mb-auto">
                     <li class="mb-3 ">
-                        <label class="form-label mb-1">Prompt:</label>
+                        <label class="form-label mb-1">System Prompt:</label>
                         <div class="input-group">
-                            <textarea class="form-control" placeholder="Type your prompt here" id="TextPrompt"></textarea>
+                            <textarea class="form-control" id="SystemPrompt">You are a talented writing assistant. Always respond by incorporating the instructions into expertly written prose that is highly detailed, evocative, vivid and engaging.
+                            </textarea>
+                        </div>
+                    </li>
+                    <li class="mb-3 ">
+                        <label class="form-label mb-1">User Prompt:</label>
+                        <div class="input-group">
+                            <textarea class="form-control" placeholder="Type your prompt here" id="UserPrompt"></textarea>
                         </div>
                     </li>
                     <li class="mb-3">
@@ -62,19 +70,13 @@
                 </a>
                 <span class="ms-3">LexiSelect</span>
             </div>
-            
-            <div class="p-3">
-                <div class="row">
-                    <div class="col">
-                        <p id="output1"></p>
-                    </div>
-                </div>
-            </div>
 
             
-            <div class="d-flex flex-column flex-nowrap p-0" style="width: 100%; height: 300px; overflow-x: scroll;" id="outputBox">
+            <div class="d-flex flex-column flex-nowrap p-3" style="width: 100%; height: 300px; overflow-x: scroll;" id="outputBox">
                 <ul class="list-group list-group-horizontal" id="outputBoxList">     
                     <!--button type="button" class="outputButton btn btn-primary">Word</button-->
+                    <button type="button" class="outputButton btn btn-primary mb-2">Example</button>
+                    <button type="button" class="outputButton btn btn-primary mb-2">Text</button>
                 </ul>
             </div>
 
@@ -84,11 +86,7 @@
                 </ul>
             </div>
         </div>
-    </div>
-    
-    
-
-
+</div>
 
     
 <template id="textButton">
@@ -101,6 +99,11 @@
             <button type="button" class="btn btn-primary">Word</button>
         </div>
     </li>
+</template>
+<template id="textOutputList">
+    <ul class="list-group list-group-horizontal">     
+        <!--button type="button" class="outputButton btn btn-primary">Word</button-->
+    </ul>
 </template>
 
 <script src="script.js"></script>
