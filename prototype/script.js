@@ -55,10 +55,10 @@ async function typeWriter(text, speed, element) {
 async function UpdateContent(response, newPath = false) {
     //console.log(response);
     currentPrompt += response.content.replace("<|assistant|>", "");
-
+    console.log(diffPrompt);
     var currentList;
 
-    if (newPath || outputLists.length == 0) {
+    if (newPath || outputLists.length == 0 || diffPrompt) {
         newList = document.getElementById("textOutputList").content.cloneNode(true);
         currentList = newList.querySelector("ul");
         outputLists.push(currentList);
@@ -71,6 +71,11 @@ async function UpdateContent(response, newPath = false) {
             tokenLists[currentIndex] = tokenLists[currentIndex].concat(response.completion_probabilities);
         }
         OutputPrompt(tokenLists[tokenLists.length - 1], currentList);
+
+        if (diffPrompt) {
+            diffPrompt = false;
+        }
+
     }
     else {
         tokenLists[currentIndex].concat(response.completion_probabilities);
@@ -153,12 +158,22 @@ var currentIndex = 0;
 var tokenLists = [];
 var currentPrompt = "";
 var outputLists = [];
+var diffPrompt = false
 
 
 document.getElementById("GenerateButton").addEventListener("click", async function() {
     var input = document.getElementById("UserPrompt").value;
     UpdateContent(await GenerateOutput(input));
 });
+
+document.getElementById("UserPrompt").addEventListener("input", () => HandlePromptChange())
+document.getElementById("SystemPrompt").addEventListener("input", () => HandlePromptChange())
+
+function HandlePromptChange() {
+    diffPrompt = true;
+    //currentPrompt = "";
+}
+
 
 async function GenerateOutput(input) {
     let sysPrompt = document.getElementById("SystemPrompt").value;
