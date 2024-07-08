@@ -165,7 +165,7 @@ document.getElementById("GenerateButton").addEventListener("click", async functi
     var input = document.getElementById("UserPrompt").value;
     UpdateContent(await GenerateOutput(input));
 });
-
+W
 document.getElementById("UserPrompt").addEventListener("input", () => HandlePromptChange())
 document.getElementById("SystemPrompt").addEventListener("input", () => HandlePromptChange())
 
