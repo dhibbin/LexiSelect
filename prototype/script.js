@@ -1,9 +1,9 @@
 async function SendPrompt(userPrompt, systemPrompt, currentOutput) {
     userPrompt = "<|user|>" + userPrompt + "<|end|>";
-    userPrompt = "<|system|>" + systemPrompt + "<|end|>";
+    systemPrompt = "<|system|>" + systemPrompt + "<|end|>";
     const prompt = systemPrompt + userPrompt + currentOutput;
     
-    //console.log(document.getElementById("n_probs").value);
+    console.log(prompt);
 
     let response = await fetch("http://127.0.0.1:8080/completion", {
         method: 'POST',
@@ -47,7 +47,7 @@ async function typeWriter(text, speed, element) {
 
 
 async function UpdateContent(response, newPath = false) {
-    console.log(response);
+    //console.log(response);
     currentPrompt += response.content.replace("<|assistant|>", "");
 
     var currentList;
@@ -71,7 +71,7 @@ async function UpdateContent(response, newPath = false) {
         currentList = outputLists[currentIndex];
         OutputPrompt(response.completion_probabilities, currentList);
     }
-    console.log(tokenLists)
+    //console.log(tokenLists)
 }
 
 async function OutputPrompt(probTokens, currentList) {
@@ -88,11 +88,11 @@ async function OutputPrompt(probTokens, currentList) {
         await typeWriter(probTokens[i].content, 10, button);
 
         //tokenLists.push(response.completion_probabilities[i]);
-        button.addEventListener("click", () => ShowProbabilities(probTokens[i], currentIndex) );
+        button.addEventListener("click", () => ShowProbabilities(probTokens[i], currentIndex, i) );
     }
 }
 
-function ShowProbabilities(tokenProbs, tokenListIndex) {
+function ShowProbabilities(tokenProbs, tokenListIndex, currentTokenIndex) {
     //console.log(tokenProbs);
 
     document.getElementById("outputProbList").innerHTML = "";
@@ -114,7 +114,7 @@ function ShowProbabilities(tokenProbs, tokenListIndex) {
             button.disabled = true;
         }
         document.getElementById("outputProbList").appendChild(clone);
-        button.addEventListener("click", () => GenerateWithNewToken(element["tok_str"], tokenListIndex, index));
+        button.addEventListener("click", () => GenerateWithNewToken(element["tok_str"], tokenListIndex, currentTokenIndex));
     }
 }
 
@@ -122,20 +122,19 @@ async function GenerateWithNewToken(newToken, listIndex, tokenIndex) {
     //TODO: Empty current prompt and add all tokens up until this token to the string add newtoken
     var newPrompt = "";
     
-    var currentTokens = JSON.parse(JSON.stringify(tokenLists[listIndex])); 
-    console.log(currentTokens);
-    currentTokens[tokenIndex].content = newToken;
-    if(listIndex < currentTokens.length - 1) {
-        currentTokens.splice(tokenIndex + 1);
+    var currentTokens = [];
+
+    for (let index = 0; index < tokenIndex + 1; index++) {
+        currentTokens.push(tokenLists[listIndex][index]);
+        if (index == tokenIndex) {
+            currentTokens[tokenIndex].content = newToken;
+        }
     }
 
     for (let index = 0; index < currentTokens.length; index++) {
-        newPrompt += currentTokens[index];
+        newPrompt += currentTokens[index].content;
     }
-    
 
-    //console.log(currentTokens);
-    //console.log(newPrompt);
     currentPrompt = newPrompt;
 
     var input = document.getElementById("UserPrompt").value;
