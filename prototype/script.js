@@ -3,15 +3,21 @@ async function SendPrompt(userPrompt, systemPrompt, currentOutput) {
     systemPrompt = "<|system|>" + systemPrompt + "<|end|>";
     const prompt = systemPrompt + userPrompt + currentOutput;
     
-    console.log(prompt);
+    //console.log(prompt);
+    let requestArgs = {
+        "n_predict": parseInt(document.getElementById("n_predict").value),
+        "n_probs": parseInt(document.getElementById("n_probs").value),
+        "seed": parseInt(document.getElementById("seed").value)
+    };
+
 
     let response = await fetch("http://127.0.0.1:8080/completion", {
         method: 'POST',
         body: JSON.stringify({
             prompt,
-            n_predict: 50,
-            n_probs : 5,
-            seed : document.getElementById("seed").value
+            n_predict: requestArgs["n_predict"],
+            n_probs : requestArgs["n_probs"],
+            seed : requestArgs["seed"]
         })
     })
 
