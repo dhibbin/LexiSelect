@@ -12,3 +12,8 @@ Do I use a pre-made front end or develop one myself
 - Therefore, I should focus on developing a front end specifically for this project, since most of the features will come from being able to visually interact with token probabilities and seeing potential paths for text generation
 
 Should this be developed as a browser extension?
+## Week 2
+
+Which JS framework to use?
+- See [Investigating JS Frameworks]
+- Conclusion: VueJS is probably the best option for this project
