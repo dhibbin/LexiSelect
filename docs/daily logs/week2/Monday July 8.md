@@ -1,3 +1,5 @@
+# Monday July 8
+
 Morning meeting
 - Took roughly 25 mins
 - Discussed problems encountered on Friday and plans for the project

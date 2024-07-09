@@ -17,3 +17,7 @@ Should this be developed as a browser extension?
 Which JS framework to use?
 - See [Investigating JS Frameworks]
 - Conclusion: VueJS is probably the best option for this project
+
+Which UI framework to use?
+- See [Investigating UI Component Libraries]
+- Conclusion: Quasar is a good choice, but if it doesn't work out Vuetify is another good choice
