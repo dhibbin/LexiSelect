@@ -1,0 +1,31 @@
+.v-expansion-panel-text__wrapper {
+    padding: 10px;
+    flex: 1 1 auto;
+    max-width: 100%;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    font-family: 'Ubuntu', sans-serif;
+}
+
+/*
+$font-family:'Ubuntu', 'sans-serif';
+
+.v-application {
+  [class*='text-'] {
+    font-family: 'Ubuntu', sans-serif !important;
+  }
+  font-family: 'Ubuntu', sans-serif !important;
+}
+*/
+
+@import url('https://fonts.googleapis.com/css?family=Ubuntu');
+
+$body-font-family: 'Ubuntu', sans-serif;
+
+.v-application {
+    font-family: $body-font-family, sans-serif !important;
+}
+  
