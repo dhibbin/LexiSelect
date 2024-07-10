@@ -1,35 +1,34 @@
 <template>
-  <v-app id="inspire">
-    <v-app-bar app>
-      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-app-bar-title>Lexi Select</v-app-bar-title>
-      <v-btn icon="mdi-magnify" variant="text"></v-btn>
-    </v-app-bar>
-
-    <v-navigation-drawer :width="400" v-model="drawer" app>
-      <!--  -->
-      <SideBar></SideBar>
-    </v-navigation-drawer>
-
-    <v-main>
-      <v-container fluid class="bg-grey-lighten-5 ma-0 d-flex justify-end align-end fill-height fill-width">
-        <v-row align="end" no-gutters class="pa-0">
-          <v-col cols="6">
-            <v-textarea class="fill-height d-flex flex-column pa-2" label="System Prompt"></v-textarea>
-          </v-col>
-          <v-col cols="6">
-            <v-textarea class="fill-height d-flex flex-column pa-2" label="User Prompt"></v-textarea>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-main>
-  </v-app>
+  <n-space vertical size="large" style="width: 100%; height: 100%;" class="full-height flex-fill" >
+    <n-layout has-sider >
+      <n-layout-sider
+        collapse-mode="transform"
+        :collapsed-width="0"
+        :width="240"
+        :show-collapsed-content="false"
+        show-trigger="bar"
+        content-style="padding: 24px;"
+        :inverted="true"
+        bordered
+      >
+      <n-button>
+        Hi
+      </n-button>
+      </n-layout-sider>
+      <n-layout-content content-style="padding: 24px; height: 100%;" style="height: 100vh;">
+        Pingshan Road
+      </n-layout-content>
+    </n-layout>
+  </n-space>
 </template>
+
 
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import SideBar from './components/SideBar.vue';
+//import { NConfigProvider, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NSpace, NButton, NIcon, NText, NGrid, NGridItem,  } from 'naive-ui'
+//import { Search as SearchIcon } from '@vicons/ionicons5'
 
 const drawer = ref(true)
 </script>
