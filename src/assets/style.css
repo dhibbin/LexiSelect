@@ -1,0 +1,5 @@
+.v-expansion-panel-text__wrapper {
+    padding: 10px;
+    flex: 1 1 auto;
+    max-width: 100%;
+}

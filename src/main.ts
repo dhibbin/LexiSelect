@@ -1,4 +1,4 @@
-//import './assets/style.css'
+
 import 'vuetify/dist/vuetify.min.css'
 //import 'prism-theme-vars/base.css'
 
@@ -11,6 +11,10 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { md2 } from 'vuetify/blueprints'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
+import '@mdi/font/css/materialdesignicons.css'
+import './assets/style.css'
+
+
 
 // Components
 import App from './App.vue'
@@ -23,12 +27,8 @@ const vuetify = createVuetify({
   },
   blueprint : md2,
   icons: {
-    defaultSet: 'mdi',
-    aliases,
-    sets: {
-      mdi,
-    },
-  }
+    defaultSet: 'mdi', // This is already the default value - only for display purposes
+  },
 })
 
 createApp(App).use(vuetify).mount('#app')
