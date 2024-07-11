@@ -42,5 +42,7 @@ const vuetify = createVuetify({
 
 })
 
+
+let newvar
 createApp(App).use(vuetify).mount('#app')
 

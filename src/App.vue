@@ -29,7 +29,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import SideBar from './components/SideBar.vue';
+import SideBar from './components/SideBar.vue'
 
 const drawer = ref(true)
+
+let newVar
 </script>
