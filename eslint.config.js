@@ -15,12 +15,17 @@ export default ts.config(
     },
     rules : {
       "@typescript-eslint/typedef": [
-      "error",
-      {
-        "arrowParameter": true,
-        "variableDeclaration": true
-      }
-    ]
+        "error",
+        {
+          "arrayDestructuring": true,
+          "variableDeclaration": true,
+          "arrowParameter" : true,
+          "memberVariableDeclaration" : true,
+          "parameter" : true,
+          "propertyDeclaration" : true,
+        }
+      ],
+      "@typescript-eslint/explicit-function-return-type": "error",
     }
   }
 )

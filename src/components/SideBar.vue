@@ -28,10 +28,11 @@ const number = ref(10)
 const panel = ref([0])
 
 const ipAddress = ref("");
-    const ipAddressRules = computed(() => [
-      (v: string) => !!v || 'IP address is required',
-      (v: string) => validateIPAddress(v) || 'Invalid IP address',
-    ]);
+
+const ipAddressRules = computed(() => [
+  (v: string) => !!v || 'IP address is required',
+  (v: string) => validateIPAddress(v) || 'Invalid IP address',
+]);
 
 function validateIPAddress(ipAddress: string) {
   const ipPattern : RegExp = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(:\d{1,5})?$/;

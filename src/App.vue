@@ -48,11 +48,10 @@
 
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import SideBar from './components/SideBar.vue'
 
-const drawer = ref(true)
-
+const drawer : Ref<boolean> = ref(true)
 
 
 </script>
