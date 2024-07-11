@@ -2,11 +2,6 @@
   "files": [],
   "references": [
     {
-      "path": "./tsconfig.app.json"
-    }
-  ],
-  /*"references": [
-    {
       "path": "./tsconfig.node.json"
     },
     {
@@ -15,5 +10,10 @@
     {
       "path": "./tsconfig.vitest.json"
     }
-  ],*/
+  ],
+  "compilerOptions": {
+        "noImplicitAny": true,
+        "strict": true,
+        // other options...
+  },
 }

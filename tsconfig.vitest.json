@@ -7,8 +7,5 @@
 
     "lib": [],
     "types": ["node", "jsdom"],
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
   }
 }

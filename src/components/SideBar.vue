@@ -24,6 +24,7 @@
 import { ref, computed } from 'vue'
 
 const number = ref(10)
+
 const panel = ref([0])
 
 const ipAddress = ref("");
