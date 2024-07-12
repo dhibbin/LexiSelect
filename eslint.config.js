@@ -18,7 +18,7 @@ export default ts.config(
         "error",
         {
           "arrayDestructuring": true,
-          "variableDeclaration": true,
+          //"variableDeclaration": true,
           "arrowParameter" : true,
           "memberVariableDeclaration" : true,
           "parameter" : true,
