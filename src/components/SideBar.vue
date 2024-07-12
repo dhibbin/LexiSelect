@@ -40,14 +40,23 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, type Ref } from 'vue'
+  import { ref, computed, type Ref, reactive, watch } from 'vue'
+  import { LLMService, LLMSettings } from '@/objects/LLMService';
 
-  const n_predict : Ref<number> = ref(10)
-  const n_probs : Ref<number> = ref(5)
-  const seed : Ref<number> = ref(-1)
+  // const n_predict : Ref<number> = ref(10)
+  // const n_probs : Ref<number> = ref(5)
+  // const seed : Ref<number> = ref(-1)
+  // const ipAddress : Ref<string> = ref("localhost:8080");
+
+  const settings : LLMSettings = reactive({
+    n_predict : 10,
+    n_probs : 5,
+    seed : -1,
+    ipAddress : "localhost:8080"
+  })
 
   const panel : Ref<number[]> = ref([0])
-  const ipAddress : Ref<string> = ref("localhost:8080");
+  
 
   const ipAddressRules = computed(() => [
     (v: string) : boolean | string => !!v || 'IP address is required',
@@ -59,5 +68,10 @@
     const localPattern : RegExp = /^(localhost)(:\d{1,5})?$/;
     return localPattern.test(ipAddress) || ipPattern.test(ipAddress);
   }
+
+  watch(settings, () => {
+    console.log("hello")
+  }, {deep : true})
+
 
 </script>
