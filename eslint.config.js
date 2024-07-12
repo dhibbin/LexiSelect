@@ -1,6 +1,7 @@
 import js from '@eslint/js'
 import eslintPluginVue from 'eslint-plugin-vue'
 import ts from 'typescript-eslint'
+//import stylistic from '@stylistic/eslint-plugin'
 
 export default ts.config(
   js.configs.recommended,
@@ -26,6 +27,7 @@ export default ts.config(
         }
       ],
       "@typescript-eslint/explicit-function-return-type": "error",
+      //'@stylistic/indent': ['error', 2],
     }
   }
 )

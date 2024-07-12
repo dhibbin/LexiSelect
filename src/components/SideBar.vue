@@ -44,12 +44,7 @@
 
 <script setup lang="ts">
   import { ref, type Ref, reactive, watch } from 'vue'
-  import { type LLMSettings, LLMSettingsWrapper } from '@/objects/LLMService';
-
-  // const n_predict : Ref<number> = ref(10)
-  // const n_probs : Ref<number> = ref(5)
-  // const seed : Ref<number> = ref(-1)
-  // const ipAddress : Ref<string> = ref("localhost:8080");
+  import { LLMService, type LLMSettings, LLMSettingsWrapper } from '@/objects/LLMService';
 
   const settings : LLMSettings = reactive({
     n_predict : 10,
@@ -60,10 +55,8 @@
 
   const panel : Ref<number[]> = ref([0])
 
-
-
   watch(settings, () => {
-    LLMSettingsWrapper.validateAndUpdate(settings)    
+    LLMService.instance.settings = settings
   }, {deep : true})
 
 

@@ -1,19 +1,30 @@
 import { computed, type ComputedRef } from 'vue'
 
 export class LLMService {
-    private static instance : LLMService
-    private wrappedSettings : LLMSettings
+    private static wrappedInstance : LLMService
+    private wrappedSettings : LLMSettings = {
+        n_predict : 10,
+        n_probs : 5,
+        seed : -1,
+        ipAddress : "localhost:8080"
+    }
 
     private constructor() {
 
     }
 
-    public static getInstance() : LLMService {
-        if (!LLMService.instance) {
-            LLMService.instance = new LLMService()
+    public static get instance(): LLMService {
+        if (!LLMService.wrappedInstance) {
+            LLMService.wrappedInstance = new LLMService()
         }
-        return LLMService.instance
+        return LLMService.wrappedInstance
     }
+
+    public set settings(settings : LLMSettings) {
+        if (LLMSettingsWrapper.validate(settings)){
+            this.wrappedSettings = settings
+        }
+    } 
 }
 
 export interface LLMSettings {
@@ -24,13 +35,14 @@ export interface LLMSettings {
     ipAddress : string
 }
 
+type RuleType = ComputedRef<((v: string) => boolean | string)[]> | ComputedRef<((v: number) => boolean | string)[]>;
+
 interface SettingsRules {
-    [key: string]: ComputedRef<((v: string) => boolean | string)[]> | 
-        ComputedRef<((v: number) => boolean | string)[]>;
-    n_predict : ComputedRef<((v: number) => boolean | string)[]>
-    n_probs : ComputedRef<((v: number) => boolean | string)[]>
-    seed : ComputedRef<((v: number) => boolean | string)[]>
-    ipAddress : ComputedRef<((v: string) => boolean | string)[]>
+    [key : string] : RuleType;
+    n_predict : RuleType,
+    n_probs : RuleType,
+    seed : RuleType,
+    ipAddress : RuleType
 }
 
 export class LLMSettingsWrapper {
@@ -53,7 +65,7 @@ export class LLMSettingsWrapper {
         ]),
     }
 
-    public static validateAndUpdate(settings : LLMSettings) : boolean {
+    public static validate(settings : LLMSettings) : boolean {
         let isValid = true
 
         for (const key in LLMSettingsWrapper.rules) {
@@ -61,16 +73,19 @@ export class LLMSettingsWrapper {
             const currentRules = LLMSettingsWrapper.rules[typedKey].value
             const value = settings[typedKey]
             currentRules.forEach(element => {
-                console.log(element)
+                if (element(value) !== true) {
+                    isValid = false
+                    console.log(isValid)
+                    return isValid
+                }
             });
         }
         return isValid
     }
 
-
     public static validateIPAddress(ipAddress: string) : boolean {
         const ipPattern : RegExp = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(:\d{1,5})?$/;
-        const localPattern : RegExp = /^(localhost)(:\d{1,5})?$/;
+        const localPattern : RegExp = /^(localhost):\d{1,5}$/;
         return localPattern.test(ipAddress) || ipPattern.test(ipAddress);
     }
 

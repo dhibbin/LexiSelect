@@ -3,10 +3,9 @@
     <v-app-bar app>
       <v-app-bar-nav-icon @click="drawer = !drawer" />
       <v-app-bar-title>Lexi Select</v-app-bar-title>
-      <v-btn 
-        icon="mdi-magnify" 
+      <v-btn icon="mdi-magnify" 
         variant="text" 
-      />
+      ></v-btn>
     </v-app-bar>
 
     <v-navigation-drawer
