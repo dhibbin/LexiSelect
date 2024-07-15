@@ -9,7 +9,7 @@ export default ts.config(
   ...eslintPluginVue.configs['flat/recommended'],
   
   {
-    files: ['*.vue', '**/*.vue'],
+    files: ['*.vue', '**/*.vue', '*.ts', '**/*.ts'],
     languageOptions: {
       parserOptions: {
         parser: ts.parser
@@ -22,9 +22,9 @@ export default ts.config(
           "arrayDestructuring": true,
           //"variableDeclaration": true,
           "arrowParameter" : true,
-          "memberVariableDeclaration" : true,
+          //"memberVariableDeclaration" : true,
           "parameter" : true,
-          "propertyDeclaration" : true,
+          //"propertyDeclaration" : true,
         }
       ],
      "@typescript-eslint/explicit-function-return-type": "error"

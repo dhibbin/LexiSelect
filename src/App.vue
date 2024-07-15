@@ -33,8 +33,7 @@
             />
           </v-col>
           <v-col cols="6">
-            <v-textarea
-              class="fill-height d-flex flex-column pa-2"
+            <v-textarea class="fill-height d-flex flex-column pa-2"
               label="User Prompt"
             />
           </v-col>
