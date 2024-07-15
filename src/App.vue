@@ -23,8 +23,7 @@
         class="bg-grey-lighten-5 ma-0 d-flex justify-end align-end fill-height fill-width"
       >
         <v-row
-          align="end"
-          no-gutters
+          align="end" no-gutters
           class="pa-0"
         >
           <v-col cols="6">
@@ -40,11 +39,14 @@
             />
           </v-col>
         </v-row>
+        <v-btn block class="">Generate Response</v-btn>
+        <v-btn block>Generate Response</v-btn>
+        <v-btn block>Generate Response</v-btn>
+        <v-btn block>Generate Response</v-btn>
       </v-container>
     </v-main>
   </v-app>
 </template>
-
 
 <script setup lang="ts">
 import { ref, type Ref } from 'vue'

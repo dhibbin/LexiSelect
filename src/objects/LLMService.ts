@@ -9,9 +9,7 @@ export class LLMService {
         ipAddress : "localhost:8080"
     }
 
-    private constructor() {
-
-    }
+    private constructor() {}
 
     public static get instance(): LLMService {
         if (!LLMService.wrappedInstance) {
@@ -24,7 +22,29 @@ export class LLMService {
         if (LLMSettingsWrapper.validate(settings)){
             this.wrappedSettings = settings
         }
-    } 
+    }
+
+    public async SendPrompt(userPrompt : string, systemPrompt : string) : Promise<JSON> {
+        userPrompt = "<|user|>" + userPrompt + "<|end|>";
+        systemPrompt = "<|system|>" + systemPrompt + "<|end|>";
+        const prompt = systemPrompt + userPrompt;
+        
+        return fetch(this.wrappedSettings.ipAddress + "/completion", {
+            method: 'POST',
+            body: JSON.stringify({
+                prompt,
+                n_predict: this.wrappedSettings.n_predict,
+                n_probs : this.wrappedSettings.n_probs,
+                seed : this.wrappedSettings.seed
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(response.statusText)
+            }
+            return response.json() as Promise<JSON>
+        })
+    }
 }
 
 export interface LLMSettings {
@@ -34,6 +54,8 @@ export interface LLMSettings {
     seed : number
     ipAddress : string
 }
+
+
 
 type RuleType = ComputedRef<((v: string) => boolean | string)[]> | ComputedRef<((v: number) => boolean | string)[]>;
 
@@ -72,8 +94,8 @@ export class LLMSettingsWrapper {
             const typedKey = key as keyof LLMSettings;
             const currentRules = LLMSettingsWrapper.rules[typedKey].value
             const value = settings[typedKey]
-            currentRules.forEach(element => {
-                if (element(value) !== true) {
+            currentRules.forEach(element => { //@ts-ignore
+                if (element(value) !== true) { // Not assignable to never error seems to be incorrectly flagged
                     isValid = false
                     console.log(isValid)
                     return isValid
