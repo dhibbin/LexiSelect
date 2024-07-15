@@ -28,8 +28,8 @@ export class LLMService {
         userPrompt = "<|user|>" + userPrompt + "<|end|>";
         systemPrompt = "<|system|>" + systemPrompt + "<|end|>";
         const prompt = systemPrompt + userPrompt;
-        
-        return fetch(this.wrappedSettings.ipAddress + "/completion", {
+        //http://127.0.0.1:8080/completion
+        return fetch("http://" + this.wrappedSettings.ipAddress + "/completion", {
             method: 'POST',
             body: JSON.stringify({
                 prompt,
@@ -38,10 +38,11 @@ export class LLMService {
                 seed : this.wrappedSettings.seed
             })
         })
-        .then(response => {
+        .then((response : Response) => {
             if (!response.ok) {
                 throw new Error(response.statusText)
             }
+            console.log(response.json())
             return response.json() as Promise<JSON>
         })
     }
@@ -94,7 +95,7 @@ export class LLMSettingsWrapper {
             const typedKey = key as keyof LLMSettings;
             const currentRules = LLMSettingsWrapper.rules[typedKey].value
             const value = settings[typedKey]
-            currentRules.forEach(element => { //@ts-ignore
+            currentRules.forEach((element : ((v: string) => boolean | string) | ((v: number) => boolean | string)) => { //@ts-expect-error See following line
                 if (element(value) !== true) { // Not assignable to never error seems to be incorrectly flagged
                     isValid = false
                     console.log(isValid)

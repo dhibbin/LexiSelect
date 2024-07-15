@@ -36,13 +36,6 @@
           hint="RNG seed for LLM, -1 is a random seed"
           :rules="LLMSettingsWrapper.rules.seed.value"
         />
-        <v-text-field v-model="settings.seed" class="rounded pa-1 ma-0"
-          type="number"
-          label="Seed"
-          persistent-hint
-          hint="RNG seed for LLM, -1 is a random seed"
-          :rules="LLMSettingsWrapper.rules.seed.value"
-        />
       </v-expansion-panel-text>
     </v-expansion-panel>
     <!-- Add more panels as needed -->
