@@ -1,4 +1,5 @@
 import { computed, type ComputedRef } from 'vue'
+import { ru } from 'vuetify/locale'
 
 export class LLMService {
     private static wrappedInstance : LLMService
@@ -37,6 +38,27 @@ export interface LLMSettings {
 
 type RuleType = ComputedRef<((v: string) => boolean | string)[]> | ComputedRef<((v: number) => boolean | string)[]>;
 
+class SettingsValue {
+    public value : string | number
+    public readonly rule : RuleType
+
+    public constructor(value : string | number, rule : RuleType) {
+        this.value = value
+        this.rule = rule
+    }
+}
+
+export class SettingsList {
+    public n_predict : SettingsValue = new SettingsValue(
+        0,
+        computed(() => [
+            (v: number) : boolean | string => v >= 0 || 'n_predict must be non-negative',
+            // Add more rules as needed
+        ])
+    )
+}
+
+
 interface SettingsRules {
     [key : string] : RuleType;
     n_predict : RuleType,
@@ -44,6 +66,8 @@ interface SettingsRules {
     seed : RuleType,
     ipAddress : RuleType
 }
+
+
 
 export class LLMSettingsWrapper {
     public static readonly rules : SettingsRules = {
@@ -67,19 +91,22 @@ export class LLMSettingsWrapper {
 
     public static validate(settings : LLMSettings) : boolean {
         let isValid = true
-
+        
         for (const key in LLMSettingsWrapper.rules) {
             const typedKey = key as keyof LLMSettings;
             const currentRules = LLMSettingsWrapper.rules[typedKey].value
             const value = settings[typedKey]
             currentRules.forEach(element => {
-                if (element(value) !== true) {
+                if (element(value) !== true) { // This argument do
                     isValid = false
+                    console.log(typeof value)
                     console.log(isValid)
                     return isValid
                 }
             });
         }
+        
+
         return isValid
     }
 

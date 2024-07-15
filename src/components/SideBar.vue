@@ -28,7 +28,7 @@
           :rules="LLMSettingsWrapper.rules.n_probs.value"
         />
         <v-text-field
-          v-model="settings.seed"
+          v-model.number="settings.seed"
           class="rounded pa-1 ma-0"
           type="number"
           label="Seed"
