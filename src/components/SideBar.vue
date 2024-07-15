@@ -10,7 +10,7 @@
           class="rounded pa-1 ma-0"
         />
         <v-text-field
-          v-model="settings.n_predict"
+          v-model.number="settings.n_predict"
           class="rounded pa-1 ma-0"
           type="number"
           label="n_predict"
@@ -19,7 +19,7 @@
           hint="Number of tokens to predict per generation"
         />
         <v-text-field
-          v-model="settings.n_probs"
+          v-model.number="settings.n_probs"
           class="rounded pa-1 ma-0"
           type="number"
           label="n_probs"
@@ -28,7 +28,7 @@
           :rules="LLMSettingsWrapper.rules.n_probs.value"
         />
         <v-text-field
-          v-model="settings.seed"
+          v-model.number="settings.seed"
           class="rounded pa-1 ma-0"
           type="number"
           label="Seed"
