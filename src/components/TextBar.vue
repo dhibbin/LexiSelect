@@ -1,13 +1,13 @@
 <template>
   <v-app-bar
     color="grey-lighten-2"
-    height="300"
+    :height="300"
     location="bottom"
     class="d-flex"
     flat
   >
     <v-container>
-      <v-tabs-window v-model="topLevelTab">
+      <v-tabs-window v-model="lowerLevelTab">
         <v-tabs-window-item value="one">
           <v-row no-gutters>
             <v-col
@@ -68,13 +68,15 @@
 
   <v-app-bar
     color="grey-lighten-2"
-    height="30"
+    :height="tabState.y"
     location="bottom"
     class="d-flex"
     flat
+    :style="{ marginBottom: tabState.marginBottom + 'px'}"
+    style="z-index: 0;"
   >
     <v-tabs
-      v-model="topLevelTab"
+      v-model="lowerLevelTab"
       bg-color="blue"
       center-active
       rounded="lg"
@@ -106,10 +108,10 @@
       rounded="lg"
       style="width: 100%;"
     >
-      <v-tab value="one">
+      <v-tab value="input">
         Input
       </v-tab>
-      <v-tab value="two">
+      <v-tab value="output">
         Output
       </v-tab>
     </v-tabs>
@@ -118,20 +120,43 @@
   
 <script setup lang="ts">
 import { LLMService } from '@/objects/LLMService';
-import { ref, type Ref } from 'vue';
+import { reactive, ref, watch, type Ref } from 'vue';
+import gsap from 'gsap'
 
 const userPrompt : Ref<string> = ref("Write a story about a man named Stanley")
 const systemPrompt : Ref<string> = ref("You are a talented writing assistant. Always respond by incorporating the instructions into expertly written prose that is highly detailed, evocative, vivid and engaging.");
-const topLevelTab = ref(null) 
+const topLevelTab = ref("output")
+const lowerLevelTab = ref("one")
+const tabState = reactive({
+  y : 30,
+  marginBottom : 0
+})
+
+watch(topLevelTab, (value : string) => {
+  if (value === "input") {
+    gsap.to(tabState, {duration : 0.1, ease : "bounce.inOut", marginBottom : 30, y : 0})
+    console.log("tweening", tabState.y)
+    tabState.marginBottom = 10
+  }
+  else {
+    gsap.to(tabState, {duration : 0.1, y : 30, ease : "power1.in", marginBottom : 0})
+    console.log("tweening", tabState.y)
+  }
+})
+
+const textBarEmits = defineEmits(["onGenerationRecieved"])
 
   async function attemptLLMGeneration() : Promise<void> {
     try {
       let output = await LLMService.instance.SendPrompt(userPrompt.value, systemPrompt.value)
       console.log(output)
+      textBarEmits("onGenerationRecieved", output)
     } catch (error) {
       console.log(error)
     }
   }
+
+
 </script>
 
 <style>

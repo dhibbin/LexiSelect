@@ -1,4 +1,5 @@
 import { computed, type ComputedRef } from 'vue'
+import type { LlamaInterface } from './LlamaInterface'
 
 export class LLMService {
     private static wrappedInstance : LLMService
@@ -24,7 +25,7 @@ export class LLMService {
         }
     }
 
-    public async SendPrompt(userPrompt : string, systemPrompt : string) : Promise<JSON> {
+    public async SendPrompt(userPrompt : string, systemPrompt : string) : Promise<LlamaInterface> {
         userPrompt = "<|user|>" + userPrompt + "<|end|>";
         systemPrompt = "<|system|>" + systemPrompt + "<|end|>";
         const prompt = systemPrompt + userPrompt;
@@ -44,7 +45,7 @@ export class LLMService {
                 throw new Error(response.statusText)
             }
             //console.log(response.json())
-            return response.json() as Promise<JSON>
+            return response.json() as Promise<LlamaInterface>
         })
     }
 }

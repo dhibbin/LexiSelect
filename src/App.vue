@@ -14,11 +14,13 @@
       <SideBar />
     </v-navigation-drawer>
 
-    <TextBar />
+    <TextBar @on-generation-recieved="onGenerationRecieved" />
  
 
     <v-main style="overflow-y: hidden;">
-      Main Content
+      <textarea
+        v-model="paragraph"
+      />
     </v-main>
   </v-app>
 </template>
@@ -27,9 +29,14 @@
   import { ref, type Ref } from 'vue'
   import SideBar from './components/SideBar.vue'
   import TextBar from './components/TextBar.vue'
-  const topLevelTab = ref(null)
+import type { LlamaInterface } from './objects/LlamaInterface';
 
   const drawer : Ref<boolean> = ref(true)
+  const paragraph : Ref<string> = ref("")
+
+  function onGenerationRecieved(value : LlamaInterface) : void {
+    paragraph.value = value.content
+  }
 
 
 </script>

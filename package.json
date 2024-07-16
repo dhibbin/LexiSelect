@@ -13,6 +13,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "gsap": "^3.12.5",
     "vue": "^3.4.29",
     "vuetify": "^3.6.11"
   },
