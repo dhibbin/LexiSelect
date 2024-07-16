@@ -28,6 +28,7 @@ export class LLMService {
         userPrompt = "<|user|>" + userPrompt + "<|end|>";
         systemPrompt = "<|system|>" + systemPrompt + "<|end|>";
         const prompt = systemPrompt + userPrompt;
+        
         //http://127.0.0.1:8080/completion
         return fetch("http://" + this.wrappedSettings.ipAddress + "/completion", {
             method: 'POST',
@@ -42,7 +43,7 @@ export class LLMService {
             if (!response.ok) {
                 throw new Error(response.statusText)
             }
-            console.log(response.json())
+            //console.log(response.json())
             return response.json() as Promise<JSON>
         })
     }
