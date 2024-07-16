@@ -17,10 +17,14 @@
     <TextBar @on-generation-recieved="onGenerationRecieved" />
  
 
-    <v-main style="overflow-y: hidden;">
+    <v-main
+      class="d-flex align-center justify-center"
+      style="overflow-y: hidden;"
+    >
       <textarea
         v-model="paragraph"
       />
+      <span>Hello</span>
     </v-main>
   </v-app>
 </template>
@@ -32,7 +36,7 @@
 import type { LlamaInterface } from './objects/LlamaInterface';
 
   const drawer : Ref<boolean> = ref(true)
-  const paragraph : Ref<string> = ref("")
+  const paragraph : Ref<string> = ref("Hello World")
 
   function onGenerationRecieved(value : LlamaInterface) : void {
     paragraph.value = value.content
