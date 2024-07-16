@@ -14,16 +14,11 @@
       <SideBar />
     </v-navigation-drawer>
 
-    <v-main>
-      <v-container
-        fluid
-        class="bg-grey-lighten-5 ma-0 justify-end align-end fill-width flex-nowrap"
-      > 
-      <v-row>
-        hello
-      </v-row>
-      <TextBar />
-      </v-container>
+    <TextBar />
+ 
+
+    <v-main style="overflow-y: hidden;">
+      Main Content
     </v-main>
   </v-app>
 </template>
@@ -32,6 +27,7 @@
   import { ref, type Ref } from 'vue'
   import SideBar from './components/SideBar.vue'
   import TextBar from './components/TextBar.vue'
+  const topLevelTab = ref(null)
 
   const drawer : Ref<boolean> = ref(true)
 
