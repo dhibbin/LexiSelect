@@ -96,9 +96,9 @@ export class LLMSettingsWrapper {
         for (const key in LLMSettingsWrapper.rules) {
             const typedKey = key as keyof LLMSettings;
             const currentRules = LLMSettingsWrapper.rules[typedKey].value
-            const value = settings[typedKey]
+            const settingsValue = settings[typedKey]
             currentRules.forEach((element : ((v: string) => boolean | string) | ((v: number) => boolean | string)) => { //@ts-expect-error See following line
-                if (element(value) !== true) { // Not assignable to never error seems to be incorrectly flagged
+                if (element(settingsValue) !== true) { // Not assignable to never error seems to be incorrectly flagged
                     isValid = false
                     console.log(isValid)
                     return isValid
