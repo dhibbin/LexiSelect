@@ -9,7 +9,7 @@
     >
     <div>
       <span
-        v-for="(word, index) in words"
+        v-for="word in words"
         :key="index"
         style="display: inline-block; top: 1px; left: 0; font-family: monospace;"
         class="spanText"
@@ -32,7 +32,11 @@ const props = defineProps<{
 const localText = ref(props.generatedText)
 const words = computed(() => {
   let splitWords = localText.value.split(" ")
-  return splitWords.map((str : string) => str.replace(/ /g, "&nbsp;"))
+  return splitWords.map((str : string, index : number) => index !== 0 ? "_" + str : str);
+})
+
+watch(words, () => {
+  console.log(words.value)
 })
 
 watch(props, () => {
@@ -53,6 +57,7 @@ watch(localText, () => {
       box-shadow: 0px 0px 1px blue;
     }
     .spanText {
+      white-space: nowrap;
       color: transparent;
     }
     .spanText:active {
