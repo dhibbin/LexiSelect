@@ -108,9 +108,20 @@ export class LLMSettingsWrapper {
         return isValid
     }
 
+    /**
+     * Validates an IP address.
+     *
+     * This function checks if the given IP address is valid. It supports both local and remote IP addresses.
+     * For remote IP addresses, it supports optional port numbers.
+     *
+     * @param {string} ipAddress - The IP address to validate.
+     * @returns {boolean} Returns true if the IP address is valid, false otherwise.
+     */
     public static validateIPAddress(ipAddress: string) : boolean {
+        // Ipv4 and localhost address regular expressions
         const ipPattern : RegExp = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(:\d{1,5})?$/;
         const localPattern : RegExp = /^(localhost):\d{1,5}$/;
+        // Return true if either regular expressions are satisfied
         return localPattern.test(ipAddress) || ipPattern.test(ipAddress);
     }
 

@@ -9,7 +9,7 @@
     >
     <div>
       <span
-        v-for="word in words"
+        v-for="(word, index) in words"
         :key="index"
         style="display: inline-block; top: 1px; left: 0; font-family: monospace;"
         class="spanText"
