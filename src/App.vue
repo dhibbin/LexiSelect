@@ -24,7 +24,6 @@
       <textarea
         v-model="paragraph"
       />
-      <span>Hello</span>
     </v-main>
   </v-app>
 </template>
@@ -33,7 +32,7 @@
   import { ref, type Ref } from 'vue'
   import SideBar from './components/SideBar.vue'
   import TextBar from './components/TextBar.vue'
-import type { LlamaInterface } from './objects/LlamaInterface';
+  import type { LlamaInterface } from './objects/LlamaInterface';
 
   const drawer : Ref<boolean> = ref(true)
   const paragraph : Ref<string> = ref("Hello World")
