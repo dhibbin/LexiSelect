@@ -21,9 +21,7 @@
       class="d-flex align-center justify-center"
       style="overflow-y: hidden;"
     >
-      <textarea
-        v-model="paragraph"
-      />
+      <TextTree :generated-text="paragraph" />
     </v-main>
   </v-app>
 </template>
@@ -32,6 +30,7 @@
   import { ref, type Ref } from 'vue'
   import SideBar from './components/SideBar.vue'
   import TextBar from './components/TextBar.vue'
+  import TextTree from './components/TextTree.vue'
   import type { LlamaInterface } from './objects/LlamaInterface';
 
   const drawer : Ref<boolean> = ref(true)
