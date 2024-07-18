@@ -1,5 +1,5 @@
 <template>
-  <div style="position: relative; width: 100%; height: 200px; overflow-y: hidden; overflow-x: scroll;">
+  <div style="position: relative; width: 100%; height: 100px; overflow-y: scroll; overflow-x: scroll;">
     <input
       v-model="localText"
       type="text"
@@ -14,12 +14,26 @@
       style="position: absolute; top: 1px; left: 0; font-family: monospace;"
       :style="{ left : characterLengths[index] + 'ch'}"
       class="spanText"
+      @mouseover="hover(true, index)"
+      @mouseleave="hover(false, index)"
     >{{ word }}</span>
+
+    <v-expand-transition>
+      <v-card
+        v-show="expand"
+        :style="{ position: 'absolute', top: '10px', left: characterLengths[expandPanelIndex] + 'ch' }"
+        class="mx-auto bg-secondary"
+        height="100"
+        width="100"
+        @mouseover="expand = true"
+        @mouseleave="expand = false"
+      />
+    </v-expand-transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, ref, watch } from 'vue'
+import { computed, defineProps, ref, watch, type Ref } from 'vue'
 
 const emits = defineEmits<{
     textUpdate : [newText : string]
@@ -30,10 +44,18 @@ const props = defineProps<{
 }>()
 
 const localText = ref(props.generatedText)
+const expandPanelIndex : Ref<number> = ref(-1)
+const expand = ref(false)
+
 const words = computed(() => {
   let splitWords = localText.value.split(" ")
   return splitWords.map((str : string, index : number) => index !== 0 ? "_" + str : str);
 })
+
+const expandPanels = computed(() => {
+  return new Array(words.value.length).fill(false)
+})
+
 const characterLengths = computed(() => {
   let previousCharacters = 0
   let prevCharList : number[] = []
@@ -42,11 +64,6 @@ const characterLengths = computed(() => {
     previousCharacters += words.value[i].length
   }
   return prevCharList
-})
-console.log(characterLengths.value)
-
-watch(words, () => {
-  console.log(words.value)
 })
 
 watch(props, () => {
@@ -57,8 +74,12 @@ watch(localText, () => {
   emits("textUpdate", localText.value)
 })
 
-
-
+function hover(openHover : boolean, tokenIndex : number) : void {
+  expandPanelIndex.value = tokenIndex
+  expandPanels.value[tokenIndex] = openHover
+  console.log(expandPanels.value[expandPanelIndex.value])
+  expand.value = openHover
+}
 
 </script>
 
