@@ -1,5 +1,5 @@
 <template>
-  <div style="position: relative; width: 100%; height: 100px; overflow-y: scroll; overflow-x: scroll;">
+  <div style="position: relative; width: 100%; height: 200px; overflow-y: scroll; overflow-x: scroll;">
     <input
       v-model="localText"
       type="text"
@@ -15,13 +15,13 @@
       :style="{ left : characterLengths[index] + 'ch'}"
       class="spanText"
       @mouseover="hover(true, index)"
-      @mouseleave="hover(false, index)"
+
     >{{ word }}</span>
 
     <v-expand-transition>
       <v-card
         v-show="expand"
-        :style="{ position: 'absolute', top: '10px', left: characterLengths[expandPanelIndex] + 'ch' }"
+        :style="{ position: 'absolute', top: '20px', left: characterLengths[expandPanelIndex] + 'ch' }"
         class="mx-auto bg-secondary"
         height="100"
         width="100"
