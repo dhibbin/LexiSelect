@@ -7,14 +7,14 @@
       :style="{ width: localText.length + 'ch' }"
       rows="1"
     >
-    <div>
-      <span
-        v-for="(word, index) in words"
-        :key="index"
-        style="display: inline-block; top: 1px; left: 0; font-family: monospace;"
-        class="spanText"
-      >{{ word }}</span> 
-    </div>
+
+    <span
+      v-for="(word, index) in words"
+      :key="index"
+      style="position: absolute; top: 1px; left: 0; font-family: monospace;"
+      :style="{ left : characterLengths[index] + 'ch'}"
+      class="spanText"
+    >{{ word }}</span>
   </div>
 </template>
 
@@ -34,6 +34,16 @@ const words = computed(() => {
   let splitWords = localText.value.split(" ")
   return splitWords.map((str : string, index : number) => index !== 0 ? "_" + str : str);
 })
+const characterLengths = computed(() => {
+  let previousCharacters = 0
+  let prevCharList : number[] = []
+  for (let i = 0; i < words.value.length; i++) {
+    prevCharList.push(previousCharacters)
+    previousCharacters += words.value[i].length
+  }
+  return prevCharList
+})
+console.log(characterLengths.value)
 
 watch(words, () => {
   console.log(words.value)
