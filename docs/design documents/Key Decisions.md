@@ -21,3 +21,16 @@ Which JS framework to use?
 Which UI framework to use?
 - See [Investigating UI Component Libraries]
 - Conclusion: Quasar is a good choice, but if it doesn't work out Vuetify is another good choice
+
+# Week 3
+
+Going from Vuetify to NaiveUI back to Vuetify
+- Decided to go with Vuetify initially but was disappointed with its grid and class modification system 
+- Switch to NaiveUI for a few hours since it didn't use material UI and had some cool features, also praised on Reddit
+- NaiveUI didn't have many devs behind it and as a result had very little documentation 
+- Decided to go back to Vuetify since it has the most documentation and most users looking for answers on StackOverflow
+
+Using typescript
+- After using vanilla JS to create the prototype, I couldn't bring myself to use a weakly and dynamically typed language for the full project
+- So I decided that I would use typescript for the entire full VueJS project
+
