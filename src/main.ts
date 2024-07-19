@@ -10,8 +10,6 @@ import { md3 } from 'vuetify/blueprints'
 import '@mdi/font/css/materialdesignicons.css'
 import './assets/style.scss'
 
-
-
 // Components
 import App from './App.vue'
 

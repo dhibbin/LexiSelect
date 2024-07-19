@@ -1,13 +1,11 @@
 <template>
   <div style="position: relative; width: 100%; height: 200px; overflow-y: scroll; overflow-x: scroll;">
     <input
-      ref="inputText"
       v-model="localText"
       type="text"
       style="position: absolute; top: 0; left: 0; overflow-y: hidden; font-family: monospace;"
       :style="{ width: localText.length + 'ch' }"
       rows="1"
-      @keydown="locateCursor"
     >
 
     <span
@@ -34,6 +32,25 @@
         <v-list :items="[{title:'hellotitle', value : 1}]" />
       </v-card>
     </v-expand-transition>
+
+    <br>
+    <v-list class="horizontal-list">
+      <v-list-item
+        v-for="(token, index) in tokens"
+        :key="index"
+        :value="token"
+        class="pa-1"
+      >
+        <v-list-item-title>
+          {{ token.completionProb.content }}
+        </v-list-item-title>
+      </v-list-item>
+    </v-list>
+    <br>
+    <v-list
+      :items="items"
+      class="horizontal-list"
+    />
   </div>
 </template>
 
@@ -72,7 +89,20 @@
   const localText = ref(props.responseLLM.content)
   const expandPanelIndex : Ref<number> = ref(0)
   const expand = ref(false)
-  const inputText = ref()
+  const items = ref([
+        {
+          title: 'Item #1',
+          value: 1,
+        },
+        {
+          title: 'Item #2',
+          value: 2,
+        },
+        {
+          title: 'Item #3',
+          value: 3,
+        },
+      ])
 
   watch(props, () => {
     localText.value = props.responseLLM.content
@@ -105,12 +135,6 @@
     return oldString.replace(/ /g, '_')
   }
 
-  function locateCursor(event : Event) : void {
-    event.preventDefault()
-    let textBody = inputText
-    console.log(event.clientX)
-  }
-
 
 </script>
 
@@ -129,5 +153,9 @@
       white-space: nowrap;
       overflow-x: scroll;
       width: 100%;
+    }
+    .horizontal-list {
+      display: flex;
+      flex-direction: row;
     }
 </style>
