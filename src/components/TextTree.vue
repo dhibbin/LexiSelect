@@ -1,5 +1,8 @@
 <template>
-  <div style="position: relative; width: 100%; height: 100%; overflow: auto;">
+  <div
+    ref="root"
+    style="position: relative; width: 100%; height: 100%; overflow: auto;"
+  >
     <br>
     
     <v-list
@@ -21,23 +24,21 @@
       </v-list-item>
     </v-list>
 
-    <v-expand-transition>
+    <v-expand-transition v-if="tokens.length > 0">
       <v-card
         v-show="expand"
-        
         style="overflow: visible;"
-        :style="{ position: 'absolute', top: '100px', fontFamily: 'monospace' }"
+        :style="{ position: 'absolute', top: '100px', fontFamily: 'monospace', left : tokens[currTokIndex].charOffset + 'ch'}"
         class="mx-auto bg-secondary"
         width="200"
       >
         <v-list style="min-height: min-content;">
           <v-list-item
-            v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs"
+            v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0)"
             :key="probIndex"
             :value="tokenProb"
           >
             <v-list-item-title
-              v-if="tokenProb.prob != 0"
               style="overflow: visible; font-family: monospace;"
             >
               {{ tokenProb.tok_str + ':' + tokenProb.prob }}
@@ -113,6 +114,7 @@
     console.log(element)
     expand.value = openHover
     currTokIndex.value = tokenIndex
+    
   }
 
   function stripSpaces(oldString : string) : string {
