@@ -6,6 +6,7 @@ Morning meeting
 - Decided to switch to a system that isn't dependent on absolute left character offsets
 
 Making the horizontal list
+- Took roughly 2 hours
 - Determined which component to use for the list, the `<v-list>` component
 - Tried to install the Vue-Horizontal npm package, since it allows all element to stack horizontally. Spent a while messing with this since the IDE kept saying it was installed when it wasnt
 - Gave up on using Vue-Horizontal and using flex CSS to get the elements to stack horizontally

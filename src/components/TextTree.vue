@@ -1,67 +1,52 @@
 <template>
-  <div style="position: relative; width: 100%; height: 200px; overflow-y: scroll; overflow-x: scroll;">
-    <input
-      v-model="localText"
-      type="text"
-      style="position: absolute; top: 0; left: 0; overflow-y: hidden; font-family: monospace;"
-      :style="{ width: localText.length + 'ch' }"
-      rows="1"
-    >
-
-    <span
-      v-for="(token, index) in tokens"
-      :key="index"
-      style="position: absolute; top: 1px; left: 0; font-family: monospace;"
-      :style="{ left : tokens[index].charOffset + 'ch'}"
-      class="spanText"
-      @mouseover="hover(true, index)"
-    >{{ stripSpaces(token.completionProb.content) }}</span>
-
-    <v-expand-transition>
-      <v-card
-        v-show="expand && !tokens[expandPanelIndex].userModified"
-        style="overflow: visible;"
-        :style="{ position: 'absolute', top: '20px', 
-                  left: (tokens.length > 0 ? tokens[expandPanelIndex].charOffset : '0')
-                    + 'ch', fontFamily: 'monospace' }"
-        class="mx-auto bg-secondary"
-        width="200px"
-        @mouseover="expand = true"
-        @mouseleave="expand = false"
-      >
-        <v-list :items="[{title:'hellotitle', value : 1}]" />
-      </v-card>
-    </v-expand-transition>
-
+  <div style="position: relative; width: 100%; height: 200px; overflow: auto;">
     <br>
-    <v-list class="horizontal-list">
+    
+    <v-list
+      class="horizontal-list"
+      style="min-width: max-content;"
+    >
       <v-list-item
         v-for="(token, index) in tokens"
         :key="index"
+        ref="elements"
         :value="token"
-        class="pa-1"
+        class="pa-0"
+        style="overflow: visible;"
+        @mouseover="hover(true, index)"
+        @mouseleave="hover(false, index)"
       >
-        <v-list-item-title>
-          {{ token.completionProb.content }}
+        <v-list-item-title style="overflow: visible; font-family: monospace;">
+          <pre>{{ stripSpaces(token.completionProb.content) }}</pre>
+          <v-expand-x-transition>
+            <v-card
+              v-show="tokens[index].expandPanel && !tokens[index].userModified"
+              style="overflow: visible;"
+              :style="{ position: 'absolute', top: '100px', fontFamily: 'monospace' }"
+              class="mx-auto bg-secondary"
+              width="200px"
+              @mouseleave="tokens[index].expandPanel = false"
+            >
+              <v-list :items="[{title:'hellotitle', value : 1}]" />
+            </v-card>
+          </v-expand-x-transition>
         </v-list-item-title>
       </v-list-item>
     </v-list>
+    
     <br>
-    <v-list
-      :items="items"
-      class="horizontal-list"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
   import type { Completionprobability, LlamaInterface } from '@/objects/LlamaInterface';
-  import { computed, defineProps, reactive, ref, watch, type Ref, type ComputedRef } from 'vue'
+  import { computed, defineProps, reactive, ref, watch, type ComputedRef } from 'vue'
 
   interface TreeToken {
     completionProb : Completionprobability
     charOffset : number
     userModified : boolean
+    expandPanel : boolean
   }
 
   const tokens : ComputedRef<TreeToken[]> = computed(() => {
@@ -71,7 +56,8 @@
       newTokens.push( reactive({
         completionProb : props.responseLLM.completion_probabilities[i],
         charOffset : previousCharacters,
-        userModified : false
+        userModified : false,
+        expandPanel : false
       }))
       previousCharacters += props.responseLLM.completion_probabilities[i].content.length
     }
@@ -87,52 +73,30 @@
   }>()
 
   const localText = ref(props.responseLLM.content)
-  const expandPanelIndex : Ref<number> = ref(0)
-  const expand = ref(false)
-  const items = ref([
-        {
-          title: 'Item #1',
-          value: 1,
-        },
-        {
-          title: 'Item #2',
-          value: 2,
-        },
-        {
-          title: 'Item #3',
-          value: 3,
-        },
-      ])
+  //const expand = ref(false)
+
+  const tokenLength = computed(() => {
+    return tokens.value.reduce(
+      (totalLength : number, currentToken : TreeToken) => totalLength + currentToken.completionProb.content.length,
+      0
+    )
+  })
 
   watch(props, () => {
     localText.value = props.responseLLM.content
-    //previousLocalText = props.responseLLM.content
+    console.log(tokenLength.value)
   })
 
   watch(localText, () => {
     emits("textUpdate", localText.value)
-    let foundChange = false
-    for (let i = 0; i < tokens.value.length; i++) {
-      for (let n = 0; n < tokens.value[i].completionProb.content.length; n++) {
-        let globalIndex = tokens.value[i].charOffset
-        //console.log(localText.value[globalIndex], tokens.value[i].completionProb.content[n])
-        if (localText.value[globalIndex + n] != tokens.value[i].completionProb.content[n] && !foundChange) {
-          console.log("found changed char", globalIndex, localText.value[n], tokens.value[i].completionProb.content[n])
-          console.log(tokens.value[i].completionProb.content)
-          foundChange = true
-        }
-      }
-      
-    }
   })
 
   function hover(openHover : boolean, tokenIndex : number) : void {
-    expandPanelIndex.value = tokenIndex
-    expand.value = openHover
+    tokens.value[tokenIndex].expandPanel = openHover
   }
 
   function stripSpaces(oldString : string) : string {
-    return oldString.replace(/ /g, '_')
+    return oldString.replace(/ /g, ' ')
   }
 
 
@@ -157,5 +121,6 @@
     .horizontal-list {
       display: flex;
       flex-direction: row;
+      overflow: visible;
     }
 </style>
