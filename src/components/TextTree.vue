@@ -1,5 +1,5 @@
 <template>
-  <div style="position: relative; width: 100%; height: 200px; overflow: auto;">
+  <div style="position: relative; width: 100%; height: 100%; overflow: auto;">
     <br>
     
     <v-list
@@ -14,22 +14,33 @@
         class="pa-0"
         style="overflow: visible;"
         @mouseover="hover(true, index)"
-        @mouseleave="hover(false, index)"
+        @mouseleave="hover(true, index)"
       >
         <v-list-item-title style="overflow: visible; font-family: monospace;">
           <pre>{{ stripSpaces(token.completionProb.content) }}</pre>
-          <v-expand-x-transition>
+          <v-expand-transition>
             <v-card
               v-show="tokens[index].expandPanel && !tokens[index].userModified"
               style="overflow: visible;"
               :style="{ position: 'absolute', top: '100px', fontFamily: 'monospace' }"
               class="mx-auto bg-secondary"
-              width="200px"
+              width="200"
               @mouseleave="tokens[index].expandPanel = false"
             >
-              <v-list :items="[{title:'hellotitle', value : 1}]" />
+              <v-list-item
+                v-for="(tokenProb, probIndex) in tokens[index].completionProb.probs"
+                :key="probIndex"
+                :value="tokenProb"
+              >
+                <v-list-item-title
+                  v-if="tokenProb.prob != 0"
+                  style="overflow: visible; font-family: monospace;"
+                >
+                  {{ tokenProb.tok_str + ':' + tokenProb.prob }}
+                </v-list-item-title>
+              </v-list-item>
             </v-card>
-          </v-expand-x-transition>
+          </v-expand-transition>
         </v-list-item-title>
       </v-list-item>
     </v-list>
