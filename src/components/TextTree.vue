@@ -9,41 +9,43 @@
       <v-list-item
         v-for="(token, index) in tokens"
         :key="index"
-        ref="elements"
+        :ref="'list' + index.toString()"
         :value="token"
         class="pa-0"
         style="overflow: visible;"
-        @mouseover="hover(true, index)"
-        @mouseleave="hover(true, index)"
+        @mouseover="hover(true, index, 'list' + index.toString())"
       >
         <v-list-item-title style="overflow: visible; font-family: monospace;">
           <pre>{{ stripSpaces(token.completionProb.content) }}</pre>
-          <v-expand-transition>
-            <v-card
-              v-show="tokens[index].expandPanel && !tokens[index].userModified"
-              style="overflow: visible;"
-              :style="{ position: 'absolute', top: '100px', fontFamily: 'monospace' }"
-              class="mx-auto bg-secondary"
-              width="200"
-              @mouseleave="tokens[index].expandPanel = false"
-            >
-              <v-list-item
-                v-for="(tokenProb, probIndex) in tokens[index].completionProb.probs"
-                :key="probIndex"
-                :value="tokenProb"
-              >
-                <v-list-item-title
-                  v-if="tokenProb.prob != 0"
-                  style="overflow: visible; font-family: monospace;"
-                >
-                  {{ tokenProb.tok_str + ':' + tokenProb.prob }}
-                </v-list-item-title>
-              </v-list-item>
-            </v-card>
-          </v-expand-transition>
         </v-list-item-title>
       </v-list-item>
     </v-list>
+
+    <v-expand-transition>
+      <v-card
+        v-show="expand"
+        
+        style="overflow: visible;"
+        :style="{ position: 'absolute', top: '100px', fontFamily: 'monospace' }"
+        class="mx-auto bg-secondary"
+        width="200"
+      >
+        <v-list style="min-height: min-content;">
+          <v-list-item
+            v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs"
+            :key="probIndex"
+            :value="tokenProb"
+          >
+            <v-list-item-title
+              v-if="tokenProb.prob != 0"
+              style="overflow: visible; font-family: monospace;"
+            >
+              {{ tokenProb.tok_str + ':' + tokenProb.prob }}
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>  
+      </v-card>
+    </v-expand-transition>
     
     <br>
   </div>
@@ -59,6 +61,9 @@
     userModified : boolean
     expandPanel : boolean
   }
+
+  const expand = ref(false)
+  const currTokIndex = ref(0)
 
   const tokens : ComputedRef<TreeToken[]> = computed(() => {
     let newTokens : TreeToken[] = []
@@ -102,8 +107,12 @@
     emits("textUpdate", localText.value)
   })
 
-  function hover(openHover : boolean, tokenIndex : number) : void {
+  function hover(openHover : boolean, tokenIndex : number, reference : string) : void {
     tokens.value[tokenIndex].expandPanel = openHover
+    let element = document.querySelector(reference)?.getBoundingClientRect
+    console.log(element)
+    expand.value = openHover
+    currTokIndex.value = tokenIndex
   }
 
   function stripSpaces(oldString : string) : string {
