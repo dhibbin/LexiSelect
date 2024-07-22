@@ -2,6 +2,7 @@
   <div
     ref="root"
     style="position: relative; width: 100%; height: 100%; overflow: auto;"
+    @scroll="handleScroll($event.currentTarget)"
   >
     <br>
     
@@ -24,11 +25,15 @@
       </v-list-item>
     </v-list>
 
+    
+    
+    <br>
     <v-expand-transition v-if="tokens.length > 0">
       <v-card
         v-show="expand"
         style="overflow: visible;"
-        :style="{ position: 'absolute', top: '100px', fontFamily: 'monospace', left : tokens[currTokIndex].charOffset + 'ch'}"
+        :style="{position: 'absolute', top: currTokPosition.top + 50 + 'px', fontFamily: 'monospace', 
+                 left : currTokPosition.left + currElementOffset + 'px'}"
         class="mx-auto bg-secondary"
         width="200"
       >
@@ -47,36 +52,36 @@
         </v-list>  
       </v-card>
     </v-expand-transition>
-    
-    <br>
   </div>
 </template>
 
 <script setup lang="ts">
   import type { Completionprobability, LlamaInterface } from '@/objects/LlamaInterface';
-  import { computed, defineProps, reactive, ref, watch, type ComputedRef } from 'vue'
+  import { computed, defineProps, reactive, ref, watch, type ComputedRef, type Ref } from 'vue'
+  import gsap from 'gsap'
 
   interface TreeToken {
     completionProb : Completionprobability
-    charOffset : number
     userModified : boolean
-    expandPanel : boolean
   }
 
   const expand = ref(false)
   const currTokIndex = ref(0)
+  const currElementOffset : Ref<number> = ref(0)
+  const currTokPosition = ref(new DOMRect)
+  const scrollOffset : Ref<number> = ref(0)
 
   const tokens : ComputedRef<TreeToken[]> = computed(() => {
     let newTokens : TreeToken[] = []
-    let previousCharacters = 0
+    //let previousCharacters = 0
     for (let i = 0; i < props.responseLLM.completion_probabilities.length; i++) {
       newTokens.push( reactive({
         completionProb : props.responseLLM.completion_probabilities[i],
-        charOffset : previousCharacters,
+        //charOffset : previousCharacters,
         userModified : false,
-        expandPanel : false
+        //expandPanel : false
       }))
-      previousCharacters += props.responseLLM.completion_probabilities[i].content.length
+      //previousCharacters += props.responseLLM.completion_probabilities[i].content.length
     }
     return newTokens
   })
@@ -90,7 +95,6 @@
   }>()
 
   const localText = ref(props.responseLLM.content)
-  //const expand = ref(false)
 
   const tokenLength = computed(() => {
     return tokens.value.reduce(
@@ -109,8 +113,9 @@
   })
 
   function hover(openHover : boolean, tokenIndex : number, reference : string, element : HTMLElement) : void {
-    console.log(element.getBoundingClientRect())
-    tokens.value[tokenIndex].expandPanel = openHover
+    //gsap.to(currTokPosition, {duration : 0.1, value : element.getBoundingClientRect(), ease : "power1.in"})
+    currTokPosition.value = element.getBoundingClientRect()
+    currElementOffset.value = scrollOffset.value
     expand.value = openHover
     currTokIndex.value = tokenIndex
     
@@ -118,6 +123,11 @@
 
   function stripSpaces(oldString : string) : string {
     return oldString.replace(/ /g, ' ')
+  }
+
+  function handleScroll(target : EventTarget | null) : void {
+    let element : HTMLElement = target as HTMLElement
+    scrollOffset.value = element.scrollLeft
   }
 
 

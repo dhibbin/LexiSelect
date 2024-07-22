@@ -27,7 +27,6 @@
       style="overflow-y: hidden;"
     >
       <TextTree
-        :generated-text="paragraph"
         :response-l-l-m="latestResponse"
       />
     </v-main>
