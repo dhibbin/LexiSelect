@@ -26,7 +26,7 @@
       class="d-flex align-center justify-center"
       style="overflow-y: hidden;"
     >
-      <TextBranch
+      <TextTree
         :response-l-l-m="latestResponse"
       />
     </v-main>
@@ -37,13 +37,14 @@
 import { ref, type Ref } from 'vue'
 import SideBar from './components/SideBar.vue'
 import TextBar from './components/TextBar.vue'
-import TextBranch from './components/TextBranch.vue'
+import TextTree from './components/TextTree.vue'
 import testResponse from './assets/testResponse.json'
 import { defaultLlamaInterface, type LlamaInterface } from './objects/LlamaInterface';
 
 const drawer : Ref<boolean> = ref(true)
 const paragraph : Ref<string> = ref("")
 const latestResponse : Ref<LlamaInterface> = ref(defaultLlamaInterface())
+let number = 0
 
 function onGenerationRecieved(value : LlamaInterface) : void {
 	paragraph.value = value.content
@@ -52,6 +53,7 @@ function onGenerationRecieved(value : LlamaInterface) : void {
 
 function sendTestJson() : void {
 	latestResponse.value = JSON.parse(JSON.stringify(testResponse))
+  latestResponse.value.content += (number++).toString()
 }
 
 

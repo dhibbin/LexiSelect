@@ -23,8 +23,6 @@
         </v-list-item-title>
       </v-list-item>
     </v-list>
-
-    
   
     <v-expand-transition v-if="tokens.length > 0">
       <v-card
@@ -59,20 +57,34 @@ import { computed, defineProps, reactive, ref, watch, type ComputedRef, type Ref
 import gsap from 'gsap'
 import { MutableDOMRect } from '@/objects/MutableDOMRect';
 
-interface TreeToken {
+export interface TreeToken {
 	completionProb : Completionprobability
 	userModified : boolean
 }
+
+const emits = defineEmits<{
+ 	newBranch : [tokens : TreeToken[]]
+}>()
+
+const props = defineProps<{
+	responseLLM : LlamaInterface,
+  previousTokens : TreeToken[] | null
+}>()
 
 const expand = ref(false)
 const currTokIndex = ref(0)
 const currElementOffset : Ref<number> = ref(0)
 const currTokPosition = ref(new MutableDOMRect)
 const scrollOffset : Ref<number> = ref(0)
-const responses : Ref<LlamaInterface[]> = ref([])
+const responses : Ref<LlamaInterface[]> = ref([props.responseLLM])
 
 const tokens : ComputedRef<TreeToken[]> = computed(() => {
 	let newTokens : TreeToken[] = []
+
+  if (props.previousTokens !== null) {
+    props.previousTokens.forEach((token : TreeToken) => tokens.value.push(token))
+  }
+
 	for (let i = 0; i < responses.value.length; i++) {
     for (let n = 0; n < responses.value[i].completion_probabilities.length; n++) {
       newTokens.push( reactive({
@@ -84,23 +96,15 @@ const tokens : ComputedRef<TreeToken[]> = computed(() => {
 	return newTokens
 })
 
- const emits = defineEmits<{
- 	newBranch : []
-}>()
-
-const props = defineProps<{
-	responseLLM : LlamaInterface
-}>()
-
-watch(props, () => {
-	responses.value.push(props.responseLLM)
+watch(() => props.responseLLM, () => {
+  responses.value.push(props.responseLLM)
 })
 
 function hover(openHover : boolean, tokenIndex : number, element : HTMLElement) : void {
 	let newRect = element.getBoundingClientRect()
-	gsap.to(currTokPosition.value, {duration : 0.3, ease : "power1.inOut", left : newRect.left})
+	gsap.to(currTokPosition.value, {duration : 0.2, ease : "power1.inOut", left : newRect.left})
+  gsap.to(currElementOffset, {duration : 0.2, ease : "power1.inOut", value : scrollOffset.value})
 	currTokPosition.value.top = newRect.top
-	currElementOffset.value = scrollOffset.value
 	expand.value = openHover
 	currTokIndex.value = tokenIndex
 }

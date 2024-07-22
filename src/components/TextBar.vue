@@ -1,7 +1,50 @@
 <template>
   <v-app-bar
     color="grey-lighten-2"
-    :height="300"
+    :height="50"
+    location="bottom"
+    class="d-flex"
+    flat
+  >
+    <v-row no-gutters>
+      <v-col
+        cols="6"
+        class="px-2"
+      >
+        <v-btn
+          block
+          class="pa-4"
+          color="blue"
+          base-color="blue"
+          variant="elevated"
+          rounded="lg"
+          @click="attemptLLMGeneration"
+        >
+          Generate New Response
+        </v-btn>
+      </v-col>
+      <v-col
+        cols="6"
+        class="px-2"
+      >
+        <v-btn
+          block
+          class="pa-4"
+          color="blue"
+          base-color="blue"
+          variant="elevated"
+          rounded="lg"
+          :disabled="true"
+          @click="attemptLLMGeneration"
+        >
+          Continue Generation
+        </v-btn>
+      </v-col>
+    </v-row>
+  </v-app-bar>
+  <v-app-bar
+    color="grey-lighten-2"
+    :height="250"
     location="bottom"
     class="d-flex"
     flat
@@ -35,24 +78,6 @@
                 no-resize
                 hide-details
               />
-            </v-col>
-          </v-row>
-          <v-row no-gutters>
-            <v-col
-              cols="12"
-              class="px-2"
-            >
-              <v-btn
-                block
-                class="pa-4"
-                color="blue"
-                base-color="blue"
-                variant="elevated"
-                rounded="lg"
-                @click="attemptLLMGeneration"
-              >
-                Generate Response
-              </v-btn>
             </v-col>
           </v-row>
         </v-tabs-window-item>
@@ -97,15 +122,15 @@ const topLevelTab = ref("input")
 
 const textBarEmits = defineEmits(["onGenerationRecieved"])
 
-  async function attemptLLMGeneration() : Promise<void> {
-    try {
-      let output = await LLMService.instance.SendPrompt(userPrompt.value, systemPrompt.value)
-      console.log(output)
-      textBarEmits("onGenerationRecieved", output)
-    } catch (error) {
-      console.log(error)
-    }
+async function attemptLLMGeneration() : Promise<void> {
+  try {
+    let output = await LLMService.instance.SendPrompt(userPrompt.value, systemPrompt.value)
+    console.log(output)
+    textBarEmits("onGenerationRecieved", output)
+  } catch (error) {
+    console.log(error)
   }
+}
 
 
 </script>
