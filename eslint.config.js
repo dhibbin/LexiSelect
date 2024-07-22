@@ -1,7 +1,7 @@
 import js from '@eslint/js'
 import eslintPluginVue from 'eslint-plugin-vue'
 import ts from 'typescript-eslint'
-//import stylistic from '@stylistic/eslint-plugin'
+import stylistic from '@stylistic/eslint-plugin'
 
 export default ts.config(
   js.configs.recommended,
@@ -15,6 +15,9 @@ export default ts.config(
         parser: ts.parser
       }
     },
+    plugins: {
+      '@stylistic': stylistic
+    },
     rules : {
       "@typescript-eslint/typedef": [
         "error",
@@ -22,12 +25,12 @@ export default ts.config(
           "arrayDestructuring": true,
           //"variableDeclaration": true,
           "arrowParameter" : true,
-          //"memberVariableDeclaration" : true,
+          "memberVariableDeclaration" : true,
           "parameter" : true,
-          //"propertyDeclaration" : true,
+          "propertyDeclaration" : true,
         }
       ],
-     "@typescript-eslint/explicit-function-return-type": "error"
+     "@typescript-eslint/explicit-function-return-type": "error",
     }
   }
 )

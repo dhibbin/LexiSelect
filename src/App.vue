@@ -26,7 +26,7 @@
       class="d-flex align-center justify-center"
       style="overflow-y: hidden;"
     >
-      <TextTree
+      <TextBranch
         :response-l-l-m="latestResponse"
       />
     </v-main>
@@ -34,25 +34,25 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, type Ref } from 'vue'
-  import SideBar from './components/SideBar.vue'
-  import TextBar from './components/TextBar.vue'
-  import TextTree from './components/TextTree.vue'
-  import testResponse from './assets/testResponse.json'
-  import { defaultLlamaInterface, type LlamaInterface } from './objects/LlamaInterface';
+import { ref, type Ref } from 'vue'
+import SideBar from './components/SideBar.vue'
+import TextBar from './components/TextBar.vue'
+import TextBranch from './components/TextBranch.vue'
+import testResponse from './assets/testResponse.json'
+import { defaultLlamaInterface, type LlamaInterface } from './objects/LlamaInterface';
 
-  const drawer : Ref<boolean> = ref(true)
-  const paragraph : Ref<string> = ref("")
-  const latestResponse : Ref<LlamaInterface> = ref(defaultLlamaInterface())
+const drawer : Ref<boolean> = ref(true)
+const paragraph : Ref<string> = ref("")
+const latestResponse : Ref<LlamaInterface> = ref(defaultLlamaInterface())
 
-  function onGenerationRecieved(value : LlamaInterface) : void {
-    paragraph.value = value.content
-    latestResponse.value = value
-  }
+function onGenerationRecieved(value : LlamaInterface) : void {
+	paragraph.value = value.content
+	latestResponse.value = value
+}
 
-  function sendTestJson() : void {
-    latestResponse.value = JSON.parse(JSON.stringify(testResponse))
-  }
+function sendTestJson() : void {
+	latestResponse.value = JSON.parse(JSON.stringify(testResponse))
+}
 
 
 </script>
