@@ -16,7 +16,7 @@
         :value="token"
         class="pa-0"
         style="overflow: visible;"
-        @mouseover="hover(true, index, 'list' + index.toString())"
+        @mouseover="hover(true, index, 'list' + index.toString(), $event.currentTarget)"
       >
         <v-list-item-title style="overflow: visible; font-family: monospace;">
           <pre>{{ stripSpaces(token.completionProb.content) }}</pre>
@@ -108,10 +108,9 @@
     emits("textUpdate", localText.value)
   })
 
-  function hover(openHover : boolean, tokenIndex : number, reference : string) : void {
+  function hover(openHover : boolean, tokenIndex : number, reference : string, element : HTMLElement) : void {
+    console.log(element.getBoundingClientRect())
     tokens.value[tokenIndex].expandPanel = openHover
-    let element = document.querySelector(reference)?.getBoundingClientRect
-    console.log(element)
     expand.value = openHover
     currTokIndex.value = tokenIndex
     
