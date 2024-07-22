@@ -38,6 +38,7 @@
             v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0)"
             :key="probIndex"
             :value="tokenProb"
+            @click="newBranch(currTokIndex, probIndex)"
           >
             <v-list-item-title
               style="overflow: visible; font-family: monospace;"
@@ -82,7 +83,7 @@ const tokens : ComputedRef<TreeToken[]> = computed(() => {
 	let newTokens : TreeToken[] = []
 
   if (props.previousTokens !== null) {
-    props.previousTokens.forEach((token : TreeToken) => tokens.value.push(token))
+    props.previousTokens.forEach((token : TreeToken) => tokens.value.push(reactive(token)))
   }
 
 	for (let i = 0; i < responses.value.length; i++) {
@@ -117,6 +118,23 @@ function handleScroll(target : EventTarget | null) : void {
 	let element : HTMLElement = target as HTMLElement
 	scrollOffset.value = element.scrollLeft
 }
+
+function newBranch(tokenIndex : number, altIndex : number) : void {
+  let newBranchTokens : TreeToken[] = []
+  for (let i = 0; i < tokenIndex; i++) {
+    newBranchTokens.push(tokens.value[i])
+  }
+  newBranchTokens.push(reactive({
+    completionProb : {
+      content : tokens.value[tokenIndex].completionProb.probs[altIndex].tok_str,
+      probs : []
+    },
+    userModified : false
+  }))
+
+  emits("newBranch", newBranchTokens)
+}
+
 
 
 </script>

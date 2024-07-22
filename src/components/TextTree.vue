@@ -4,6 +4,7 @@
     :key="index"
     :response-l-l-m="branch.response"
     :previous-tokens="branch.tokens"
+    @new-branch="newBranch"
   />
 </template>
 
@@ -18,10 +19,8 @@ interface BranchParameters {
     tokens : TreeToken[] | null
 }
 
-
 const branches : Ref<BranchParameters[]> = ref([])
 const activeBranch : Ref<number> = ref(0)
-
 
 const props = defineProps<{
     responseLLM : LlamaInterface,
@@ -38,6 +37,10 @@ watch(() => props.responseLLM, () => {
         branches.value[activeBranch.value].response = props.responseLLM
     }
 })
+
+function newBranch(tokens : TreeToken[]) : void {
+    console.log("Recieved ", tokens.length, " tokens")
+}
 
 
 
