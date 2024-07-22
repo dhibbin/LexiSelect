@@ -1,55 +1,49 @@
 <template>
-  <div
-    ref="root"
-    style="position: relative; width: 100%; height: 100%; overflow: auto;"
-    @scroll="handleScroll($event.currentTarget)"
-  >
-    <br>
+  <br>
     
-    <v-list
-      class="horizontal-list"
-      style="min-width: max-content;"
+  <v-list
+    class="horizontal-list"
+    style="min-width: max-content;"
+  >
+    <v-list-item
+      v-for="(token, index) in tokens"
+      :key="index"
+      :value="token"
+      class="pa-0"
+      style="overflow: visible;"
+      @mouseover="hover(true, index, $event.currentTarget)"
     >
-      <v-list-item
-        v-for="(token, index) in tokens"
-        :key="index"
-        :value="token"
-        class="pa-0"
-        style="overflow: visible;"
-        @mouseover="hover(true, index, $event.currentTarget)"
-      >
-        <v-list-item-title style="overflow: visible; font-family: monospace;">
-          <pre>{{ stripSpaces(token.completionProb.content) }}</pre>
-        </v-list-item-title>
-      </v-list-item>
-    </v-list>
+      <v-list-item-title style="overflow: visible; font-family: monospace;">
+        <pre>{{ stripSpaces(token.completionProb.content) }}</pre>
+      </v-list-item-title>
+    </v-list-item>
+  </v-list>
   
-    <v-expand-transition v-if="tokens.length > 0">
-      <v-card
-        v-show="expand"
-        style="overflow: visible;"
-        :style="{position: 'absolute', top: currTokPosition.top + 'px', fontFamily: 'monospace', 
-                 left : currTokPosition.left + currElementOffset + 'px'}"
-        class="mx-auto bg-secondary"
-        width="200"
-      >
-        <v-list style="min-height: min-content;">
-          <v-list-item
-            v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0)"
-            :key="probIndex"
-            :value="tokenProb"
-            @click="newBranch(currTokIndex, probIndex)"
+  <v-expand-transition v-if="tokens.length > 0">
+    <v-card
+      v-show="expand"
+      style="overflow: visible;"
+      :style="{position: 'absolute', top: currTokPosition.top + 'px', fontFamily: 'monospace', 
+               left : currTokPosition.left + currElementOffset + 'px'}"
+      class="mx-auto bg-secondary"
+      width="200"
+    >
+      <v-list style="min-height: min-content;">
+        <v-list-item
+          v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0)"
+          :key="probIndex"
+          :value="tokenProb"
+          @click="newBranch(currTokIndex, probIndex)"
+        >
+          <v-list-item-title
+            style="overflow: visible; font-family: monospace;"
           >
-            <v-list-item-title
-              style="overflow: visible; font-family: monospace;"
-            >
-              {{ tokenProb.tok_str + ':' + tokenProb.prob }}
-            </v-list-item-title>
-          </v-list-item>
-        </v-list>  
-      </v-card>
-    </v-expand-transition>
-  </div>
+            {{ tokenProb.tok_str + ':' + tokenProb.prob }}
+          </v-list-item-title>
+        </v-list-item>
+      </v-list>  
+    </v-card>
+  </v-expand-transition>
 </template>
 
 <script setup lang="ts">
@@ -68,22 +62,22 @@ const emits = defineEmits<{
 }>()
 
 const props = defineProps<{
-	responseLLM : LlamaInterface,
+	responseLLM : LlamaInterface | null,
   previousTokens : TreeToken[] | null
+  scrollOffset : number
 }>()
 
 const expand = ref(false)
 const currTokIndex = ref(0)
 const currElementOffset : Ref<number> = ref(0)
 const currTokPosition = ref(new MutableDOMRect)
-const scrollOffset : Ref<number> = ref(0)
-const responses : Ref<LlamaInterface[]> = ref([props.responseLLM])
+const responses : Ref<LlamaInterface[]> = ref(props?.responseLLM ? [props.responseLLM] : [])
 
 const tokens : ComputedRef<TreeToken[]> = computed(() => {
 	let newTokens : TreeToken[] = []
 
   if (props.previousTokens !== null) {
-    props.previousTokens.forEach((token : TreeToken) => tokens.value.push(reactive(token)))
+    props.previousTokens.forEach((token : TreeToken) => newTokens.push(token))
   }
 
 	for (let i = 0; i < responses.value.length; i++) {
@@ -98,13 +92,15 @@ const tokens : ComputedRef<TreeToken[]> = computed(() => {
 })
 
 watch(() => props.responseLLM, () => {
-  responses.value.push(props.responseLLM)
+  if (props.responseLLM !== null) {
+    responses.value.push(props.responseLLM)
+  }
 })
 
 function hover(openHover : boolean, tokenIndex : number, element : HTMLElement) : void {
 	let newRect = element.getBoundingClientRect()
 	gsap.to(currTokPosition.value, {duration : 0.2, ease : "power1.inOut", left : newRect.left})
-  gsap.to(currElementOffset, {duration : 0.2, ease : "power1.inOut", value : scrollOffset.value})
+  gsap.to(currElementOffset, {duration : 0.2, ease : "power1.inOut", value : props.scrollOffset})
 	currTokPosition.value.top = newRect.top
 	expand.value = openHover
 	currTokIndex.value = tokenIndex
@@ -114,10 +110,7 @@ function stripSpaces(oldString : string) : string {
 	return oldString.replace(/ /g, ' ')
 }
 
-function handleScroll(target : EventTarget | null) : void {
-	let element : HTMLElement = target as HTMLElement
-	scrollOffset.value = element.scrollLeft
-}
+
 
 function newBranch(tokenIndex : number, altIndex : number) : void {
   let newBranchTokens : TreeToken[] = []
