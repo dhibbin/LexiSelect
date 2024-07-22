@@ -11,10 +11,10 @@
       :value="token"
       class="pa-0"
       style="overflow: visible;"
-      @mouseover="hover(true, index, $event.currentTarget)"
+      @mouseover="hover(index, $event.currentTarget)"
     >
       <v-list-item-title style="overflow: visible; font-family: monospace;">
-        <pre>{{ stripSpaces(token.completionProb.content) }}</pre>
+        <pre>{{ token.completionProb.content }}</pre>
       </v-list-item-title>
     </v-list-item>
   </v-list>
@@ -23,12 +23,13 @@
     <v-card
       v-show="expand"
       style="overflow: visible;"
-      :style="{position: 'absolute', top: currTokPosition.top + 'px', fontFamily: 'monospace', 
-               left : currTokPosition.left + currElementOffset + 'px'}"
+      :style="{position: 'relative', top: 0 + 'px', fontFamily: 'monospace', 
+               left : (currTokPosition.left + currElementOffset - currWindow.innerWidth / 2) + 'px'}"
       class="mx-auto bg-secondary"
       width="200"
+      @mouseleave="expand=false"
     >
-      <v-list style="min-height: min-content;">
+      <v-list style="max-height: min-content; height: 10000px">
         <v-list-item
           v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0)"
           :key="probIndex"
@@ -72,6 +73,8 @@ const currTokIndex = ref(0)
 const currElementOffset : Ref<number> = ref(0)
 const currTokPosition = ref(new MutableDOMRect)
 const responses : Ref<LlamaInterface[]> = ref(props?.responseLLM ? [props.responseLLM] : [])
+const currWindow = ref(window)
+let delayedCall : gsap.core.Tween | null = null
 
 const tokens : ComputedRef<TreeToken[]> = computed(() => {
 	let newTokens : TreeToken[] = []
@@ -97,20 +100,21 @@ watch(() => props.responseLLM, () => {
   }
 })
 
-function hover(openHover : boolean, tokenIndex : number, element : HTMLElement) : void {
+function hover(tokenIndex : number, element : HTMLElement) : void {
 	let newRect = element.getBoundingClientRect()
 	gsap.to(currTokPosition.value, {duration : 0.2, ease : "power1.inOut", left : newRect.left})
   gsap.to(currElementOffset, {duration : 0.2, ease : "power1.inOut", value : props.scrollOffset})
 	currTokPosition.value.top = newRect.top
-	expand.value = openHover
+	expand.value = false
 	currTokIndex.value = tokenIndex
+
+  if (delayedCall !== null) {
+    delayedCall.kill()
+  }
+  delayedCall = gsap.delayedCall(1.0, function() {
+    expand.value = true
+  })
 }
-
-function stripSpaces(oldString : string) : string {
-	return oldString.replace(/ /g, ' ')
-}
-
-
 
 function newBranch(tokenIndex : number, altIndex : number) : void {
   let newBranchTokens : TreeToken[] = []
@@ -128,6 +132,10 @@ function newBranch(tokenIndex : number, altIndex : number) : void {
   emits("newBranch", newBranchTokens)
 }
 
+function getOverlay(element : HTMLElement) : void {
+  console.log("hello")
+  console.log(element.scrollHeight)
+}
 
 
 </script>
