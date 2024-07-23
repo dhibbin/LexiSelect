@@ -23,18 +23,18 @@
   <v-expand-transition
     v-if="tokens.length > 0"
     :rounded="false"
+    :style="{ height : menuHeight + 'px'}"
   >
     <v-card
       v-show="expand"
       ref="tokenMenu"
-      style="overflow: visible;"
       :style="{position: 'relative', top: 0 + 'px', fontFamily: 'monospace', 
                left : (currTokPosition.left + currElementOffset - currWindow.innerWidth / 2) + 'px',
                height : 'min-content'}"
-      class="mx-auto bg-secondary"
+      class="mx-auto"
       width="200"
       @mouseleave="setExpand(false)"
-      @mouseover="setExpand(true)"
+      @mouseenter="setExpand(true)"
     >
       <v-list>
         <v-list-item
@@ -44,7 +44,7 @@
           @click="newBranch(currTokIndex, probIndex)"
         >
           <v-list-item-title
-            style="overflow: visible; font-family: monospace;"
+            style="font-family: monospace;"
           >
             {{ tokenProb.tok_str + ':' + tokenProb.prob }}
           </v-list-item-title>
@@ -52,6 +52,29 @@
       </v-list>  
     </v-card>
   </v-expand-transition>
+
+  <v-card
+    ref="virtualTokenMenu"
+    :style="{position: 'absolute', top: 0 + 'px', fontFamily: 'monospace', 
+             left : (currTokPosition.left + currElementOffset - currWindow.innerWidth / 2) + 'px',
+             height : 'min-content'}"
+    class="mx-auto hidden"
+    width="200"
+  >
+    <v-list>
+      <v-list-item
+        v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0)"
+        :key="probIndex"
+        :value="tokenProb"
+      >
+        <v-list-item-title
+          style="font-family: monospace;"
+        >
+          {{ tokenProb.tok_str + ':' + tokenProb.prob }}
+        </v-list-item-title>
+      </v-list-item>
+    </v-list>  
+  </v-card>
 </template>
 
 <script setup lang="ts">
@@ -82,8 +105,15 @@ const currElementOffset : Ref<number> = ref(0)
 const currTokPosition = ref(new MutableDOMRect)
 const responses : Ref<LlamaInterface[]> = ref(props?.responseLLM ? [props.responseLLM] : [])
 const currWindow = ref(window)
-let delayedCall : gsap.core.Tween | null = null
 const tokenMenu = ref<InstanceType<typeof VCard> | null>(null);
+const virtualTokenMenu = ref<InstanceType<typeof VCard> | null>(null);
+const menuHeight = ref(0)
+
+// Resize Observer to watch for changes in the virtual menu
+let resizeObserver = new ResizeObserver(changeMenuHeight)
+
+// Delayed calls for lerped values
+let expandDelayedCall : gsap.core.Tween | null = null
 
 const tokens : ComputedRef<TreeToken[]> = computed(() => {
   let newTokens : TreeToken[] = []
@@ -103,10 +133,15 @@ const tokens : ComputedRef<TreeToken[]> = computed(() => {
   return newTokens
 })
 
+
 watch(() => props.responseLLM, () => {
   if (props.responseLLM !== null) {
     responses.value.push(props.responseLLM)
   }
+})
+
+watch(() => virtualTokenMenu.value, () => {
+  resizeObserver.observe(virtualTokenMenu.value?.$el)
 })
 
 function hover(tokenIndex : number, element : HTMLElement) : void {
@@ -114,9 +149,8 @@ function hover(tokenIndex : number, element : HTMLElement) : void {
   gsap.to(currTokPosition.value, {duration : 0.2, ease : "power1.inOut", left : newRect.left})
   gsap.to(currElementOffset, {duration : 0.2, ease : "power1.inOut", value : props.scrollOffset})
   currTokPosition.value.top = newRect.top
-  expand.value = true
+  setExpand(true)
   currTokIndex.value = tokenIndex
-  console.log(tokenMenu.value?.$el.getBoundingClientRect())
 }
 
 function newBranch(tokenIndex : number, altIndex : number) : void {
@@ -133,25 +167,27 @@ function newBranch(tokenIndex : number, altIndex : number) : void {
   }))
 
   emits("newBranch", newBranchTokens)
+  setExpand(false)
 }
 
 function setExpand(newValue : boolean) : void {
   if (newValue) {
     expand.value = newValue
-    delayedCall?.kill()
+    expandDelayedCall?.kill()
   }
   else {
-    delayedCall = gsap.delayedCall(0.1, function() {
+    expandDelayedCall = gsap.delayedCall(0.1, function() {
       expand.value = newValue
-      delayedCall = null
+      expandDelayedCall = null
     })
   }
 }
 
-watch(() => tokenMenu.value?.$el.getBoundingClientRect(), () => {
-  console.log("Height changing")
-  console.log(tokenMenu.value?.$el.getBoundingClientRect())
-})
+function changeMenuHeight() : void {
+  console.log("hello there buddy")
+  gsap.to(menuHeight, {duration : 0.3, ease : "power1.inOut", 
+    value : virtualTokenMenu.value?.$el.getBoundingClientRect().height})
+}
 
 
 </script>
@@ -176,5 +212,8 @@ watch(() => tokenMenu.value?.$el.getBoundingClientRect(), () => {
       display: flex;
       flex-direction: row;
       overflow: visible;
+    }
+    .hidden {
+      visibility: hidden;
     }
 </style>
