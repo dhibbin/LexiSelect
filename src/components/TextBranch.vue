@@ -23,8 +23,7 @@
   <v-expand-transition v-if="tokens.length > 0">
     <v-card
       v-show="expand"
-      :ref="$tokenMenu"
-      :on="getOverlay"
+      ref="tokenMenu"
       style="overflow: visible;"
       :style="{position: 'relative', top: 0 + 'px', fontFamily: 'monospace', 
                left : (currTokPosition.left + currElementOffset - currWindow.innerWidth / 2) + 'px',
@@ -50,13 +49,44 @@
       </v-list>  
     </v-card>
   </v-expand-transition>
+
+  <v-expand-transition v-if="tokens.length > 0">
+    <v-card 
+      v-show="expand"
+      ref="headline"
+      style="overflow: visible;"
+      :style="{position: 'relative', top: 0 + 'px', fontFamily: 'monospace', 
+               left : (currTokPosition.left + currElementOffset - currWindow.innerWidth / 2) + 'px',
+               height : 'min-content'}"
+      class="mx-auto bg-secondary"
+      width="200"
+      @mouseleave="expand=false"
+      @mouseover="expand=true"
+    >
+    <v-list>
+        <v-list-item
+          v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0)"
+          :key="probIndex"
+          :value="tokenProb"
+          @click="newBranch(currTokIndex, probIndex)"
+        >
+          <v-list-item-title
+            style="overflow: visible; font-family: monospace;"
+          >
+            {{ tokenProb.tok_str + ':' + tokenProb.prob }}
+          </v-list-item-title>
+        </v-list-item>
+      </v-list>  
+    </v-card>
+  </v-expand-transition>
 </template>
 
 <script setup lang="ts">
 import type { Completionprobability, LlamaInterface } from '@/objects/LlamaInterface';
-import { computed, defineProps, onMounted, reactive, ref, watch, type ComputedRef, type Ref } from 'vue'
+import { computed, defineProps, onMounted, reactive, ref, watch, type ComputedRef, type Ref, type VNodeRef } from 'vue'
 import gsap from 'gsap'
 import { MutableDOMRect } from '@/objects/MutableDOMRect';
+import type { VCard } from 'vuetify/components';
 
 export interface TreeToken {
 	completionProb : Completionprobability
@@ -80,7 +110,9 @@ const currTokPosition = ref(new MutableDOMRect)
 const responses : Ref<LlamaInterface[]> = ref(props?.responseLLM ? [props.responseLLM] : [])
 const currWindow = ref(window)
 let delayedCall : gsap.core.Tween | null = null
-const $tokenMenu : Ref<HTMLElement | null> = ref(null)
+const tokenMenu = ref<InstanceType<typeof VCard> | null>(null);
+const headline = ref<InstanceType<typeof VCard> | null>(null);
+
 
 const tokens : ComputedRef<TreeToken[]> = computed(() => {
 	let newTokens : TreeToken[] = []
@@ -113,7 +145,7 @@ function hover(tokenIndex : number, element : HTMLElement) : void {
 	currTokPosition.value.top = newRect.top
 	expand.value = true
 	currTokIndex.value = tokenIndex
-  console.log(tokenMenu.value?.innerHTML)
+  console.log(tokenMenu.value?.$el.getBoundingClientRect())
   // if (delayedCall !== null) {
   //   delayedCall.kill()
   // }
@@ -139,12 +171,9 @@ function newBranch(tokenIndex : number, altIndex : number) : void {
 }
 
 onMounted(() => {
-  console.log($tokenMenu.value)
+  console.log(tokenMenu.value?.$el.getBoundingClientRect()) 
+  console.log(headline.value?.$el.getBoundingClientRect()) 
 })
-
-function getOverlay() : void {
-  console.log("hello")
-}
 
 
 
