@@ -37,6 +37,10 @@ const props = defineProps<{
   responseLLM : LlamaInterface,
 }>()
 
+const emits = defineEmits<{
+  updateOutputs : [outputs : (TreeToken[] | null)[]]
+}>()
+
 watch(() => props.responseLLM, () => {
   if (branches.value.length <= 0) {
     branches.value.push(reactive({
@@ -48,6 +52,11 @@ watch(() => props.responseLLM, () => {
   else {
     branches.value[activeBranch.value].response = props.responseLLM
   }
+})
+
+watch(() => branches.value, () => {
+  let outputs : (TreeToken[] | null)[] = branches.value.map((v : BranchParameters) => v.totalTokens);
+  emits("updateOutputs", outputs)
 })
 
 function newBranch(tokens : TreeToken[]) : void {
