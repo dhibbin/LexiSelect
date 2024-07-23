@@ -31,6 +31,7 @@ export default ts.config(
         }
       ],
      "@typescript-eslint/explicit-function-return-type": "error",
+     '@stylistic/indent': ['error', 2],
     }
   }
 )
