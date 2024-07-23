@@ -1,8 +1,6 @@
 <template>
-  <br>
-    
   <v-list
-    class="horizontal-list"
+    class="horizontal-list bg-background"
     style="min-width: max-content;"
     @mouseleave="setExpand(false)"
   >
@@ -10,7 +8,7 @@
       v-for="(token, index) in tokens"
       :key="index"
       :value="token"
-      class="pa-0"
+      class="pa-0 bg-background"
       style="overflow: visible;"
       @mouseover="hover(index, $event.currentTarget)"
     >
@@ -114,6 +112,7 @@ let resizeObserver = new ResizeObserver(changeMenuHeight)
 
 // Delayed calls for lerped values
 let expandDelayedCall : gsap.core.Tween | null = null
+let heightDelayedCall : gsap.core.Tween | null = null
 
 const tokens : ComputedRef<TreeToken[]> = computed(() => {
   let newTokens : TreeToken[] = []
@@ -185,7 +184,10 @@ function setExpand(newValue : boolean) : void {
 
 function changeMenuHeight() : void {
   console.log("hello there buddy")
-  gsap.to(menuHeight, {duration : 0.3, ease : "power1.inOut", 
+  if (heightDelayedCall !== null) {
+    heightDelayedCall.kill()
+  }
+  heightDelayedCall = gsap.to(menuHeight, {duration : 0.3, ease : "power1.inOut", 
     value : virtualTokenMenu.value?.$el.getBoundingClientRect().height})
 }
 
