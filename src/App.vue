@@ -26,6 +26,7 @@
       class="d-flex align-center justify-center"
       style="overflow-y: hidden;"
     >
+      <testComp />  
       <TextTree
         :response-l-l-m="latestResponse"
       />
@@ -39,6 +40,7 @@ import SideBar from './components/SideBar.vue'
 import TextBar from './components/TextBar.vue'
 import TextTree from './components/TextTree.vue'
 import testResponse from './assets/testResponse.json'
+import testComp from './components/testComp.vue'
 import { defaultLlamaInterface, type LlamaInterface } from './objects/LlamaInterface';
 
 const drawer : Ref<boolean> = ref(true)

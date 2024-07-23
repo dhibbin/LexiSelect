@@ -4,6 +4,7 @@
   <v-list
     class="horizontal-list"
     style="min-width: max-content;"
+    @mouseleave="expand=false"
   >
     <v-list-item
       v-for="(token, index) in tokens"
@@ -22,14 +23,18 @@
   <v-expand-transition v-if="tokens.length > 0">
     <v-card
       v-show="expand"
+      :ref="$tokenMenu"
+      :on="getOverlay"
       style="overflow: visible;"
       :style="{position: 'relative', top: 0 + 'px', fontFamily: 'monospace', 
-               left : (currTokPosition.left + currElementOffset - currWindow.innerWidth / 2) + 'px'}"
+               left : (currTokPosition.left + currElementOffset - currWindow.innerWidth / 2) + 'px',
+               height : 'min-content'}"
       class="mx-auto bg-secondary"
       width="200"
       @mouseleave="expand=false"
+      @mouseover="expand=true"
     >
-      <v-list style="max-height: min-content; height: 10000px">
+      <v-list>
         <v-list-item
           v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0)"
           :key="probIndex"
@@ -49,7 +54,7 @@
 
 <script setup lang="ts">
 import type { Completionprobability, LlamaInterface } from '@/objects/LlamaInterface';
-import { computed, defineProps, reactive, ref, watch, type ComputedRef, type Ref } from 'vue'
+import { computed, defineProps, onMounted, reactive, ref, watch, type ComputedRef, type Ref } from 'vue'
 import gsap from 'gsap'
 import { MutableDOMRect } from '@/objects/MutableDOMRect';
 
@@ -75,6 +80,7 @@ const currTokPosition = ref(new MutableDOMRect)
 const responses : Ref<LlamaInterface[]> = ref(props?.responseLLM ? [props.responseLLM] : [])
 const currWindow = ref(window)
 let delayedCall : gsap.core.Tween | null = null
+const $tokenMenu : Ref<HTMLElement | null> = ref(null)
 
 const tokens : ComputedRef<TreeToken[]> = computed(() => {
 	let newTokens : TreeToken[] = []
@@ -105,15 +111,15 @@ function hover(tokenIndex : number, element : HTMLElement) : void {
 	gsap.to(currTokPosition.value, {duration : 0.2, ease : "power1.inOut", left : newRect.left})
   gsap.to(currElementOffset, {duration : 0.2, ease : "power1.inOut", value : props.scrollOffset})
 	currTokPosition.value.top = newRect.top
-	expand.value = false
+	expand.value = true
 	currTokIndex.value = tokenIndex
-
-  if (delayedCall !== null) {
-    delayedCall.kill()
-  }
-  delayedCall = gsap.delayedCall(1.0, function() {
-    expand.value = true
-  })
+  console.log(tokenMenu.value?.innerHTML)
+  // if (delayedCall !== null) {
+  //   delayedCall.kill()
+  // }
+  // delayedCall = gsap.delayedCall(1.0, function() {
+  //   expand.value = true
+  // })
 }
 
 function newBranch(tokenIndex : number, altIndex : number) : void {
@@ -132,10 +138,15 @@ function newBranch(tokenIndex : number, altIndex : number) : void {
   emits("newBranch", newBranchTokens)
 }
 
-function getOverlay(element : HTMLElement) : void {
+onMounted(() => {
+  console.log($tokenMenu.value)
+})
+
+function getOverlay() : void {
   console.log("hello")
-  console.log(element.scrollHeight)
 }
+
+
 
 
 </script>
