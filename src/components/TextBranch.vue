@@ -8,7 +8,7 @@
       v-for="(token, index) in tokens"
       :key="index"
       :value="token"
-      class="pa-0 bg-background"
+      :class="'pa-0 ' + (props.isActive ? 'bg-primary' : 'bg-background')"
       style="overflow: visible;"
       @mouseover="hover(index, $event.currentTarget)"
     >
@@ -27,7 +27,7 @@
       v-show="expand"
       ref="tokenMenu"
       :style="{position: 'relative', top: 0 + 'px', fontFamily: 'monospace', 
-               left : (currTokPosition.left + currElementOffset - currWindow.innerWidth / 2) + 'px',
+               left : (currTokPosition.left + currElementOffset - currWindow.innerWidth / 2) + 100 + 'px',
                height : 'min-content'}"
       class="mx-auto"
       width="200"
@@ -77,7 +77,7 @@
 
 <script setup lang="ts">
 import type { Completionprobability, LlamaInterface } from '@/objects/LlamaInterface';
-import { computed, defineProps, reactive, ref, watch, type ComputedRef, type Ref } from 'vue'
+import { computed, defineProps, onMounted, reactive, ref, watch, type ComputedRef, type Ref } from 'vue'
 import gsap from 'gsap'
 import { MutableDOMRect } from '@/objects/MutableDOMRect';
 import type { VCard } from 'vuetify/components';
@@ -89,12 +89,14 @@ export interface TreeToken {
 
 const emits = defineEmits<{
   newBranch : [tokens : TreeToken[]]
+  updateTokens : [tokens : TreeToken[]]
 }>()
 
 const props = defineProps<{
   responseLLM : LlamaInterface | null,
   previousTokens : TreeToken[] | null
   scrollOffset : number
+  isActive : boolean
 }>()
 
 const expand = ref(false)
@@ -132,7 +134,6 @@ const tokens : ComputedRef<TreeToken[]> = computed(() => {
   return newTokens
 })
 
-
 watch(() => props.responseLLM, () => {
   if (props.responseLLM !== null) {
     responses.value.push(props.responseLLM)
@@ -143,10 +144,19 @@ watch(() => virtualTokenMenu.value, () => {
   resizeObserver.observe(virtualTokenMenu.value?.$el)
 })
 
+watch(() => tokens.value, () => {
+  emits("updateTokens", tokens.value)
+})
+
+onMounted(() => {
+  emits("updateTokens", tokens.value)
+})
+
+
 function hover(tokenIndex : number, element : HTMLElement) : void {
   let newRect = element.getBoundingClientRect()
-  gsap.to(currTokPosition.value, {duration : 0.2, ease : "power1.inOut", left : newRect.left})
-  gsap.to(currElementOffset, {duration : 0.2, ease : "power1.inOut", value : props.scrollOffset})
+  gsap.to(currTokPosition.value, {duration : 0.1, ease : "power1.inOut", left : newRect.left})
+  gsap.to(currElementOffset, {duration : 0.1, ease : "power1.inOut", value : props.scrollOffset})
   currTokPosition.value.top = newRect.top
   setExpand(true)
   currTokIndex.value = tokenIndex
@@ -183,13 +193,14 @@ function setExpand(newValue : boolean) : void {
 }
 
 function changeMenuHeight() : void {
-  console.log("hello there buddy")
   if (heightDelayedCall !== null) {
     heightDelayedCall.kill()
   }
-  heightDelayedCall = gsap.to(menuHeight, {duration : 0.3, ease : "power1.inOut", 
+  heightDelayedCall = gsap.to(menuHeight, {duration : 0.1, ease : "power1.inOut", 
     value : virtualTokenMenu.value?.$el.getBoundingClientRect().height})
 }
+
+//TODO: Figure out why on first hover the lerp fails
 
 
 </script>

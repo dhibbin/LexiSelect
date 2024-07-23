@@ -1,52 +1,9 @@
 <template>
   <v-app-bar
-    color="grey-lighten-2"
-    :height="50"
+    color="background"
+    :height="280"
     location="bottom"
-    class="d-flex"
-    flat
-  >
-    <v-row no-gutters>
-      <v-col
-        cols="6"
-        class="px-2"
-      >
-        <v-btn
-          block
-          class="pa-4"
-          color="blue"
-          base-color="blue"
-          variant="elevated"
-          rounded="lg"
-          @click="attemptLLMGeneration"
-        >
-          Generate New Response
-        </v-btn>
-      </v-col>
-      <v-col
-        cols="6"
-        class="px-2"
-      >
-        <v-btn
-          block
-          class="pa-4"
-          color="blue"
-          base-color="blue"
-          variant="elevated"
-          rounded="lg"
-          :disabled="true"
-          @click="attemptLLMGeneration"
-        >
-          Continue Generation
-        </v-btn>
-      </v-col>
-    </v-row>
-  </v-app-bar>
-  <v-app-bar
-    color="grey-lighten-2"
-    :height="250"
-    location="bottom"
-    class="d-flex"
+    class="d-flex pa-0 ma-0"
     flat
   >
     <v-container>
@@ -80,9 +37,64 @@
               />
             </v-col>
           </v-row>
+          <v-row no-gutters>
+            <v-col
+              cols="12"
+              class="px-2"
+            >
+              <v-btn
+                block
+                class="pa-4"
+                color="blue"
+                base-color="blue"
+                variant="elevated"
+                rounded="lg"
+                @click="attemptLLMGeneration"
+              >
+                Generate New Response
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-tabs-window-item>
-        <v-tabs-window-item value="output">
-          <v-card-text>Two</v-card-text>
+        <v-tabs-window-item
+          value="output"
+          class="pa-0"
+        >
+          <v-sheet
+            class="d-flex flex-nowrap bg-background pa-0"
+            style="overflow-x: scroll;"
+          >
+            <v-col
+              v-for="(number, index) in [1,2,3,4,5,6]"
+              :key="index"
+              class="pa-1"
+              cols="auto"
+              align-self="end"
+            >
+              <v-row no-gutters> 
+                <v-textarea
+                  class="fill-height d-flex flex-column pa-2"
+                  label="Output 1"
+                  rows="8"
+                  no-resize
+                  hide-details
+                />
+              </v-row>  
+              <v-row no-gutters>
+                <v-btn
+                  block
+                  class="pa-4"
+                  color="blue"
+                  base-color="blue"
+                  variant="elevated"
+                  rounded="lg"
+                  @click="attemptLLMGeneration"
+                >
+                  Continue Generation
+                </v-btn>
+              </v-row>
+            </v-col>
+          </v-sheet>
         </v-tabs-window-item>
       </v-tabs-window>
     </v-container>  

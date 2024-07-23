@@ -8,10 +8,12 @@
       v-for="(branch, index) in branches"
       :key="index"
       :response-l-l-m="branch.response"
-      :previous-tokens="branch.tokens"
+      :previous-tokens="branch.previousTokens"
       :scroll-offset="scrollOffset"
+      :is-active="activeBranch == index"
       @new-branch="newBranch"
-    />
+      @update-tokens="updateTokens($event, index)"
+    />  
   </div>
 </template>
 
@@ -23,7 +25,8 @@ import type { LlamaInterface } from '@/objects/LlamaInterface';
 
 interface BranchParameters {
   response : LlamaInterface | null,
-  tokens : TreeToken[] | null
+  previousTokens : TreeToken[] | null
+  totalTokens : TreeToken[] | null
 }
 
 const branches : Ref<BranchParameters[]> = ref([])
@@ -38,7 +41,8 @@ watch(() => props.responseLLM, () => {
   if (branches.value.length <= 0) {
     branches.value.push(reactive({
       response : props.responseLLM,
-      tokens : null
+      previousTokens : null,
+      totalTokens : null
     }))
   }
   else {
@@ -50,7 +54,8 @@ function newBranch(tokens : TreeToken[]) : void {
   console.log("Recieved ", tokens.length, " tokens")
   branches.value.push(reactive({
     response : null,
-    tokens : tokens
+    previousTokens : tokens,
+    totalTokens : null
   }))
   activeBranch.value = branches.value.length - 1
 }
@@ -60,6 +65,10 @@ function handleScroll(target : EventTarget | null) : void {
   scrollOffset.value = element.scrollLeft
 }
 
+function updateTokens(tokens : TreeToken[], index : number) : void {
+  branches.value[index].totalTokens = tokens
+  console.log("change tokens in branch", index)
+}
 
 
 
