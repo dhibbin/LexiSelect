@@ -10,9 +10,12 @@
       :value="token"
       :class="'pa-0 ' + (props.isActive ? 'bg-primary' : 'bg-background')"
       style="overflow: visible;"
-      @mouseover="hover(index, $event.currentTarget)"
+      @mouseenter="hover(index, $event.currentTarget)"
+      @click="click"
     >
-      <v-list-item-title style="overflow: visible; font-family: monospace;">
+      <v-list-item-title
+        style="overflow: visible; font-family: monospace;"
+      >
         <pre>{{ token.completionProb.content }}</pre>
       </v-list-item-title>
     </v-list-item>
@@ -39,7 +42,8 @@
           v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0)"
           :key="probIndex"
           :value="tokenProb"
-          @click="newBranch(currTokIndex, probIndex)"
+          :disabled="tokenProb.tok_str == tokens[currTokIndex].completionProb.content"
+          @click="newBranch(currTokIndex, tokenProb.tok_str)"
         >
           <v-list-item-title
             style="font-family: monospace;"
@@ -50,6 +54,22 @@
       </v-list>  
     </v-card>
   </v-expand-transition>
+
+  <v-expand-x-transition>
+    <v-card
+      v-show="openInputBox && !expand"
+      :style="{position: 'relative', top: 0 + 'px', fontFamily: 'monospace', 
+               left : (currTokPosition.left + currElementOffset) + 'px', width : 200 + 'px'}"
+      auto-grow
+      @mouseleave="openInputBox = false"
+    >
+      <v-text-field
+        v-model="customTokenInput"
+        label="New Token"
+        @keydown.enter="newBranch(currTokIndex, customTokenInput)"
+      />
+    </v-card>
+  </v-expand-x-transition>
 
   <v-card
     ref="virtualTokenMenu"
@@ -108,6 +128,8 @@ const currWindow = ref(window)
 const tokenMenu = ref<InstanceType<typeof VCard> | null>(null);
 const virtualTokenMenu = ref<InstanceType<typeof VCard> | null>(null);
 const menuHeight = ref(0)
+const openInputBox = ref(false)
+const customTokenInput = ref("")
 
 // Resize Observer to watch for changes in the virtual menu
 let resizeObserver = new ResizeObserver(changeMenuHeight)
@@ -162,14 +184,19 @@ function hover(tokenIndex : number, element : HTMLElement) : void {
   currTokIndex.value = tokenIndex
 }
 
-function newBranch(tokenIndex : number, altIndex : number) : void {
+function click() : void {
+  openInputBox.value = true
+  setExpand(false)
+}
+
+function newBranch(tokenIndex : number, newToken : string) : void {
   let newBranchTokens : TreeToken[] = []
   for (let i = 0; i < tokenIndex; i++) {
     newBranchTokens.push(tokens.value[i])
   }
   newBranchTokens.push(reactive({
     completionProb : {
-      content : tokens.value[tokenIndex].completionProb.probs[altIndex].tok_str,
+      content : newToken,
       probs : []
     },
     userModified : false
