@@ -43,21 +43,21 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, type Ref, reactive, watch } from 'vue'
-  import { LLMService, type LLMSettings, LLMSettingsWrapper } from '@/objects/LLMService';
+import { ref, type Ref, reactive, watch } from 'vue'
+import { LLMService, type LLMSettings, LLMSettingsWrapper } from '@/objects/LLMService';
 
-  const settings : LLMSettings = reactive({
-    n_predict : 10,
-    n_probs : 5,
-    seed : -1,
-    ipAddress : "localhost:8080"
-  })
+const settings : LLMSettings = reactive({
+  n_predict : 10,
+  n_probs : 5,
+  seed : -1,
+  ipAddress : "localhost:8080"
+})
 
-  const panel : Ref<number[]> = ref([0])
+const panel : Ref<number[]> = ref([0])
 
-  watch(settings, () => {
-    LLMService.instance.settings = settings
-  }, {deep : true})
+watch(settings, () => {
+  LLMService.instance.settings = settings
+}, {deep : true})
 
 
 </script>
