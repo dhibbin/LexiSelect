@@ -54,7 +54,7 @@
                 base-color="blue"
                 variant="elevated"
                 rounded="lg"
-                @click="startGeneration"
+                @click="startGeneration(-1)"
               >
                 Generate New Response
               </v-btn>
@@ -141,7 +141,7 @@
   
 <script setup lang="ts">
 import { LLMService  } from '@/objects/LLMService';
-import { ref, type Ref, watch, defineEmits, reactive } from 'vue';
+import { ref, type Ref, watch, reactive } from 'vue';
 import type { TreeToken } from './TextBranch.vue'
 import { type LlamaInterface } from '../objects/LlamaInterface';
 import { type BranchResposne } from './TextTree.vue';
@@ -155,7 +155,7 @@ const startButtonLoading : Ref<boolean> = ref(false)
 const userPrompt : Ref<string> = ref("Write a story about a man named Stanley")
 const systemPrompt : Ref<string> = ref("You are a talented writing assistant. Always respond by incorporating the instructions into expertly written prose that is highly detailed, evocative, vivid and engaging.");
 const topLevelTab = ref("input")
-const outputs : Ref<outputData[]> = ref([])
+const outputs : Ref<outputData[]> = ref([{content : "", loading : false}])
 
 const emits = defineEmits<{
   onGenerationRecieved : [output : BranchResposne]
@@ -167,22 +167,39 @@ const props = defineProps<{
 }>()
 
 async function requestGeneration(index : number = -1) : Promise<LlamaInterface> {
+  let previousOutput = ""
+  if (index !== -1) {
+    previousOutput = outputs.value[index].content
+  }
+
   return await LLMService.instance.SendPrompt(
-    userPrompt.value, systemPrompt.value, index != -1 ? outputs.value[index].content : "")
+    userPrompt.value, systemPrompt.value, previousOutput)
 }
 
 async function startGeneration(index : number = -1) : Promise<void> {
-  index != -1 ? startButtonLoading.value = true : outputs.value[index].loading = true
+  setLoading(true, index)
+
   try {
     let output = await requestGeneration(index)
     emits("onGenerationRecieved", reactive({
       response : output,
       index : index
     }))
-    index != -1 ? startButtonLoading.value = false : outputs.value[index].loading = false
   }
   catch(error) {
     console.log(error)
+  }
+  finally {
+    setLoading(false, index)
+  }
+}
+
+function setLoading(isLoading : boolean, index : number = -1) : void {
+  if (index != -1) {
+    outputs.value[index].loading = isLoading
+  }
+  else {
+    startButtonLoading.value = isLoading 
   }
 }
 

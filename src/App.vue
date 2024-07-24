@@ -64,15 +64,14 @@ import SideBar from './components/SideBar.vue'
 import TextBar from './components/TextBar.vue'
 import TextTree from './components/TextTree.vue'
 import testResponse from './assets/testResponse.json'
-import { defaultLlamaInterface, type LlamaInterface } from './objects/LlamaInterface';
+import { defaultLlamaInterface } from './objects/LlamaInterface';
 import type { TreeToken } from './components/TextBranch.vue'
 import { type BranchResposne } from './components/TextTree.vue';
 
 const drawer : Ref<boolean> = ref(true)
 const latestResponse : Ref<BranchResposne> = ref({ response : defaultLlamaInterface(), index : -1})
 const outputs : Ref<(TreeToken[] | null)[]> = ref([])
-let number = 0
-const showSnackbar = ref(true)
+const showSnackbar = ref(false)
 
 
 function onGenerationRecieved(newReponse : BranchResposne) : void {
@@ -80,10 +79,10 @@ function onGenerationRecieved(newReponse : BranchResposne) : void {
 }
 
 function sendTestJson() : void {
-  latestResponse.value = {
-    response : JSON.parse(JSON.stringify(testResponse),
-    index : -1
-  } as BranchResposne
+  latestResponse.value = reactive({
+    response : JSON.parse(JSON.stringify(testResponse)),
+    index : -1,
+  }) 
 }
 
 function updateOutputs(newOutputs : (TreeToken[] | null)[]) : void {

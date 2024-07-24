@@ -77,7 +77,7 @@
 
 <script setup lang="ts">
 import type { Completionprobability, LlamaInterface } from '@/objects/LlamaInterface';
-import { computed, defineProps, onMounted, reactive, ref, watch, type ComputedRef, type Ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch, type ComputedRef, type Ref } from 'vue'
 import gsap from 'gsap'
 import { MutableDOMRect } from '@/objects/MutableDOMRect';
 import type { VCard } from 'vuetify/components';

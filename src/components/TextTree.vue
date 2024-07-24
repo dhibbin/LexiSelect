@@ -11,7 +11,7 @@
       :previous-tokens="branch.previousTokens"
       :scroll-offset="scrollOffset"
       :is-active="activeBranch == index"
-      @new-branch="newBranch"
+      @new-branch="newBranchFromTokens"
       @update-tokens="updateTokens($event, index)"
     />  
   </div>
@@ -39,7 +39,7 @@ const activeBranch : Ref<number> = ref(0)
 const scrollOffset : Ref<number> = ref(0)
 
 const props = defineProps<{
-  responseLLM : LlamaInterface,
+  responseLLM : BranchResposne,
 }>()
 
 const emits = defineEmits<{
@@ -49,13 +49,18 @@ const emits = defineEmits<{
 watch(() => props.responseLLM, () => {
   if (branches.value.length <= 0) {
     branches.value.push(reactive({
-      response : props.responseLLM,
+      response : props.responseLLM.response,
       previousTokens : null,
       totalTokens : null
     }))
   }
   else {
-    branches.value[activeBranch.value].response = props.responseLLM
+    if (props.responseLLM.index == -1) {
+      newBranchFromResponse(props.responseLLM.response)
+    }
+    else {
+      branches.value[activeBranch.value].response = props.responseLLM.response
+    }
   }
 })
 
@@ -65,11 +70,21 @@ watch(() => branches.value, () => {
   emits("updateOutputs", outputs)
 }, {deep : true})
 
-function newBranch(tokens : TreeToken[]) : void {
+function newBranchFromTokens(tokens : TreeToken[]) : void {
   console.log("Recieved ", tokens.length, " tokens")
   branches.value.push(reactive({
     response : null,
     previousTokens : tokens,
+    totalTokens : null
+  }))
+  activeBranch.value = branches.value.length - 1
+}
+
+function newBranchFromResponse(response : LlamaInterface) : void {
+  console.log("Recieved ", response)
+  branches.value.push(reactive({
+    response : response,
+    previousTokens : null,
     totalTokens : null
   }))
   activeBranch.value = branches.value.length - 1
