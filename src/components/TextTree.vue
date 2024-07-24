@@ -56,8 +56,9 @@ watch(() => props.responseLLM, () => {
 
 watch(() => branches.value, () => {
   let outputs : (TreeToken[] | null)[] = branches.value.map((v : BranchParameters) => v.totalTokens);
+  console.log("branches changed")
   emits("updateOutputs", outputs)
-})
+}, {deep : true})
 
 function newBranch(tokens : TreeToken[]) : void {
   console.log("Recieved ", tokens.length, " tokens")
@@ -76,7 +77,6 @@ function handleScroll(target : EventTarget | null) : void {
 
 function updateTokens(tokens : TreeToken[], index : number) : void {
   branches.value[index].totalTokens = tokens
-  console.log("change tokens in branch", index)
 }
 
 

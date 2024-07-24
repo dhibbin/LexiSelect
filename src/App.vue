@@ -19,7 +19,10 @@
       <SideBar />
     </v-navigation-drawer>
 
-    <TextBar @on-generation-recieved="onGenerationRecieved" />
+    <TextBar
+      :branch-tokens="outputs"
+      @on-generation-recieved="onGenerationRecieved"
+    />
  
 
     <v-main
@@ -28,6 +31,7 @@
     >
       <TextTree
         :response-l-l-m="latestResponse"
+        @update-outputs="updateOutputs"
       />
     </v-main>
   </v-app>
@@ -40,20 +44,27 @@ import TextBar from './components/TextBar.vue'
 import TextTree from './components/TextTree.vue'
 import testResponse from './assets/testResponse.json'
 import { defaultLlamaInterface, type LlamaInterface } from './objects/LlamaInterface';
+import type { TreeToken } from './components/TextBranch.vue'
+
 
 const drawer : Ref<boolean> = ref(true)
 const paragraph : Ref<string> = ref("")
 const latestResponse : Ref<LlamaInterface> = ref(defaultLlamaInterface())
+const outputs : Ref<(TreeToken[] | null)[]> = ref([])
 let number = 0
 
 function onGenerationRecieved(value : LlamaInterface) : void {
-	paragraph.value = value.content
-	latestResponse.value = value
+  paragraph.value = value.content
+  latestResponse.value = value
 }
 
 function sendTestJson() : void {
-	latestResponse.value = JSON.parse(JSON.stringify(testResponse))
+  latestResponse.value = JSON.parse(JSON.stringify(testResponse))
   latestResponse.value.content += (number++).toString()
+}
+
+function updateOutputs(newOutputs : (TreeToken[] | null)[]) : void {
+  outputs.value = newOutputs
 }
 
 

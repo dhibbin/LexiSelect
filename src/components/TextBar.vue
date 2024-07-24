@@ -1,13 +1,17 @@
-<template>
+<template>  
   <v-app-bar
-    color="background"
+    color="surface"
     :height="280"
     location="bottom"
-    class="d-flex pa-0 ma-0"
     flat
   >
-    <v-container>
-      <v-tabs-window v-model="topLevelTab">
+    <v-container
+      class="pa-0"
+    >
+      <v-tabs-window
+        v-model="topLevelTab"
+        class="pa-0"
+      >
         <v-tabs-window-item value="input">
           <v-row no-gutters>
             <v-col
@@ -61,11 +65,11 @@
           class="pa-0"
         >
           <v-sheet
-            class="d-flex flex-nowrap bg-background pa-0"
+            class="d-flex flex-nowrap bg-surface pa-0"
             style="overflow-x: scroll;"
           >
             <v-col
-              v-for="(number, index) in [1,2,3,4,5,6]"
+              v-for="(_, index) in outputs"
               :key="index"
               class="pa-1"
               cols="auto"
@@ -73,6 +77,7 @@
             >
               <v-row no-gutters> 
                 <v-textarea
+                  v-model="outputs[index]"
                   class="fill-height d-flex flex-column pa-2"
                   label="Output 1"
                   rows="8"
@@ -99,7 +104,7 @@
       </v-tabs-window>
     </v-container>  
   </v-app-bar>
-
+  
   <v-app-bar
     color="grey-lighten-2"
     height="30"
@@ -114,6 +119,13 @@
       rounded="lg"
       style="width: 100%;"
     >
+      <v-fab
+        class="ms-4"
+        icon="mdi-plus"
+        location="start"
+        size="small"
+        offset
+      />
       <v-tab value="input">
         Input
       </v-tab>
@@ -126,13 +138,19 @@
   
 <script setup lang="ts">
 import { LLMService } from '@/objects/LLMService';
-import { ref, type Ref } from 'vue';
+import { ref, type Ref, watch } from 'vue';
+import type { TreeToken } from './TextBranch.vue'
 
 const userPrompt : Ref<string> = ref("Write a story about a man named Stanley")
 const systemPrompt : Ref<string> = ref("You are a talented writing assistant. Always respond by incorporating the instructions into expertly written prose that is highly detailed, evocative, vivid and engaging.");
 const topLevelTab = ref("input")
+const outputs : Ref<string[]> = ref([])
 
 const textBarEmits = defineEmits(["onGenerationRecieved"])
+
+const props = defineProps<{
+  branchTokens : (TreeToken[] | null)[],
+}>()
 
 async function attemptLLMGeneration() : Promise<void> {
   try {
@@ -143,6 +161,17 @@ async function attemptLLMGeneration() : Promise<void> {
     console.log(error)
   }
 }
+
+watch(() => props.branchTokens, () => {
+  console.log("new outputs received")
+  for (let i = 0; i < props.branchTokens.length; i++) {
+    if (props.branchTokens[i] !== null) {
+      outputs.value.push(props.branchTokens[i]!.map((t : TreeToken) => t.completionProb.content).join(''))
+    }
+  }
+})
+
+
 
 
 </script>
