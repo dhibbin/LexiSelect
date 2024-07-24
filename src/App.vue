@@ -29,6 +29,27 @@
       class="d-flex align-center justify-center"
       style="overflow-y: hidden;"
     >
+      <v-snackbar
+        v-model="showSnackbar"
+        color="error"
+        :timeout="3000"
+      >
+        <div class="d-flex justify-space-evenly bg-transparent">
+          <v-sheet
+            class="pa-2 bg-transparent"
+          >
+            Request to LLM server failed
+          </v-sheet>  
+          <v-btn
+            class="align-center justify-center"
+            color="background"
+            @click="showSnackbar = false"
+          >
+            Close
+          </v-btn>
+        </div>  
+      </v-snackbar> 
+    
       <TextTree
         :response-l-l-m="latestResponse"
         @update-outputs="updateOutputs"
@@ -38,29 +59,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type Ref } from 'vue'
+import { reactive, ref, type Ref } from 'vue'
 import SideBar from './components/SideBar.vue'
 import TextBar from './components/TextBar.vue'
 import TextTree from './components/TextTree.vue'
 import testResponse from './assets/testResponse.json'
 import { defaultLlamaInterface, type LlamaInterface } from './objects/LlamaInterface';
 import type { TreeToken } from './components/TextBranch.vue'
-
+import { type BranchResposne } from './components/TextTree.vue';
 
 const drawer : Ref<boolean> = ref(true)
-const paragraph : Ref<string> = ref("")
-const latestResponse : Ref<LlamaInterface> = ref(defaultLlamaInterface())
+const latestResponse : Ref<BranchResposne> = ref({ response : defaultLlamaInterface(), index : -1})
 const outputs : Ref<(TreeToken[] | null)[]> = ref([])
 let number = 0
+const showSnackbar = ref(true)
 
-function onGenerationRecieved(value : LlamaInterface) : void {
-  paragraph.value = value.content
-  latestResponse.value = value
+
+function onGenerationRecieved(newReponse : BranchResposne) : void {
+  latestResponse.value = newReponse
 }
 
 function sendTestJson() : void {
-  latestResponse.value = JSON.parse(JSON.stringify(testResponse))
-  latestResponse.value.content += (number++).toString()
+  latestResponse.value = {
+    response : JSON.parse(JSON.stringify(testResponse),
+    index : -1
+  } as BranchResposne
 }
 
 function updateOutputs(newOutputs : (TreeToken[] | null)[]) : void {

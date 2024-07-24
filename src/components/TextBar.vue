@@ -47,13 +47,14 @@
               class="px-2"
             >
               <v-btn
+                :loading="startButtonLoading"
                 block
                 class="pa-4"
                 color="blue"
                 base-color="blue"
                 variant="elevated"
                 rounded="lg"
-                @click="attemptLLMGeneration"
+                @click="startGeneration"
               >
                 Generate New Response
               </v-btn>
@@ -77,9 +78,9 @@
             >
               <v-row no-gutters> 
                 <v-textarea
-                  v-model="outputs[index]"
+                  v-model="outputs[index].content"
                   class="fill-height d-flex flex-column pa-2"
-                  label="Output 1"
+                  :label="'Output ' + (index + 1).toString()"
                   rows="8"
                   no-resize
                   hide-details
@@ -88,12 +89,14 @@
               <v-row no-gutters>
                 <v-btn
                   block
+                  :loading="outputs[index].loading"
+                  :timeout="100"
                   class="pa-4"
                   color="blue"
                   base-color="blue"
                   variant="elevated"
                   rounded="lg"
-                  @click="attemptLLMGeneration"
+                  @click="startGeneration(index)"
                 >
                   Continue Generation
                 </v-btn>
@@ -104,7 +107,7 @@
       </v-tabs-window>
     </v-container>  
   </v-app-bar>
-  
+
   <v-app-bar
     color="grey-lighten-2"
     height="30"
@@ -137,38 +140,63 @@
 </template>
   
 <script setup lang="ts">
-import { LLMService } from '@/objects/LLMService';
-import { ref, type Ref, watch } from 'vue';
+import { LLMService  } from '@/objects/LLMService';
+import { ref, type Ref, watch, defineEmits, reactive } from 'vue';
 import type { TreeToken } from './TextBranch.vue'
+import { type LlamaInterface } from '../objects/LlamaInterface';
+import { type BranchResposne } from './TextTree.vue';
 
+interface outputData {
+  content : string 
+  loading : boolean
+}
+
+const startButtonLoading : Ref<boolean> = ref(false)
 const userPrompt : Ref<string> = ref("Write a story about a man named Stanley")
 const systemPrompt : Ref<string> = ref("You are a talented writing assistant. Always respond by incorporating the instructions into expertly written prose that is highly detailed, evocative, vivid and engaging.");
 const topLevelTab = ref("input")
-const outputs : Ref<string[]> = ref([])
+const outputs : Ref<outputData[]> = ref([])
 
-const textBarEmits = defineEmits(["onGenerationRecieved"])
+const emits = defineEmits<{
+  onGenerationRecieved : [output : BranchResposne]
+  generationFailed : []
+}>()
 
 const props = defineProps<{
   branchTokens : (TreeToken[] | null)[],
 }>()
 
-async function attemptLLMGeneration() : Promise<void> {
+async function requestGeneration(index : number = -1) : Promise<LlamaInterface> {
+  return await LLMService.instance.SendPrompt(
+    userPrompt.value, systemPrompt.value, index != -1 ? outputs.value[index].content : "")
+}
+
+async function startGeneration(index : number = -1) : Promise<void> {
+  index != -1 ? startButtonLoading.value = true : outputs.value[index].loading = true
   try {
-    let output = await LLMService.instance.SendPrompt(userPrompt.value, systemPrompt.value)
-    console.log(output)
-    textBarEmits("onGenerationRecieved", output)
-  } catch (error) {
+    let output = await requestGeneration(index)
+    emits("onGenerationRecieved", reactive({
+      response : output,
+      index : index
+    }))
+    index != -1 ? startButtonLoading.value = false : outputs.value[index].loading = false
+  }
+  catch(error) {
     console.log(error)
   }
 }
 
 watch(() => props.branchTokens, () => {
-  console.log("new outputs received")
+  outputs.value = []
   for (let i = 0; i < props.branchTokens.length; i++) {
     if (props.branchTokens[i] !== null) {
-      outputs.value.push(props.branchTokens[i]!.map((t : TreeToken) => t.completionProb.content).join(''))
+      outputs.value.push(reactive({
+        content : props.branchTokens[i]!.map((t : TreeToken) => t.completionProb.content).join(''),
+        loading : false
+      }))
     }
   }
+  console.log(outputs.value)
 })
 
 

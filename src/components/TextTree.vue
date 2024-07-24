@@ -24,9 +24,14 @@ import type { TreeToken } from './TextBranch.vue'
 import type { LlamaInterface } from '@/objects/LlamaInterface';
 
 interface BranchParameters {
-  response : LlamaInterface | null,
+  response : LlamaInterface | null
   previousTokens : TreeToken[] | null
   totalTokens : TreeToken[] | null
+}
+
+export interface BranchResposne {
+  response : LlamaInterface
+  index : number
 }
 
 const branches : Ref<BranchParameters[]> = ref([])
