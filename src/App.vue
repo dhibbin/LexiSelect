@@ -22,6 +22,7 @@
     <TextBar
       :branch-tokens="outputs"
       @on-generation-recieved="onGenerationRecieved"
+      @generation-failed="onGenerationFailed"
     />
  
 
@@ -87,6 +88,10 @@ function sendTestJson() : void {
 
 function updateOutputs(newOutputs : (TreeToken[] | null)[]) : void {
   outputs.value = newOutputs
+}
+
+function onGenerationFailed() : void {
+  showSnackbar.value = true
 }
 
 

@@ -188,6 +188,7 @@ async function startGeneration(index : number = -1) : Promise<void> {
   }
   catch(error) {
     console.log(error)
+    emits("generationFailed")
   }
   finally {
     setLoading(false, index)
