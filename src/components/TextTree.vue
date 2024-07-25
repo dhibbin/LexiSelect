@@ -22,7 +22,6 @@ import { reactive, type Ref, ref, watch } from 'vue';
 import TextBranch from './TextBranch.vue'
 import type { TreeToken } from './TextBranch.vue'
 import type { LlamaInterface } from '@/objects/LlamaInterface';
-import TextBar from './TextBar.vue';
 
 interface BranchParameters {
   response : LlamaInterface | null
@@ -41,11 +40,11 @@ const scrollOffset : Ref<number> = ref(0)
 
 const props = defineProps<{
   responseLLM : BranchResposne
-  textBarInstance : Ref<InstanceType<typeof TextBar>>
 }>()
 
 const emits = defineEmits<{
   updateOutputs : [outputs : (TreeToken[] | null)[]]
+  generateOnNewBranch : [index : number]
 }>()
 
 watch(() => props.responseLLM, () => {
@@ -80,7 +79,7 @@ function newBranchFromTokens(tokens : TreeToken[]) : void {
     totalTokens : null
   }))
   activeBranch.value = branches.value.length - 1
-  props.generateFromTextBar(activeBranch.value)
+  emits("generateOnNewBranch", activeBranch.value)
 }
 
 function newBranchFromResponse(response : LlamaInterface) : void {

@@ -165,7 +165,7 @@ const emits = defineEmits<{
 }>()
 
 const props = defineProps<{
-  branchTokens : (TreeToken[] | null)[],
+  branchTokens : (TreeToken[] | null)[]
 }>()
 
 defineExpose({

@@ -20,8 +20,8 @@
     </v-navigation-drawer>
 
     <TextBar
-      :branch-tokens="outputs"
       ref="textBar"
+      :branch-tokens="outputs"
       @on-generation-recieved="onGenerationRecieved"
       @generation-failed="onGenerationFailed"
     />
@@ -54,7 +54,7 @@
     
       <TextTree
         :response-l-l-m="latestResponse"
-        :text-bar-instance="textBar"
+        @generate-on-new-branch="generateOnNewBranch"
         @update-outputs="updateOutputs"
       />
     </v-main>
@@ -70,12 +70,14 @@ import testResponse from './assets/testResponse.json'
 import { defaultLlamaInterface } from './objects/LlamaInterface';
 import type { TreeToken } from './components/TextBranch.vue'
 import { type BranchResposne } from './components/TextTree.vue';
+import gsap from 'gsap'
+
 
 const drawer : Ref<boolean> = ref(true)
 const latestResponse : Ref<BranchResposne> = ref({ response : defaultLlamaInterface(), index : -1})
 const outputs : Ref<(TreeToken[] | null)[]> = ref([])
 const showSnackbar = ref(false)
-const textBar = ref<InstanceType<typeof TextBar> | null>();
+const textBar = ref()
 
 function onGenerationRecieved(newReponse : BranchResposne) : void {
   latestResponse.value = newReponse
@@ -96,9 +98,8 @@ function onGenerationFailed() : void {
   showSnackbar.value = true
 }
 
-function emptyPromiseVoid(index? : number) : Promise<void> { 
-  console.log(`Failed attempted generation for branch ${index}`)
-  return new Promise<void>(() => {})
+function generateOnNewBranch(index : number) : void {
+  gsap.delayedCall(0.1, () => {textBar.value.startGeneration(index)})
 }
 
 
