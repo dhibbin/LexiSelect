@@ -226,6 +226,7 @@ function handleTextAreaInput(index : number) : void {
       // If not at end of token array, iterate over text area until next token found
       if (n < props.branchTokens[index].length - 1) { 
         if(currentWord != currentToken) {
+          //TODO : Rewrite this to check against all tokens ahead of current token
           let nextToken = props.branchTokens[index][n+1].completionProb.content
           
           for (let m = 0; m < textContent.length; m++) {
