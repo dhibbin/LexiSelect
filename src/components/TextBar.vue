@@ -84,6 +84,7 @@
                   rows="8"
                   no-resize
                   hide-details
+                  @input="handleTextAreaInput(index)"
                 />
               </v-row>  
               <v-row no-gutters>
@@ -155,11 +156,12 @@ const startButtonLoading : Ref<boolean> = ref(false)
 const userPrompt : Ref<string> = ref("Write a story about a man named Stanley")
 const systemPrompt : Ref<string> = ref("You are a talented writing assistant. Always respond by incorporating the instructions into expertly written prose that is highly detailed, evocative, vivid and engaging.");
 const topLevelTab = ref("input")
-const outputs : Ref<outputData[]> = ref([{content : "", loading : false}])
+const outputs : Ref<outputData[]> = ref([])
 
 const emits = defineEmits<{
   onGenerationRecieved : [output : BranchResposne]
   generationFailed : []
+  tokensUpdated : [tokens : TreeToken[], index : number]
 }>()
 
 const props = defineProps<{
@@ -204,6 +206,60 @@ function setLoading(isLoading : boolean, index : number = -1) : void {
   }
 }
 
+function handleTextAreaInput(index : number) : void {
+  // Create copy of textarea contents and empty TreeToken array
+  let textContent = outputs.value[index].content
+  let newTokens : TreeToken[] = []
+  if (props.branchTokens[index] !== null) {
+    // If not null, copy array contents and start iteration
+    newTokens = props.branchTokens[index]
+    
+    for (let n = 0; n < props.branchTokens[index].length; n++) {
+      // Get current token from token list and current word from text area
+      let currentToken = props.branchTokens[index][n].completionProb.content
+      let currentWord = textContent.slice(0, currentToken.length)
+      
+      // If not at end of token array, iterate over text area until next token found
+      if (n < props.branchTokens[index].length - 1) { 
+        if(currentWord != currentToken) {
+          let nextToken = props.branchTokens[index][n+1].completionProb.content
+          
+          for (let m = 0; m < textContent.length; m++) {
+            // If next token found, update contents of token array and remove contents from textarea
+            if (nextToken == textContent.slice(m, m + nextToken.length)) {
+              newTokens[n].completionProb.content = textContent.slice(0, m)
+              newTokens[n].userModified = true
+              textContent = textContent.slice(m)
+              break
+            }
+          }
+        }
+        else {
+          // If current token and word match, remove current word from textarea
+          newTokens[n].completionProb.content = currentWord
+          textContent = textContent.slice(currentToken.length)
+          newTokens[n].userModified = false  
+        }
+      }
+      else {
+        // If at end of token array, add remaining text area to final token and remove contents from textarea
+        console.log("at end of arry")
+        newTokens[n].completionProb.content = textContent
+        newTokens[n].userModified = true
+        textContent = textContent.slice(textContent.length)
+      }
+    }
+  }
+
+  if (textContent.length == 0) {
+    emits("tokensUpdated", newTokens, index)
+  }
+  else {
+    console.log("Error : failed to locate changes in TextBar output textarea, index: ${index}")
+  }
+
+}
+
 watch(() => props.branchTokens, () => {
   outputs.value = []
   for (let i = 0; i < props.branchTokens.length; i++) {
@@ -214,7 +270,6 @@ watch(() => props.branchTokens, () => {
       }))
     }
   }
-  console.log(outputs.value)
 })
 
 

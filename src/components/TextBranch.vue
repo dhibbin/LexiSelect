@@ -27,7 +27,7 @@
     :style="{ height : menuHeight + 'px'}"
   >
     <v-card
-      v-show="expand"
+      v-show="expand && !tokens[currTokIndex].userModified"
       ref="tokenMenu"
       :style="{position: 'relative', top: 0 + 'px', fontFamily: 'monospace', 
                left : (currTokPosition.left + currElementOffset - currWindow.innerWidth / 2) + 100 + 'px',
