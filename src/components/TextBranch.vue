@@ -16,7 +16,7 @@
       <v-list-item-title
         style="overflow: visible; font-family: monospace;"
       >
-        <pre>{{ token.completionProb.content }}</pre>
+        <pre>{{ token.completionProb.content.replace(/[\n\r]+/g, ' ') }}</pre>
       </v-list-item-title>
     </v-list-item>
   </v-list>
@@ -27,7 +27,7 @@
     :style="{ height : menuHeight + 'px'}"
   >
     <v-card
-      v-show="expand && !tokens[currTokIndex].userModified"
+      v-show="expand"
       ref="tokenMenu"
       :style="{position: 'relative', top: 0 + 'px', fontFamily: 'monospace', 
                left : (currTokPosition.left + currElementOffset - currWindow.innerWidth / 2) + 100 + 'px',
@@ -102,9 +102,9 @@ import gsap from 'gsap'
 import { MutableDOMRect } from '@/objects/MutableDOMRect';
 import type { VCard } from 'vuetify/components';
 
+
 export interface TreeToken {
   completionProb : Completionprobability
-  userModified : boolean
 }
 
 const emits = defineEmits<{
@@ -113,7 +113,7 @@ const emits = defineEmits<{
 }>()
 
 const props = defineProps<{
-  responseLLM : LlamaInterface | null,
+  responseLLM : LlamaInterface | null
   previousTokens : TreeToken[] | null
   scrollOffset : number
   isActive : boolean
@@ -149,7 +149,6 @@ const tokens : ComputedRef<TreeToken[]> = computed(() => {
     for (let n = 0; n < responses.value[i].completion_probabilities.length; n++) {
       newTokens.push( reactive({
         completionProb : responses.value[i].completion_probabilities[n],
-        userModified : false,
       }))
     }
   }
@@ -199,10 +198,9 @@ function newBranch(tokenIndex : number, newToken : string) : void {
       content : newToken,
       probs : []
     },
-    userModified : false
   }))
-
   emits("newBranch", newBranchTokens)
+
   setExpand(false)
 }
 

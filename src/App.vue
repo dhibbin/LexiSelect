@@ -21,6 +21,7 @@
 
     <TextBar
       :branch-tokens="outputs"
+      ref="textBar"
       @on-generation-recieved="onGenerationRecieved"
       @generation-failed="onGenerationFailed"
     />
@@ -53,6 +54,7 @@
     
       <TextTree
         :response-l-l-m="latestResponse"
+        :text-bar-instance="textBar"
         @update-outputs="updateOutputs"
       />
     </v-main>
@@ -73,7 +75,7 @@ const drawer : Ref<boolean> = ref(true)
 const latestResponse : Ref<BranchResposne> = ref({ response : defaultLlamaInterface(), index : -1})
 const outputs : Ref<(TreeToken[] | null)[]> = ref([])
 const showSnackbar = ref(false)
-
+const textBar = ref<InstanceType<typeof TextBar> | null>();
 
 function onGenerationRecieved(newReponse : BranchResposne) : void {
   latestResponse.value = newReponse
@@ -92,6 +94,11 @@ function updateOutputs(newOutputs : (TreeToken[] | null)[]) : void {
 
 function onGenerationFailed() : void {
   showSnackbar.value = true
+}
+
+function emptyPromiseVoid(index? : number) : Promise<void> { 
+  console.log(`Failed attempted generation for branch ${index}`)
+  return new Promise<void>(() => {})
 }
 
 

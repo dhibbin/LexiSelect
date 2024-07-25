@@ -168,6 +168,10 @@ const props = defineProps<{
   branchTokens : (TreeToken[] | null)[],
 }>()
 
+defineExpose({
+  startGeneration
+})
+
 async function requestGeneration(index : number = -1) : Promise<LlamaInterface> {
   let previousOutput = ""
   if (index !== -1) {
@@ -228,7 +232,6 @@ function handleTextAreaInput(index : number) : void {
             // If next token found, update contents of token array and remove contents from textarea
             if (nextToken == textContent.slice(m, m + nextToken.length)) {
               newTokens[n].completionProb.content = textContent.slice(0, m)
-              newTokens[n].userModified = true
               textContent = textContent.slice(m)
               break
             }
@@ -238,14 +241,11 @@ function handleTextAreaInput(index : number) : void {
           // If current token and word match, remove current word from textarea
           newTokens[n].completionProb.content = currentWord
           textContent = textContent.slice(currentToken.length)
-          newTokens[n].userModified = false  
         }
       }
       else {
         // If at end of token array, add remaining text area to final token and remove contents from textarea
-        console.log("at end of arry")
         newTokens[n].completionProb.content = textContent
-        newTokens[n].userModified = true
         textContent = textContent.slice(textContent.length)
       }
     }
@@ -257,7 +257,6 @@ function handleTextAreaInput(index : number) : void {
   else {
     console.log("Error : failed to locate changes in TextBar output textarea, index: ${index}")
   }
-
 }
 
 watch(() => props.branchTokens, () => {
