@@ -15,62 +15,58 @@
         <v-tabs-window-item
           value="input"
           class="pa-0 d-flex flex-column"
-        >
-          <v-container
-            class="pa-0 d-flex flex-column"
-            style="height: 100%;"
-          >  
-            <v-row
-              no-gutters
-              style="height: 100%;"
-              class="align-self-stretch"
+        >        
+          <v-row
+            no-gutters
+            align="start"
+          >
+            <v-col
+              cols="6"
+              align-self="start"
             >
-              <v-col
-                cols="6"
-                align-self="end"
+              <v-textarea
+                ref="systemTextArea"
+                v-model="systemPrompt"
+                class="fill-height d-flex flex-column pa-2"
+                label="System Prompt"
+                no-resize
+                :rows="rows"
+                hide-details
+              />
+            </v-col>
+            <v-col 
+              cols="6"
+              align-self="end"
+            >
+              <v-textarea
+                v-model="userPrompt"
+                class="fill-height d-flex flex-column pa-2"
+                label="User Prompt"
+                :rows="rows"
+                no-resize
+                hide-details
+              />
+            </v-col>
+          </v-row>
+          <v-row no-gutters>
+            <v-col
+              cols="12"
+              class="px-2"
+            >
+              <v-btn
+                :loading="startButtonLoading"
+                block
+                class="pa-4"
+                color="blue"
+                base-color="blue"
+                variant="elevated"
+                rounded="lg"
+                @click="startGeneration(-1)"
               >
-                <v-textarea
-                  v-model="systemPrompt"
-                  class="fill-height d-flex flex-column pa-2"
-                  label="System Prompt"
-                  rows="8"
-                  hide-details
-                />
-              </v-col>
-              <v-col 
-                cols="6"
-                align-self="end"
-              >
-                <v-textarea
-                  v-model="userPrompt"
-                  class="fill-height d-flex flex-column pa-2"
-                  label="User Prompt"
-                  rows="8"
-                  no-resize
-                  hide-details
-                />
-              </v-col>
-            </v-row>
-            <v-row no-gutters>
-              <v-col
-                cols="12"
-                class="px-2"
-              >
-                <v-btn
-                  :loading="startButtonLoading"
-                  block
-                  class="pa-4"
-                  color="blue"
-                  base-color="blue"
-                  variant="elevated"
-                  rounded="lg"
-                  @click="startGeneration(-1)"
-                >
-                  Generate New Response
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-container>
+                Generate New Response
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-tabs-window-item>
         <v-tabs-window-item
           value="output"
@@ -92,7 +88,7 @@
                   v-model="outputs[index].content"
                   class="fill-height d-flex flex-column pa-2"
                   :label="'Output ' + (index + 1).toString()"
-                  rows="8"
+                  :rows="rows"
                   no-resize
                   hide-details
                   @input="handleTextAreaInput(index)"
@@ -169,10 +165,12 @@ const userPrompt : Ref<string> = ref("Write a story about a man named Stanley")
 const systemPrompt : Ref<string> = ref("You are a talented writing assistant. Always respond by incorporating the instructions into expertly written prose that is highly detailed, evocative, vivid and engaging.");
 const topLevelTab = ref("input")
 const outputs : Ref<outputData[]> = ref([])
+const systemTextArea = ref()
 
 const isDragging = ref(false)
-const tabHeight = ref(400)
+const tabHeight = ref(280)
 const mouseOffset = ref(0)
+const rows = ref(8)
 
 const emits = defineEmits<{
   onGenerationRecieved : [output : BranchResposne]
@@ -197,6 +195,28 @@ onUnmounted(() => {
   window.removeEventListener('mousemove', dragMouseMove);
   window.removeEventListener('mouseup', () => {isDragging.value = false})
 });
+
+watch(() => props.branchTokens, () => {
+  outputs.value = []
+  for (let i = 0; i < props.branchTokens.length; i++) {
+    if (props.branchTokens[i] !== null) {
+      outputs.value.push(reactive({
+        content : props.branchTokens[i]!.map((t : TreeToken) => t.completionProb.content).join(''),
+        loading : false
+      }))
+    }
+  }
+})
+
+watch(() => topLevelTab.value, () => {
+  console.log(topLevelTab.value)
+})
+
+watch(() => tabHeight.value, () => {
+  const pixelLineHeight = parseInt(window.getComputedStyle(systemTextArea.value?.$el).lineHeight, 10)
+  rows.value = Math.floor(tabHeight.value / pixelLineHeight) - 4
+})
+
 
 function dragMouseDown(event : MouseEvent) : void {
   let element : HTMLElement = event.currentTarget as HTMLElement
@@ -298,25 +318,6 @@ function handleTextAreaInput(index : number) : void {
     console.log("Error : failed to locate changes in TextBar output textarea, index: ${index}")
   }
 }
-
-watch(() => props.branchTokens, () => {
-  outputs.value = []
-  for (let i = 0; i < props.branchTokens.length; i++) {
-    if (props.branchTokens[i] !== null) {
-      outputs.value.push(reactive({
-        content : props.branchTokens[i]!.map((t : TreeToken) => t.completionProb.content).join(''),
-        loading : false
-      }))
-    }
-  }
-})
-
-watch(() => tabHeight.value, () => {
-  console.log(tabHeight.value)
-})
-
-
-
 
 </script>
 
