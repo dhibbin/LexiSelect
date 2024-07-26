@@ -2,7 +2,7 @@
   <v-list
     class="horizontal-list bg-background"
     style="min-width: max-content;"
-    @mouseleave="setExpand(false)"
+    @mouseleave="setExpand(false, 0.5)"
   >
     <v-list-item
       v-for="(token, index) in tokens"
@@ -10,8 +10,7 @@
       :value="token"
       :class="'pa-0 ' + (props.isActive ? 'bg-primary' : 'bg-background')"
       style="overflow: visible;"
-      @mouseenter="hover(index, $event.currentTarget)"
-      @click="click"
+      @click="click(index, $event)"
     >
       <v-list-item-title
         style="overflow: visible; font-family: monospace;"
@@ -24,7 +23,7 @@
   <v-expand-transition
     v-if="tokens.length > 0"
     :rounded="false"
-    :style="{ height : menuHeight + 'px'}"
+    :style="{ height : menuHeight.displayedHeight + 'px'}"
   >
     <v-card
       v-show="expand"
@@ -34,10 +33,16 @@
                height : 'min-content'}"
       class="mx-auto"
       width="200"
-      @mouseleave="setExpand(false)"
+      @mouseleave="setExpand(false, 0.5)"
       @mouseenter="setExpand(true)"
     >
       <v-list>
+        <v-text-field
+          v-model="customTokenInput"
+          label="New Token"
+          hide-details
+          @keydown.enter="newBranch(currTokIndex, customTokenInput)"
+        /> 
         <v-list-item
           v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0)"
           :key="probIndex"
@@ -51,25 +56,9 @@
             {{ tokenProb.tok_str + ':' + tokenProb.prob }}
           </v-list-item-title>
         </v-list-item>
-      </v-list>  
+      </v-list> 
     </v-card>
   </v-expand-transition>
-
-  <v-expand-x-transition>
-    <v-card
-      v-show="openInputBox && !expand"
-      :style="{position: 'relative', top: 0 + 'px', fontFamily: 'monospace', 
-               left : (currTokPosition.left + currElementOffset) + 'px', width : 200 + 'px'}"
-      auto-grow
-      @mouseleave="openInputBox = false"
-    >
-      <v-text-field
-        v-model="customTokenInput"
-        label="New Token"
-        @keydown.enter="newBranch(currTokIndex, customTokenInput)"
-      />
-    </v-card>
-  </v-expand-x-transition>
 
   <v-card
     ref="virtualTokenMenu"
@@ -80,6 +69,12 @@
     width="200"
   >
     <v-list>
+      <v-text-field
+        v-model="customTokenInput"
+        label="New Token"
+        hide-details
+        @keydown.enter="newBranch(currTokIndex, customTokenInput)"
+      /> 
       <v-list-item
         v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0)"
         :key="probIndex"
@@ -127,12 +122,11 @@ const responses : Ref<LlamaInterface[]> = ref(props?.responseLLM ? [props.respon
 const currWindow = ref(window)
 const tokenMenu = ref<InstanceType<typeof VCard> | null>(null);
 const virtualTokenMenu = ref<InstanceType<typeof VCard> | null>(null);
-const menuHeight = ref(0)
-const openInputBox = ref(false)
+const menuHeight = {
+  displayedHeight : ref(virtualTokenMenu.value?.$el.getBoundingClientRect.height),
+  targetHeight : ref(virtualTokenMenu.value?.$el.getBoundingClientRect.height)
+}
 const customTokenInput = ref("")
-
-// Resize Observer to watch for changes in the virtual menu
-let resizeObserver = new ResizeObserver(changeMenuHeight)
 
 // Delayed calls for lerped values
 let expandDelayedCall : gsap.core.Tween | null = null
@@ -161,8 +155,9 @@ watch(() => props.responseLLM, () => {
   }
 })
 
-watch(() => virtualTokenMenu.value, () => {
-  resizeObserver.observe(virtualTokenMenu.value?.$el)
+watch(menuHeight.displayedHeight, () => {
+  console.log("target hieght changed")
+  //gsap.to(menuHeight, {duration : 0.1, ease : "power1.inOut", displayedHeight : menuHeight.targetHeight})
 })
 
 watch(() => tokens.value, () => {
@@ -173,18 +168,16 @@ onMounted(() => {
   emits("updateTokens", tokens.value)
 })
 
-function hover(tokenIndex : number, element : HTMLElement) : void {
+function click(tokenIndex : number, event : Event) : void {
+  let element : HTMLElement = event.currentTarget as HTMLElement
   let newRect = element.getBoundingClientRect()
+  //gsap.to(menuHeight, {duration : 0.1, ease : "power1.inOut", value : virtualTokenMenu.value?.$el.getBoundingClientRect.height})
   gsap.to(currTokPosition.value, {duration : 0.1, ease : "power1.inOut", left : newRect.left})
   gsap.to(currElementOffset, {duration : 0.1, ease : "power1.inOut", value : props.scrollOffset})
+  //menuHeight.value = virtualTokenMenu.value?.$el.getBoundingClientRect.height
   currTokPosition.value.top = newRect.top
   setExpand(true)
   currTokIndex.value = tokenIndex
-}
-
-function click() : void {
-  openInputBox.value = true
-  setExpand(false)
 }
 
 function newBranch(tokenIndex : number, newToken : string) : void {
@@ -203,13 +196,14 @@ function newBranch(tokenIndex : number, newToken : string) : void {
   setExpand(false)
 }
 
-function setExpand(newValue : boolean) : void {
+function setExpand(newValue : boolean, delay : number = 0.1) : void {
   if (newValue) {
     expand.value = newValue
     expandDelayedCall?.kill()
+    //gsap.delayedCall(0.2, changeMenuHeight)
   }
   else {
-    expandDelayedCall = gsap.delayedCall(0.1, function() {
+    expandDelayedCall = gsap.delayedCall(delay, function() {
       expand.value = newValue
       expandDelayedCall = null
     })
@@ -251,6 +245,6 @@ function changeMenuHeight() : void {
       overflow: visible;
     }
     .hidden {
-      visibility: hidden;
+      visibility: visible;
     }
 </style>

@@ -2,7 +2,9 @@ import { computed, type ComputedRef } from 'vue'
 import type { LlamaInterface } from './LlamaInterface'
 
 export class LLMService {
+  private listeners : ((num : number) => void)[] = []
   private static wrappedInstance : LLMService
+  
   private wrappedSettings : LLMSettings = {
     n_predict : 10,
     n_probs : 5,
@@ -25,6 +27,16 @@ export class LLMService {
     }
   }
 
+  public addListener(listener : (num : number) => void) : void {
+    this.listeners.push(listener)
+  }
+
+  private callListeners(num : number) : void {
+    for (const listener of this.listeners) {
+      listener(num)
+    }
+  }
+
   public async SendPrompt(userPrompt : string, systemPrompt : string, previousGeneration : string = "") : Promise<LlamaInterface> {
     userPrompt = "<|user|>" + userPrompt + "<|end|>";
     systemPrompt = "<|system|>" + systemPrompt + "<|end|>";
@@ -40,11 +52,14 @@ export class LLMService {
         seed : this.wrappedSettings.seed
       })
     })
-      .then((response : Response) => {
+      .then(async (response : Response) => {
         if (!response.ok) {
           throw new Error(response.statusText)
         }
-        //console.log(response.json())
+
+        const parsedResponse = await response.json() as LlamaInterface
+        this.callListeners(parsedResponse.generation_settings.seed)
+        
         return response.json() as Promise<LlamaInterface>
       })
   }
