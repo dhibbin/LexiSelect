@@ -23,7 +23,7 @@
   <v-expand-transition
     v-if="tokens.length > 0"
     :rounded="false"
-    :style="{ height : menuHeight.displayedHeight + 'px'}"
+    :style="{ height : menuHeight + 'px'}"
   >
     <v-card
       v-show="expand"
@@ -92,10 +92,11 @@
 
 <script setup lang="ts">
 import type { Completionprobability, LlamaInterface } from '@/objects/LlamaInterface';
-import { computed, onMounted, reactive, ref, watch, type ComputedRef, type Ref } from 'vue'
+import { computed, onMounted, onUpdated, reactive, ref, watch, type ComputedRef, type Ref } from 'vue'
 import gsap from 'gsap'
 import { MutableDOMRect } from '@/objects/MutableDOMRect';
 import type { VCard } from 'vuetify/components';
+import { he } from 'vuetify/locale';
 
 
 export interface TreeToken {
@@ -122,10 +123,7 @@ const responses : Ref<LlamaInterface[]> = ref(props?.responseLLM ? [props.respon
 const currWindow = ref(window)
 const tokenMenu = ref<InstanceType<typeof VCard> | null>(null);
 const virtualTokenMenu = ref<InstanceType<typeof VCard> | null>(null);
-const menuHeight = {
-  displayedHeight : ref(virtualTokenMenu.value?.$el.getBoundingClientRect.height),
-  targetHeight : ref(virtualTokenMenu.value?.$el.getBoundingClientRect.height)
-}
+const menuHeight = ref(0)
 const customTokenInput = ref("")
 
 // Delayed calls for lerped values
@@ -155,17 +153,25 @@ watch(() => props.responseLLM, () => {
   }
 })
 
-watch(menuHeight.displayedHeight, () => {
-  console.log("target hieght changed")
-  //gsap.to(menuHeight, {duration : 0.1, ease : "power1.inOut", displayedHeight : menuHeight.targetHeight})
-})
-
 watch(() => tokens.value, () => {
   emits("updateTokens", tokens.value)
 })
 
 onMounted(() => {
   emits("updateTokens", tokens.value)
+  heightDelayedCall = gsap.to(menuHeight, {duration : 0, ease : "power1.inOut", value : 0})
+  setExpand(true)
+})
+
+onUpdated(() => {
+  let targetHeight : number = virtualTokenMenu.value?.$el.getBoundingClientRect().height
+  console.log(targetHeight, menuHeight.value)
+  if (Math.abs(menuHeight.value - targetHeight) >= 1) {
+    if (heightDelayedCall?.isActive() == false || heightDelayedCall?.vars.value != targetHeight ) {
+      heightDelayedCall?.kill()
+      heightDelayedCall = gsap.to(menuHeight, {duration : 0.1, ease : "power1.inOut", value : targetHeight})
+    }
+  }
 })
 
 function click(tokenIndex : number, event : Event) : void {
