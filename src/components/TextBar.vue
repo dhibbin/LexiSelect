@@ -6,8 +6,7 @@
     flat
   >
     <v-container
-      class="d-flex flex-column flex-nowrap"
-      style="height: 100%;"
+      class="pa-0"
     >
       <v-tabs-window
         v-model="topLevelTab"
@@ -15,63 +14,63 @@
       >
         <v-tabs-window-item
           value="input"
-          class="pa-0"
+          class="pa-0 d-flex flex-column"
         >
-          <v-row
-            no-gutters
-            class="ma-1 pa-1 flex-1-1-100 bg-purple-lighten-5"
-            :style="{ height : tabHeight - 75 + 'px'}"
-            align-self="start"
-          >
-            <v-col
-              cols="6"
+          <v-container
+            class="pa-0 d-flex flex-column"
+            style="height: 100%;"
+          >  
+            <v-row
+              no-gutters
+              style="height: 100%;"
+              class="align-self-stretch"
             >
-              <v-card
-                v-ripple
-                class="d-flex flex-column flex-nowrap bg-red-lighten-3"
-                style="height: 100%;"
+              <v-col
+                cols="6"
+                align-self="end"
               >
-                <textarea
-                  v-model="systemPrompt"
-                  label="System Prompt"
-                  style="resize: none; padding: 9px; height: 100%;"
-                  hide-details
-                />
-              </v-card>
-            </v-col>
-            <v-col
-              cols="6"
-            >
-              <v-card class="d-flex flex-column flex-nowrap bg-red-lighten-3">
                 <v-textarea
                   v-model="systemPrompt"
-                  class="d-flex pa-2 flex-1-1-100"
+                  class="fill-height d-flex flex-column pa-2"
                   label="System Prompt"
+                  rows="8"
+                  hide-details
+                />
+              </v-col>
+              <v-col 
+                cols="6"
+                align-self="end"
+              >
+                <v-textarea
+                  v-model="userPrompt"
+                  class="fill-height d-flex flex-column pa-2"
+                  label="User Prompt"
+                  rows="8"
                   no-resize
                   hide-details
                 />
-              </v-card>
-            </v-col>
-          </v-row>
-          <v-row no-gutters>
-            <v-col
-              cols="12"
-              class="px-2"
-            >
-              <v-btn
-                :loading="startButtonLoading"
-                block
-                class="pa-4"
-                color="blue"
-                base-color="blue"
-                variant="elevated"
-                rounded="lg"
-                @click="startGeneration(-1)"
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col
+                cols="12"
+                class="px-2"
               >
-                Generate New Response
-              </v-btn>
-            </v-col>
-          </v-row>
+                <v-btn
+                  :loading="startButtonLoading"
+                  block
+                  class="pa-4"
+                  color="blue"
+                  base-color="blue"
+                  variant="elevated"
+                  rounded="lg"
+                  @click="startGeneration(-1)"
+                >
+                  Generate New Response
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-container>
         </v-tabs-window-item>
         <v-tabs-window-item
           value="output"
@@ -79,26 +78,22 @@
         >
           <v-sheet
             class="d-flex flex-nowrap bg-surface pa-0"
-            style="overflow-x: scroll; width: 100%; height: 100%;"
+            style="overflow-x: scroll;"
           >
             <v-col
               v-for="(_, index) in outputs"
               :key="index"
-              class="pa-1 fill-height"
+              class="pa-1"
               cols="auto"
               align-self="end"
-              :style="{ height : tabHeight + 'px'}"
             >
-              <v-row
-                class="flex-1-1-100"
-                no-gutters
-              > 
+              <v-row no-gutters> 
                 <v-textarea
                   v-model="outputs[index].content"
-                  class="fill-height d-flex flex-column pa-2 align-self-stretch"
+                  class="fill-height d-flex flex-column pa-2"
                   :label="'Output ' + (index + 1).toString()"
+                  rows="8"
                   no-resize
-                  :style="{height : tabHeight - 75 + 'px'}"
                   hide-details
                   @input="handleTextAreaInput(index)"
                 />
@@ -328,14 +323,5 @@ watch(() => tabHeight.value, () => {
 <style>
 .v-tab {
   border-radius: 0 !important;
-}
-.custom-textarea .v-input__slot {
-  margin-bottom: 0;
-}
-.custom-textarea .v-text-field__details {
-  display: none;
-}
-.v-field {
-  height: 1000px;
 }
 </style>

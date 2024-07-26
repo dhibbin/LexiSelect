@@ -30,7 +30,7 @@
     <v-main
       class="d-flex align-center justify-center"
       style="overflow-y: hidden;"
-    >    
+    >
       <v-snackbar
         v-model="showSnackbar"
         color="error"
