@@ -1,7 +1,7 @@
 <template>  
   <v-app-bar
     color="surface"
-    :height="280"
+    :height="tabHeight"
     location="bottom"
     flat
   >
@@ -12,54 +12,65 @@
         v-model="topLevelTab"
         class="pa-0"
       >
-        <v-tabs-window-item value="input">
-          <v-row no-gutters>
-            <v-col
-              cols="6"
-              align-self="end"
+        <v-tabs-window-item
+          value="input"
+          class="pa-0 d-flex flex-column"
+        >
+          <v-container
+            class="pa-0 d-flex flex-column"
+            style="height: 100%;"
+          >  
+            <v-row
+              no-gutters
+              style="height: 100%;"
+              class="align-self-stretch"
             >
-              <v-textarea
-                v-model="systemPrompt"
-                class="fill-height d-flex flex-column pa-2"
-                label="System Prompt"
-                rows="8"
-                no-resize
-                hide-details
-              />
-            </v-col>
-            <v-col 
-              cols="6"
-              align-self="end"
-            >
-              <v-textarea
-                v-model="userPrompt"
-                class="fill-height d-flex flex-column pa-2"
-                label="User Prompt"
-                rows="8"
-                no-resize
-                hide-details
-              />
-            </v-col>
-          </v-row>
-          <v-row no-gutters>
-            <v-col
-              cols="12"
-              class="px-2"
-            >
-              <v-btn
-                :loading="startButtonLoading"
-                block
-                class="pa-4"
-                color="blue"
-                base-color="blue"
-                variant="elevated"
-                rounded="lg"
-                @click="startGeneration(-1)"
+              <v-col
+                cols="6"
+                align-self="end"
               >
-                Generate New Response
-              </v-btn>
-            </v-col>
-          </v-row>
+                <v-textarea
+                  v-model="systemPrompt"
+                  class="fill-height d-flex flex-column pa-2"
+                  label="System Prompt"
+                  rows="8"
+                  hide-details
+                />
+              </v-col>
+              <v-col 
+                cols="6"
+                align-self="end"
+              >
+                <v-textarea
+                  v-model="userPrompt"
+                  class="fill-height d-flex flex-column pa-2"
+                  label="User Prompt"
+                  rows="8"
+                  no-resize
+                  hide-details
+                />
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col
+                cols="12"
+                class="px-2"
+              >
+                <v-btn
+                  :loading="startButtonLoading"
+                  block
+                  class="pa-4"
+                  color="blue"
+                  base-color="blue"
+                  variant="elevated"
+                  rounded="lg"
+                  @click="startGeneration(-1)"
+                >
+                  Generate New Response
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-container>
         </v-tabs-window-item>
         <v-tabs-window-item
           value="output"
@@ -129,6 +140,7 @@
         location="start"
         size="small"
         offset
+        @mousedown="dragMouseDown($event)"
       />
       <v-tab value="input">
         Input
@@ -142,7 +154,7 @@
   
 <script setup lang="ts">
 import { LLMService  } from '@/objects/LLMService';
-import { ref, type Ref, watch, reactive } from 'vue';
+import { ref, type Ref, watch, reactive, onMounted, onUnmounted } from 'vue';
 import type { TreeToken } from './TextBranch.vue'
 import { type LlamaInterface } from '../objects/LlamaInterface';
 import { type BranchResposne } from './TextTree.vue';
@@ -158,6 +170,10 @@ const systemPrompt : Ref<string> = ref("You are a talented writing assistant. Al
 const topLevelTab = ref("input")
 const outputs : Ref<outputData[]> = ref([])
 
+const isDragging = ref(false)
+const tabHeight = ref(400)
+const mouseOffset = ref(0)
+
 const emits = defineEmits<{
   onGenerationRecieved : [output : BranchResposne]
   generationFailed : []
@@ -171,6 +187,29 @@ const props = defineProps<{
 defineExpose({
   startGeneration
 })
+
+onMounted(() => {
+  window.addEventListener('mousemove', dragMouseMove)
+  window.addEventListener('mouseup', () => {isDragging.value = false})
+});
+
+onUnmounted(() => {
+  window.removeEventListener('mousemove', dragMouseMove);
+  window.removeEventListener('mouseup', () => {isDragging.value = false})
+});
+
+function dragMouseDown(event : MouseEvent) : void {
+  let element : HTMLElement = event.currentTarget as HTMLElement
+  mouseOffset.value = (window.innerHeight - event.clientY) - (window.innerHeight - element.getBoundingClientRect().bottom)
+  console.log("difference", mouseOffset.value)
+  isDragging.value = true
+}
+
+function dragMouseMove(event : MouseEvent) : void {
+  if (isDragging.value) {
+    tabHeight.value = (window.innerHeight - event.clientY) - mouseOffset.value
+  }
+}
 
 async function requestGeneration(index : number = -1) : Promise<LlamaInterface> {
   let previousOutput = ""
@@ -270,6 +309,10 @@ watch(() => props.branchTokens, () => {
       }))
     }
   }
+})
+
+watch(() => tabHeight.value, () => {
+  console.log(tabHeight.value)
 })
 
 

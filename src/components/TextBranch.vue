@@ -10,7 +10,6 @@
       :value="token"
       :class="'pa-0 ' + (props.isActive ? 'bg-primary' : 'bg-background')"
       style="overflow: visible;"
-      :style="{ visibility : tokenVisibilities[index] ? 'visible' : 'visible'}"
       @mouseenter="hover(index, $event.currentTarget)"
       @click="click"
     >
@@ -156,13 +155,10 @@ const tokens : ComputedRef<TreeToken[]> = computed(() => {
   return newTokens
 })
 
-const tokenVisibilities : Ref<boolean[]> = ref([])
-
 watch(() => props.responseLLM, () => {
   if (props.responseLLM !== null) {
     responses.value.push(props.responseLLM)
   }
-  gsap.delayedCall(0.1, showTokens)
 })
 
 watch(() => virtualTokenMenu.value, () => {
@@ -173,28 +169,9 @@ watch(() => tokens.value, () => {
   emits("updateTokens", tokens.value)
 })
 
-watch(() => tokenVisibilities.value, () => {
-  console.log(tokenVisibilities.value)
-})
-
 onMounted(() => {
   emits("updateTokens", tokens.value)
 })
-
-function showTokens() : void {
-  console.log("shown")
-  for (let i = 0; i < tokens.value.length - tokenVisibilities.value.length; i++) {
-    tokenVisibilities.value.push(false)
-  }
-  console.log("tokens updated")
-  let callDelay = 0
-  for (let i = 0; i < tokenVisibilities.value.length; i++) {
-    if (!tokenVisibilities.value[i]) {
-      callDelay += 0.1
-      tokenVisibilities.value[i] = true
-    }
-  }
-}
 
 function hover(tokenIndex : number, element : HTMLElement) : void {
   let newRect = element.getBoundingClientRect()
