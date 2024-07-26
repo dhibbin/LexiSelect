@@ -96,8 +96,6 @@ import { computed, onMounted, onUpdated, reactive, ref, watch, type ComputedRef,
 import gsap from 'gsap'
 import { MutableDOMRect } from '@/objects/MutableDOMRect';
 import type { VCard } from 'vuetify/components';
-import { he } from 'vuetify/locale';
-
 
 export interface TreeToken {
   completionProb : Completionprobability
@@ -216,14 +214,6 @@ function setExpand(newValue : boolean, delay : number = 0.1) : void {
   }
 }
 
-function changeMenuHeight() : void {
-  if (heightDelayedCall !== null) {
-    heightDelayedCall.kill()
-  }
-  heightDelayedCall = gsap.to(menuHeight, {duration : 0.1, ease : "power1.inOut", 
-    value : virtualTokenMenu.value?.$el.getBoundingClientRect().height})
-}
-
 //TODO: Figure out why on first hover the lerp fails
 
 
@@ -251,6 +241,6 @@ function changeMenuHeight() : void {
       overflow: visible;
     }
     .hidden {
-      visibility: visible;
+      visibility: hidden;
     }
 </style>
