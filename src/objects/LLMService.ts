@@ -57,8 +57,8 @@ export class LLMService {
           throw new Error(response.statusText)
         }
 
-        const parsedResponse = await response.json() as LlamaInterface
-        this.callListeners(parsedResponse.generation_settings.seed)
+        //const parsedResponse = await response.json() as LlamaInterface
+        //this.callListeners(parsedResponse.generation_settings.seed)
         
         return response.json() as Promise<LlamaInterface>
       })
