@@ -14,7 +14,6 @@
       >
         <v-tabs-window-item
           value="input"
-          class="pa-0 d-flex flex-column"
         >        
           <v-row
             no-gutters
