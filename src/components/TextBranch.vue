@@ -44,7 +44,7 @@
           @keydown.enter="newBranch(currTokIndex, customTokenInput)"
         /> 
         <v-list-item
-          v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0)"
+          v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0 || v.tok_str == tokens[currTokIndex].completionProb.content)"
           :key="probIndex"
           :value="tokenProb"
           :disabled="tokenProb.tok_str == tokens[currTokIndex].completionProb.content"
@@ -76,7 +76,7 @@
         @keydown.enter="newBranch(currTokIndex, customTokenInput)"
       /> 
       <v-list-item
-        v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0)"
+        v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0 || v.tok_str == tokens[currTokIndex].completionProb.content)"
         :key="probIndex"
         :value="tokenProb"
       >
@@ -137,6 +137,23 @@ const tokens : ComputedRef<TreeToken[]> = computed(() => {
 
   for (let i = 0; i < responses.value.length; i++) {
     for (let n = 0; n < responses.value[i].completion_probabilities.length; n++) {
+      let currToken = responses.value[i].completion_probabilities[n]
+      let tokenInList = false
+
+      for (let m = 0; m < currToken.probs.length; m++) {
+        if (currToken.content == currToken.probs[m].tok_str) {
+          tokenInList = true
+        }
+      }
+
+      if (!tokenInList) {
+        console.log(currToken.content)
+        currToken.probs.push(reactive({
+          prob : 0,
+          tok_str : currToken.content
+        }))
+      }
+      
       newTokens.push( reactive({
         completionProb : responses.value[i].completion_probabilities[n],
       }))
