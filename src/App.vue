@@ -25,6 +25,7 @@
       @tokens-updated="textAreaUpdateOutput"
       @on-generation-recieved="onGenerationRecieved"
       @generation-failed="onGenerationFailed"
+      @remove-branch="textTree?.removeBranch"
     />
  
 
@@ -54,6 +55,7 @@
       </v-snackbar> 
     
       <TextTree
+        ref="textTree"
         :response-l-l-m="latestResponse"
         :typed-tokens="typedTokens"
         @generate-on-new-branch="generateOnNewBranch"
@@ -81,6 +83,7 @@ const typedTokens = ref<[TreeToken[], number]>([[], 0])
 const outputs : Ref<(TreeToken[] | null)[]> = ref([])
 const showSnackbar = ref(false)
 const textBar = ref()
+const textTree = ref<InstanceType<typeof TextTree> | null>(null)
 
 function onGenerationRecieved(newReponse : BranchResposne) : void {
   latestResponse.value = newReponse

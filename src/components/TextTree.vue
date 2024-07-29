@@ -50,6 +50,10 @@ const emits = defineEmits<{
   generateOnNewBranch : [index : number]
 }>()
 
+defineExpose({
+  removeBranch
+})
+
 watch(() => props.responseLLM, () => {
   if (branches.value.length <= 0) {
     branches.value.push(reactive({
@@ -76,6 +80,7 @@ watch(() => branches.value, () => {
 
 watch(() => props.typedTokens, () => {
   branches.value[props.typedTokens[1]].previousTokens = props.typedTokens[0]
+  branches.value[props.typedTokens[1]].response = null
   branches.value[props.typedTokens[1]].triggerEmptyTokens = !branches.value[props.typedTokens[1]].triggerEmptyTokens
 }, {deep : true})
 
@@ -108,6 +113,11 @@ function handleScroll(target : EventTarget | null) : void {
 
 function updateTokens(tokens : TreeToken[], index : number) : void {
   branches.value[index].totalTokens = tokens
+}
+
+function removeBranch(index : number) : void {
+  branches.value.splice(index, 1)
+  console.log(branches.value[1])
 }
 
 

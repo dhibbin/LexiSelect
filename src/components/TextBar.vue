@@ -91,21 +91,30 @@
                   no-resize
                   hide-details
                   @input="handleTextAreaInput(index)"
-                />
+                /> 
               </v-row>  
               <v-row no-gutters>
                 <v-btn
-                  block
+                  style="width: 70%;"
                   :loading="outputs[index].loading"
                   :timeout="100"
-                  class="pa-4"
                   color="blue"
-                  base-color="blue"
                   variant="elevated"
                   rounded="lg"
                   @click="startGeneration(index)"
                 >
                   Continue Generation
+                </v-btn>
+                <v-btn
+                  style="width: 30%;"
+                  class="bg-red"
+                  rounded="lg"
+                  @click="removeBranch(index)"
+                >
+                  <v-icon
+                    icon="mdi-minus-circle"
+                  />
+                  Remove
                 </v-btn>
               </v-row>
             </v-col>
@@ -175,14 +184,12 @@ const emits = defineEmits<{
   onGenerationRecieved : [output : BranchResposne]
   generationFailed : []
   tokensUpdated : [tokens : TreeToken[], index : number]
+  removeBranch : [index : number]
 }>()
 
 const props = defineProps<{
   branchTokens : (TreeToken[] | null)[]
 }>()
-
-
-
 
 defineExpose({
   startGeneration
@@ -210,15 +217,9 @@ watch(() => props.branchTokens, () => {
   }
 })
 
-watch(() => topLevelTab.value, () => {
-  console.log(topLevelTab.value)
-})
-
-watch(() => tabHeight.value, () => {
-  const pixelLineHeight = parseInt(window.getComputedStyle(systemTextArea.value?.$el).lineHeight, 10)
-  rows.value = Math.floor(tabHeight.value / pixelLineHeight) - 4
-})
-
+function removeBranch(index : number) : void {
+  emits("removeBranch", index)
+}
 
 function dragMouseDown(event : MouseEvent) : void {
   let element : HTMLElement = event.currentTarget as HTMLElement
