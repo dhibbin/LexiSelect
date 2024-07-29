@@ -9,6 +9,7 @@
       :key="index"
       :response-l-l-m="branch.response"
       :previous-tokens="branch.previousTokens"
+      :trigger-new-token="branch.triggerEmptyTokens"
       :scroll-offset="scrollOffset"
       :is-active="activeBranch == index"
       @new-branch="newBranchFromTokens"
@@ -27,6 +28,7 @@ interface BranchParameters {
   response : LlamaInterface | null
   previousTokens : TreeToken[] | null
   totalTokens : TreeToken[] | null
+  triggerEmptyTokens : boolean
 }
 
 export interface BranchResposne {
@@ -40,6 +42,7 @@ const scrollOffset : Ref<number> = ref(0)
 
 const props = defineProps<{
   responseLLM : BranchResposne
+  typedTokens : [TreeToken[], number]
 }>()
 
 const emits = defineEmits<{
@@ -52,7 +55,8 @@ watch(() => props.responseLLM, () => {
     branches.value.push(reactive({
       response : props.responseLLM.response,
       previousTokens : null,
-      totalTokens : null
+      totalTokens : null,
+      triggerEmptyTokens : false
     }))
   }
   else {
@@ -67,8 +71,12 @@ watch(() => props.responseLLM, () => {
 
 watch(() => branches.value, () => {
   let outputs : (TreeToken[] | null)[] = branches.value.map((v : BranchParameters) => v.totalTokens);
-  console.log("branches changed")
   emits("updateOutputs", outputs)
+}, {deep : true})
+
+watch(() => props.typedTokens, () => {
+  branches.value[props.typedTokens[1]].previousTokens = props.typedTokens[0]
+  branches.value[props.typedTokens[1]].triggerEmptyTokens = !branches.value[props.typedTokens[1]].triggerEmptyTokens
 }, {deep : true})
 
 function newBranchFromTokens(tokens : TreeToken[]) : void {
@@ -76,18 +84,19 @@ function newBranchFromTokens(tokens : TreeToken[]) : void {
   branches.value.push(reactive({
     response : null,
     previousTokens : tokens,
-    totalTokens : null
+    totalTokens : null,
+    triggerEmptyTokens : false
   }))
   activeBranch.value = branches.value.length - 1
   emits("generateOnNewBranch", activeBranch.value)
 }
 
 function newBranchFromResponse(response : LlamaInterface) : void {
-  console.log("Recieved ", response)
   branches.value.push(reactive({
     response : response,
     previousTokens : null,
-    totalTokens : null
+    totalTokens : null,
+    triggerEmptyTokens : false
   }))
   activeBranch.value = branches.value.length - 1
 }

@@ -22,6 +22,7 @@
     <TextBar
       ref="textBar"
       :branch-tokens="outputs"
+      @tokens-updated="textAreaUpdateOutput"
       @on-generation-recieved="onGenerationRecieved"
       @generation-failed="onGenerationFailed"
     />
@@ -54,6 +55,7 @@
     
       <TextTree
         :response-l-l-m="latestResponse"
+        :typed-tokens="typedTokens"
         @generate-on-new-branch="generateOnNewBranch"
         @update-outputs="updateOutputs"
       />
@@ -75,6 +77,7 @@ import gsap from 'gsap'
 
 const drawer : Ref<boolean> = ref(true)
 const latestResponse : Ref<BranchResposne> = ref({ response : defaultLlamaInterface(), index : -1})
+const typedTokens = ref<[TreeToken[], number]>([[], 0])
 const outputs : Ref<(TreeToken[] | null)[]> = ref([])
 const showSnackbar = ref(false)
 const textBar = ref()
@@ -100,6 +103,11 @@ function onGenerationFailed() : void {
 
 function generateOnNewBranch(index : number) : void {
   gsap.delayedCall(0.1, () => {textBar.value.startGeneration(index)})
+}
+
+function textAreaUpdateOutput(newTokens : TreeToken[], index : number) : void {
+  outputs.value[index] = newTokens
+  typedTokens.value = [newTokens, index]
 }
 
 

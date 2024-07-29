@@ -145,6 +145,7 @@ const props = defineProps<{
   previousTokens : TreeToken[] | null
   scrollOffset : number
   isActive : boolean
+  triggerNewToken : boolean
 }>()
 
 const expand = ref(false)
@@ -181,7 +182,6 @@ const tokens : ComputedRef<TreeToken[]> = computed(() => {
       }
 
       if (!tokenInList) {
-        console.log(currToken.content)
         currToken.probs.push(reactive({
           prob : 0,
           tok_str : currToken.content
@@ -206,6 +206,10 @@ watch(() => tokens.value, () => {
   emits("updateTokens", tokens.value)
 })
 
+watch(() => props.triggerNewToken, () => {
+  emptyTokens()
+})
+
 onMounted(() => {
   emits("updateTokens", tokens.value)
   heightDelayedCall = gsap.to(menuHeight, {duration : 0, ease : "power1.inOut", value : 0})
@@ -221,6 +225,10 @@ onUpdated(() => {
       heightDelayedCall = gsap.to(menuHeight, {duration : 0.1, ease : "power1.inOut", value : targetHeight})
     }
   }
+})
+
+defineExpose({
+  emptyTokens
 })
 
 function click(tokenIndex : number, event : Event) : void {
@@ -272,6 +280,10 @@ function toPercentage(num : number) : string {
   else {
     return (num * 100).toFixed(1).toString()
   }
+}
+
+function emptyTokens() : void {
+  responses.value = []
 }
 
 //TODO: Figure out why on first hover the lerp fails

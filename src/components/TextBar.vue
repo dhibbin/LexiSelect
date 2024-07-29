@@ -181,6 +181,9 @@ const props = defineProps<{
   branchTokens : (TreeToken[] | null)[]
 }>()
 
+
+
+
 defineExpose({
   startGeneration
 })
@@ -274,7 +277,7 @@ function handleTextAreaInput(index : number) : void {
   let newTokens : TreeToken[] = []
   if (props.branchTokens[index] !== null) {
     // If not null, copy array contents and start iteration
-    newTokens = props.branchTokens[index]
+    newTokens = JSON.parse(JSON.stringify(props.branchTokens[index])) 
     
     for (let n = 0; n < props.branchTokens[index].length; n++) {
       // Get current token from token list and current word from text area
