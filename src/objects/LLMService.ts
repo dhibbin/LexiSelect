@@ -50,7 +50,6 @@ export class LLMService {
     userPrompt = this.settings.userPrepend + userPrompt + this.settings.userPostpend;
     systemPrompt = this.settings.systemPrepend + systemPrompt + this.settings.systemPostpend;
     const prompt = systemPrompt + userPrompt + previousGeneration;
-	
     //http://127.0.0.1:8080/completion
     return fetch("http://" + this.wrappedSettings.ipAddress + "/completion", {
       method: 'POST',
@@ -68,33 +67,96 @@ export class LLMService {
 
         //const parsedResponse = await response.json() as LlamaInterface
         //this.callListeners(parsedResponse.generation_settings.seed)
+        console.log((await response.json() as LlamaInterface).generation_settings.seed)
         
         return response.json() as Promise<LlamaInterface>
       })
   }
 }
 
+/**
+ * The settings used in requests to the LLM Server
+ * @interface 
+ */
 export interface LLMSettings {
+  /**
+   * Settings consist of numbers, strings or string arrays
+   * @type {number | string | string[]}
+   * @note Add more types here as necessary if extending settings used by LexiSelect
+   */
   [key: string]: number | string | string[]; 
   
   // Basic settings
+
+  /**
+   * The number of token predictions to make
+   * @type {number}
+   */
   n_predict : number
+
+  /**
+   * The number of alternative token probabilities to return
+   * @type {number}
+   */
   n_probs : number
+
+  /**
+   * The seed for the random number generator
+   * @type {number}
+   */
   seed : number
+
+  /**
+   * The IP address of the server
+   * @type {string}
+   */
   ipAddress : string
 
   // Prompt template settings
+
+  /**
+   * The string to prepend to the system prompt
+   * @type {string}
+   */
   systemPrepend : string
+
+  /**
+   * The string to append to the system prompt
+   * @type {string}
+   */
   systemPostpend : string
+
+  /**
+   * The string to prepend to the user prompt
+   * @type {string}
+   */
   userPrepend : string
-  userPostpend : string 
+
+  /**
+   * The string to append to the user prompt
+   * @type {string}
+   */
+  userPostpend : string
+
+  /**
+   * The tokens to use in the response template.
+   * @type {string[]}
+   */
   responseTemplateTokens : string[]
 }
 
 
-
+/**
+ * Type used for declaring rules for settings within SettingsRules
+ */
 type RuleType = ComputedRef<((v: string) => boolean | string)[]> | ComputedRef<((v: number) => boolean | string)[]>;
 
+/**
+ * Represents the rules for LLMSettings
+ * 
+ * Each property represents a rule for the property of the same keyname in LLMSettings
+ * @interface 
+ */
 interface SettingsRules {
   [key : string] : RuleType;
   n_predict : RuleType,
