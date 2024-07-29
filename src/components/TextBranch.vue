@@ -130,6 +130,7 @@ import { computed, onMounted, onUpdated, reactive, ref, watch, type ComputedRef,
 import gsap from 'gsap'
 import { MutableDOMRect } from '@/objects/MutableDOMRect';
 import type { VCard } from 'vuetify/components';
+import { LLMService } from '@/objects/LLMService';
 
 export interface TreeToken {
   completionProb : Completionprobability
@@ -188,9 +189,13 @@ const tokens : ComputedRef<TreeToken[]> = computed(() => {
         }))
       }
       
-      newTokens.push( reactive({
-        completionProb : responses.value[i].completion_probabilities[n],
-      }))
+      if (!LLMService.instance.settings.responseTemplateTokens.includes(currToken.content)) {
+        newTokens.push( reactive({
+          completionProb : responses.value[i].completion_probabilities[n],
+        }))
+      }
+
+
     }
   }
   return newTokens
@@ -283,7 +288,8 @@ function toPercentage(num : number) : string {
 }
 
 function emptyTokens() : void {
-  responses.value = []
+  responses.value
+  
 }
 
 //TODO: Figure out why on first hover the lerp fails

@@ -9,7 +9,12 @@ export class LLMService {
     n_predict : 10,
     n_probs : 5,
     seed : -1,
-    ipAddress : "localhost:8080"
+    ipAddress : "localhost:8080",
+    systemPrepend : "<|system|>",
+    systemPostpend : "<|end|>",
+    userPrepend : "<|user|>" ,
+    userPostpend : "<|end|>",
+    responseTemplateTokens : ["<|assistant|>"],
   }
 
   private constructor() {}
@@ -27,6 +32,10 @@ export class LLMService {
     }
   }
 
+  public get settings() : LLMSettings {
+    return this.wrappedSettings
+  }
+
   public addListener(listener : (num : number) => void) : void {
     this.listeners.push(listener)
   }
@@ -38,8 +47,8 @@ export class LLMService {
   }
 
   public async SendPrompt(userPrompt : string, systemPrompt : string, previousGeneration : string = "") : Promise<LlamaInterface> {
-    userPrompt = "<|user|>" + userPrompt + "<|end|>";
-    systemPrompt = "<|system|>" + systemPrompt + "<|end|>";
+    userPrompt = this.settings.userPrepend + userPrompt + this.settings.userPostpend;
+    systemPrompt = this.settings.systemPrepend + systemPrompt + this.settings.systemPostpend;
     const prompt = systemPrompt + userPrompt + previousGeneration;
 	
     //http://127.0.0.1:8080/completion
@@ -66,11 +75,20 @@ export class LLMService {
 }
 
 export interface LLMSettings {
-  [key: string]: number | string; 
+  [key: string]: number | string | string[]; 
+  
+  // Basic settings
   n_predict : number
   n_probs : number
   seed : number
   ipAddress : string
+
+  // Prompt template settings
+  systemPrepend : string
+  systemPostpend : string
+  userPrepend : string
+  userPostpend : string 
+  responseTemplateTokens : string[]
 }
 
 
@@ -85,19 +103,31 @@ interface SettingsRules {
   ipAddress : RuleType
 }
 
+/**
+ * A class that wraps functionality for settings
+ */
 export class LLMSettingsWrapper {
+  
+  /**
+     * An object that defines validation rules for each setting.
+     * 
+     * Each rule is a computed property that returns an array of validation functions.
+     * Each function takes a value and returns a boolean or string.
+     * Returns true if value is valid, returns a string error message if value is invalid
+     * @type {SettingsRules}
+     * @public
+     * @static
+     * @readonly
+     */
   public static readonly rules : SettingsRules = {
     n_predict : computed(() => [
       (v: number) : boolean | string => v >= 0 || 'n_predict must be non-negative',
-      // Add more rules as needed
     ]),
     n_probs : computed(() => [
       (v: number) : boolean | string => v >= 0 || 'n_probs must be non-negative',
-      // Add more rules as needed
     ]),
     seed : computed(() => [
       (v: number) : boolean | string => Number.isInteger(v) || 'seed must be an integer',
-      // Add more rules as needed
     ]),
     ipAddress : computed(() => [
       (v: string) : boolean | string => !!v || 'IP address is required',
@@ -105,21 +135,36 @@ export class LLMSettingsWrapper {
     ]),
   }
 
+  /**
+     * Validates an LLMSettings instance
+     *
+     * Checks if the provided LLMSettings comply with the rules defined in LLMSettingsWrapper.rules
+     *
+     * @param {LLMSettings} settings - The settings address to validate.
+     * @returns {boolean} Returns true if the settings are valid, false otherwise.
+     */
   public static validate(settings : LLMSettings) : boolean {
+    // Boolean to set to false if a rule is broken
     let isValid = true
 
+    // For every settings value that has an associated rule:
     for (const key in LLMSettingsWrapper.rules) {
+      // Get the current rules and settings value from provided settings
       const typedKey = key as keyof LLMSettings;
       const currentRules = LLMSettingsWrapper.rules[typedKey].value
       const settingsValue = settings[typedKey]
+
+      // For each rule for the current settings value, check if the rule function returns true
       currentRules.forEach((element : ((v: string) => boolean | string) | ((v: number) => boolean | string)) => { //@ts-expect-error See following line
         if (element(settingsValue) !== true) { // Not assignable to never error seems to be incorrectly flagged
+          // If rule doesn't return true, validation has failed, return false
           isValid = false
-          console.log(isValid)
           return isValid
         }
       });
     }
+
+    // If the settings values have passed all declared rules, return true
     return isValid
   }
 
@@ -139,5 +184,4 @@ export class LLMSettingsWrapper {
     // Return true if either regular expressions are satisfied
     return localPattern.test(ipAddress) || ipPattern.test(ipAddress);
   }
-
 }

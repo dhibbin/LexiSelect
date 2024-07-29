@@ -35,12 +35,55 @@
         />
       </v-expansion-panel-text>
     </v-expansion-panel>
+    <v-expansion-panel>
+      <v-expansion-panel-title>Prompt Template</v-expansion-panel-title>
+      <v-expansion-panel-text class="pa-0">
+        <v-text-field
+          v-model="settings.systemPrepend"
+          label="System prompt prepend"
+          hint="Template token to prepend to system prompt"
+          persistent-hint
+          class="rounded pa-1 ma-0"
+        />
+        <v-text-field
+          v-model.number="settings.systemPostpend"
+          class="rounded pa-1 ma-0"
+          label="System prompt postpend"
+          persistent-hint
+          hint="Template token to postpend to system prompt"
+        />
+        <v-text-field
+          v-model.number="settings.userPrepend"
+          class="rounded pa-1 ma-0"
+          label="User prompt prepend"
+          persistent-hint
+          hint="Template token to prepend to user prompt"
+        />
+        <v-text-field
+          v-model.number="settings.userPostpend"
+          class="rounded pa-1 ma-0"
+          label="User prompt postpend"
+          persistent-hint
+          hint="Template token to postpend to user prompt"
+        />
+        <v-combobox
+          v-model="settings.responseTemplateTokens"
+          label="Response template token "
+          hint="Tokens to remove from LLM response"
+          persistent-hint
+          closable-chips
+          chips
+          multiple
+        />
+      </v-expansion-panel-text>
+    </v-expansion-panel>
   </v-expansion-panels>
 </template>
 
 <script setup lang="ts">
 import { ref, type Ref, reactive, watch } from 'vue'
-import { LLMService, type LLMSettings, LLMSettingsWrapper } from '@/objects/LLMService';
+import { LLMService, type LLMSettings } from '@/objects/LLMService';
+import { LLMSettingsWrapper } from '@/objects/LLMSettingsWrapper';
 
 const seed = reactive({
   displayedNumber : -1,
@@ -51,7 +94,12 @@ const settings : LLMSettings = reactive({
   n_predict : 10,
   n_probs : 5,
   seed : seed.usedNumber,
-  ipAddress : "localhost:8080"
+  ipAddress : "localhost:8080",
+  systemPrepend : "<|system|>",
+  systemPostpend : "<|end|>",
+  userPrepend : "<|user|>" ,
+  userPostpend : "<|end|>",
+  responseTemplateTokens : ["<|assistant|>"],
 })
 
 const panel : Ref<number[]> = ref([0])
