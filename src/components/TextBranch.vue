@@ -31,12 +31,15 @@
       :style="{position: 'relative', top: 0 + 'px', fontFamily: 'monospace', 
                left : (currTokPosition.left + currElementOffset - currWindow.innerWidth / 2) + 100 + 'px',
                height : 'min-content'}"
-      class="mx-auto"
+      class="mx-auto animated-element"
       width="200"
       @mouseleave="setExpand(false, 0.5)"
       @mouseenter="setExpand(true)"
     >
-      <v-list>
+      <v-list
+        class="pa-0"
+        dense="true"
+      >
         <v-text-field
           v-model="customTokenInput"
           label="New Token"
@@ -44,17 +47,30 @@
           @keydown.enter="newBranch(currTokIndex, customTokenInput)"
         /> 
         <v-list-item
-          v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0 || v.tok_str == tokens[currTokIndex].completionProb.content)"
+          v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0 || v.tok_str == tokens[currTokIndex].completionProb.content)"  
           :key="probIndex"
+          class="pa-0 ma-0"
           :value="tokenProb"
           :disabled="tokenProb.tok_str == tokens[currTokIndex].completionProb.content"
+          density="compact"
           @click="newBranch(currTokIndex, tokenProb.tok_str)"
-        >
+        >   
           <v-list-item-title
-            style="font-family: monospace;"
+            style="font-family: monospace; text-align: center;"
+            class="pa-1"
           >
-            {{ tokenProb.tok_str + ':' + tokenProb.prob }}
+            {{ tokenProb.tok_str }}
           </v-list-item-title>
+          <template #prepend> 
+            <v-sheet
+              class="pa-1 ma-1 v-align-center v-text-center"
+              style="width: 58px; text-align: center;"
+              color="info"
+              rounded="sm"
+            >
+              {{ toPercentage(tokenProb.prob) + '%' }}
+            </v-sheet>
+          </template>
         </v-list-item>
       </v-list> 
     </v-card>
@@ -68,7 +84,10 @@
     class="mx-auto hidden"
     width="200"
   >
-    <v-list>
+    <v-list
+      class="pa-0"
+      dense="true"
+    >
       <v-text-field
         v-model="customTokenInput"
         label="New Token"
@@ -76,17 +95,32 @@
         @keydown.enter="newBranch(currTokIndex, customTokenInput)"
       /> 
       <v-list-item
-        v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0 || v.tok_str == tokens[currTokIndex].completionProb.content)"
+        v-for="(tokenProb, probIndex) in tokens[currTokIndex].completionProb.probs.filter(v => v.prob != 0 || v.tok_str == tokens[currTokIndex].completionProb.content)"  
         :key="probIndex"
+        class="pa-0 ma-0"
         :value="tokenProb"
-      >
+        :disabled="tokenProb.tok_str == tokens[currTokIndex].completionProb.content"
+        density="compact"
+        @click="newBranch(currTokIndex, tokenProb.tok_str)"
+      >   
         <v-list-item-title
-          style="font-family: monospace;"
+          style="font-family: monospace; text-align: center;"
+          class="pa-1"
         >
-          {{ tokenProb.tok_str + ':' + tokenProb.prob }}
+          {{ tokenProb.tok_str }}
         </v-list-item-title>
+        <template #prepend> 
+          <v-sheet
+            class="pa-1 ma-1 v-align-center v-text-center"
+            style="width: 58px; text-align: center;"
+            color="info"
+            rounded="sm"
+          >
+            {{ toPercentage(tokenProb.prob) + '%' }}
+          </v-sheet>
+        </template>
       </v-list-item>
-    </v-list>  
+    </v-list> 
   </v-card>
 </template>
 
@@ -121,7 +155,7 @@ const responses : Ref<LlamaInterface[]> = ref(props?.responseLLM ? [props.respon
 const currWindow = ref(window)
 const tokenMenu = ref<InstanceType<typeof VCard> | null>(null);
 const virtualTokenMenu = ref<InstanceType<typeof VCard> | null>(null);
-const menuHeight = ref(0)
+const menuHeight = ref(virtualTokenMenu.value?.$el.getBoundingClientRect().height)
 const customTokenInput = ref("")
 
 // Delayed calls for lerped values
@@ -180,7 +214,7 @@ onMounted(() => {
 
 onUpdated(() => {
   let targetHeight : number = virtualTokenMenu.value?.$el.getBoundingClientRect().height
-  console.log(targetHeight, menuHeight.value)
+  //console.log(targetHeight, menuHeight.value)
   if (Math.abs(menuHeight.value - targetHeight) >= 1) {
     if (heightDelayedCall?.isActive() == false || heightDelayedCall?.vars.value != targetHeight ) {
       heightDelayedCall?.kill()
@@ -231,6 +265,15 @@ function setExpand(newValue : boolean, delay : number = 0.1) : void {
   }
 }
 
+function toPercentage(num : number) : string {
+  if (num >= 1) {
+    return (num * 100).toFixed(1).toString().slice(0,3)
+  }
+  else {
+    return (num * 100).toFixed(1).toString()
+  }
+}
+
 //TODO: Figure out why on first hover the lerp fails
 
 
@@ -259,5 +302,10 @@ function setExpand(newValue : boolean, delay : number = 0.1) : void {
     }
     .hidden {
       visibility: hidden;
+    }
+
+    .animated-element {
+      transition: height 0.3s ease-out;
+      overflow: hidden;
     }
 </style>
