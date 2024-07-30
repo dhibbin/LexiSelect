@@ -1,10 +1,18 @@
-import { computed, type ComputedRef } from 'vue'
 import type { LlamaInterface } from './LlamaInterface'
+import { type LLMSettings, LLMSettingsWrapper } from './LLMSettings'
 
+/**
+ * LLMService is a singleton class that provides methods to interact with the Llama API
+ * @note The service should be easily extendible to add compatability with Kobold/OpenAI etc
+ */
 export class LLMService {
+  /** The singleton's listening for the latest seed from the Llama  */
   private listeners : ((num : number) => void)[] = []
-  private static wrappedInstance : LLMService
   
+  /** The singleton instance of LLMService */
+  private static wrappedInstance : LLMService  
+
+  /** Settings used by singleton when sending prompts to the Llama API */
   private wrappedSettings : LLMSettings = {
     n_predict : 10,
     n_probs : 5,
@@ -17,8 +25,15 @@ export class LLMService {
     responseTemplateTokens : ["<|assistant|>"],
   }
 
+  /**
+   * The LLMService constructor is private to ensure the only instance is the singleton instance
+   */
   private constructor() {}
 
+  /**
+   * Static method to access the singleton instance of the LLMService class
+   * @returns The singleton instance of the LLMService class
+   */
   public static get instance(): LLMService {
     if (!LLMService.wrappedInstance) {
       LLMService.wrappedInstance = new LLMService()
@@ -26,39 +41,82 @@ export class LLMService {
     return LLMService.wrappedInstance
   }
 
+  /**
+   * Setter for the settings property. Doesn't change the settings if the values are invalid
+   * @param settings - The new settings
+   */
   public set settings(settings : LLMSettings) {
     if (LLMSettingsWrapper.validate(settings)){
       this.wrappedSettings = settings
     }
   }
 
+  /**
+   * Getter for the settings property
+   * @returns The current settings
+   */
   public get settings() : LLMSettings {
     return this.wrappedSettings
   }
 
+  /**
+   * Adds a listener to the singleton
+   * @param listener - A bound function that listens to the singleton
+   */
   public addListener(listener : (num : number) => void) : void {
     this.listeners.push(listener)
   }
 
+  /**
+   * Calls all of the singleton's listeners with the provided number
+   * 
+   * Used to provided the updated seed to the sidebar
+   * @param num -  The number to call the listeners with
+   */
   private callListeners(num : number) : void {
     for (const listener of this.listeners) {
       listener(num)
     }
   }
 
+  /**
+   * Sends a prompt to the Llama API and calls the listener functions with the seed of the generation settings
+   * 
+   * @param userPrompt - The user prompt
+   * @param systemPrompt - The system prompt
+   * @param previousGeneration - The previous generation
+   * @returns The response from the Llama API
+   */
   public async sendPrompt(userPrompt : string, systemPrompt : string, 
-    previousGeneration : string = "") : Promise<LlamaInterface> {
+    previousGeneration : string = "") : Promise<LlamaInterface> 
+  {
+    // Get the response and call the SideBar listener with the updated seed
     const latestReposne = await this.wrappedSendPrompt(userPrompt, systemPrompt, previousGeneration)
     this.callListeners(latestReposne.generation_settings.seed)
+    
+    // Return the response
     return latestReposne
   }
 
+  /**
+   * Sends a prompt to the Llama API
+   * 
+   * Constructs a prompt from the user/system prompts and the previously generated tokens
+   * 
+   * @param userPrompt - The user prompt
+   * @param systemPrompt - The system prompt
+   * @param previousGeneration - The previous generation
+   * @returns The response from the Llama API.
+   */
   private async wrappedSendPrompt(userPrompt : string, systemPrompt : string, 
-    previousGeneration : string = "") : Promise<LlamaInterface> { 
+    previousGeneration : string = "") : Promise<LlamaInterface> 
+  { 
+    // Construct the prompt using the template tokens provided in the settings
     userPrompt = this.settings.userPrepend + userPrompt + this.settings.userPostpend;
     systemPrompt = this.settings.systemPrepend + systemPrompt + this.settings.systemPostpend;
     const prompt = systemPrompt + userPrompt + previousGeneration;
 
+    // Return the JSON resposne from the Llama API
     return fetch("http://" + this.wrappedSettings.ipAddress + "/completion", {
       method: 'POST',
       body: JSON.stringify({
@@ -78,176 +136,3 @@ export class LLMService {
   }
 }
 
-/**
- * The settings used in requests to the LLM Server
- * @interface 
- */
-export interface LLMSettings {
-  /**
-   * Settings consist of numbers, strings or string arrays
-   * @type {number | string | string[]}
-   * @note Add more types here as necessary if extending settings used by LexiSelect
-   */
-  [key: string]: number | string | string[]; 
-  
-  // Basic settings
-
-  /**
-   * The number of token predictions to make
-   * @type {number}
-   */
-  n_predict : number
-
-  /**
-   * The number of alternative token probabilities to return
-   * @type {number}
-   */
-  n_probs : number
-
-  /**
-   * The seed for the random number generator
-   * @type {number}
-   */
-  seed : number
-
-  /**
-   * The IP address of the server
-   * @type {string}
-   */
-  ipAddress : string
-
-  // Prompt template settings
-
-  /**
-   * The string to prepend to the system prompt
-   * @type {string}
-   */
-  systemPrepend : string
-
-  /**
-   * The string to append to the system prompt
-   * @type {string}
-   */
-  systemPostpend : string
-
-  /**
-   * The string to prepend to the user prompt
-   * @type {string}
-   */
-  userPrepend : string
-
-  /**
-   * The string to append to the user prompt
-   * @type {string}
-   */
-  userPostpend : string
-
-  /**
-   * The tokens to use in the response template.
-   * @type {string[]}
-   */
-  responseTemplateTokens : string[]
-}
-
-
-/**
- * Type used for declaring rules for settings within SettingsRules
- */
-type RuleType = ComputedRef<((v: string) => boolean | string)[]> | ComputedRef<((v: number) => boolean | string)[]>;
-
-/**
- * Represents the rules for LLMSettings
- * 
- * Each property represents a rule for the property of the same keyname in LLMSettings
- * @interface 
- */
-interface SettingsRules {
-  [key : string] : RuleType;
-  n_predict : RuleType,
-  n_probs : RuleType,
-  seed : RuleType,
-  ipAddress : RuleType
-}
-
-/**
- * A class that wraps functionality for settings
- */
-export class LLMSettingsWrapper {
-  
-  /**
-     * An object that defines validation rules for each setting.
-     * 
-     * Each rule is a computed property that returns an array of validation functions.
-     * Each function takes a value and returns a boolean or string.
-     * Returns true if value is valid, returns a string error message if value is invalid
-     * @type {SettingsRules}
-     * @public
-     * @static
-     * @readonly
-     */
-  public static readonly rules : SettingsRules = {
-    n_predict : computed(() => [
-      (v: number) : boolean | string => v >= 0 || 'n_predict must be non-negative',
-    ]),
-    n_probs : computed(() => [
-      (v: number) : boolean | string => v >= 0 || 'n_probs must be non-negative',
-    ]),
-    seed : computed(() => [
-      (v: number) : boolean | string => Number.isInteger(v) || 'seed must be an integer',
-    ]),
-    ipAddress : computed(() => [
-      (v: string) : boolean | string => !!v || 'IP address is required',
-      (v: string) : boolean | string => LLMSettingsWrapper.validateIPAddress(v) || 'Invalid IP address',
-    ]),
-  }
-
-  /**
-     * Validates an LLMSettings instance
-     *
-     * Checks if the provided LLMSettings comply with the rules defined in LLMSettingsWrapper.rules
-     *
-     * @param {LLMSettings} settings - The settings address to validate.
-     * @returns {boolean} Returns true if the settings are valid, false otherwise.
-     */
-  public static validate(settings : LLMSettings) : boolean {
-    // Boolean to set to false if a rule is broken
-    let isValid = true
-
-    // For every settings value that has an associated rule:
-    for (const key in LLMSettingsWrapper.rules) {
-      // Get the current rules and settings value from provided settings
-      const typedKey = key as keyof LLMSettings;
-      const currentRules = LLMSettingsWrapper.rules[typedKey].value
-      const settingsValue = settings[typedKey]
-
-      // For each rule for the current settings value, check if the rule function returns true
-      currentRules.forEach((element : ((v: string) => boolean | string) | ((v: number) => boolean | string)) => { //@ts-expect-error See following line
-        if (element(settingsValue) !== true) { // Not assignable to never error seems to be incorrectly flagged
-          // If rule doesn't return true, validation has failed, return false
-          isValid = false
-          return isValid
-        }
-      });
-    }
-
-    // If the settings values have passed all declared rules, return true
-    return isValid
-  }
-
-  /**
-     * Validates an IP address.
-     *
-     * This function checks if the given IP address is valid. It supports both local and remote IP addresses.
-     * For remote IP addresses, it supports optional port numbers.
-     *
-     * @param {string} ipAddress - The IP address to validate.
-     * @returns {boolean} Returns true if the IP address is valid, false otherwise.
-     */
-  public static validateIPAddress(ipAddress: string) : boolean {
-    // Ipv4 and localhost address regular expressions
-    const ipPattern : RegExp = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(:\d{1,5})?$/;
-    const localPattern : RegExp = /^(localhost):\d{1,5}$/;
-    // Return true if either regular expressions are satisfied
-    return localPattern.test(ipAddress) || ipPattern.test(ipAddress);
-  }
-}

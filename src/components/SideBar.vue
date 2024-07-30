@@ -82,7 +82,9 @@
 
 <script setup lang="ts">
 import { ref, type Ref, reactive, watch } from 'vue'
-import { LLMService, type LLMSettings, LLMSettingsWrapper } from '@/objects/LLMService';
+import { LLMService } from '@/objects/LLMService';
+import { type LLMSettings, LLMSettingsWrapper } from '@/objects/LLMSettings'
+
 
 const seed = reactive({
   displayedNumber : -1,
