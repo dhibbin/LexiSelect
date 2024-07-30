@@ -46,11 +46,19 @@ export class LLMService {
     }
   }
 
-  public async SendPrompt(userPrompt : string, systemPrompt : string, previousGeneration : string = "") : Promise<LlamaInterface> {
+  public async sendPrompt(userPrompt : string, systemPrompt : string, 
+    previousGeneration : string = "") : Promise<LlamaInterface> {
+    const latestReposne = await this.wrappedSendPrompt(userPrompt, systemPrompt, previousGeneration)
+    this.callListeners(latestReposne.generation_settings.seed)
+    return latestReposne
+  }
+
+  private async wrappedSendPrompt(userPrompt : string, systemPrompt : string, 
+    previousGeneration : string = "") : Promise<LlamaInterface> { 
     userPrompt = this.settings.userPrepend + userPrompt + this.settings.userPostpend;
     systemPrompt = this.settings.systemPrepend + systemPrompt + this.settings.systemPostpend;
     const prompt = systemPrompt + userPrompt + previousGeneration;
-    //http://127.0.0.1:8080/completion
+
     return fetch("http://" + this.wrappedSettings.ipAddress + "/completion", {
       method: 'POST',
       body: JSON.stringify({
@@ -65,10 +73,6 @@ export class LLMService {
           throw new Error(response.statusText)
         }
 
-        //const parsedResponse = await response.json() as LlamaInterface
-        //this.callListeners(parsedResponse.generation_settings.seed)
-        console.log((await response.json() as LlamaInterface).generation_settings.seed)
-        
         return response.json() as Promise<LlamaInterface>
       })
   }

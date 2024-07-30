@@ -240,7 +240,7 @@ async function requestGeneration(index : number = -1) : Promise<LlamaInterface> 
     previousOutput = outputs.value[index].content
   }
 
-  return await LLMService.instance.SendPrompt(
+  return await LLMService.instance.sendPrompt(
     userPrompt.value, systemPrompt.value, previousOutput)
 }
 
