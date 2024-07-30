@@ -90,7 +90,7 @@
                   :rows="rows"
                   no-resize
                   hide-details
-                  @input="handleTextAreaInput(index)"
+                  @input="newHandleTextAreaInput(index, $event)"
                 /> 
               </v-row>  
               <v-row no-gutters>
@@ -175,6 +175,7 @@ const topLevelTab = ref("input")
 const outputs : Ref<outputData[]> = ref([])
 const previousOutputs : Ref<string[][]> = ref([])
 const systemTextArea = ref()
+const currentCursorPosition = ref(0)
 
 const isDragging = ref(false)
 const tabHeight = ref(280)
@@ -227,7 +228,6 @@ function removeBranch(index : number) : void {
 function dragMouseDown(event : MouseEvent) : void {
   let element : HTMLElement = event.currentTarget as HTMLElement
   mouseOffset.value = (window.innerHeight - event.clientY) - (window.innerHeight - element.getBoundingClientRect().bottom)
-  console.log("difference", mouseOffset.value)
   isDragging.value = true
 }
 
@@ -285,8 +285,9 @@ function newHandleTextAreaInput(index : number, event : Event) : void {
     let newContent = outputs.value[index].content
     let charDifference = newContent.length - oldContent.length
     let cursorOffset = (event.target as HTMLTextAreaElement).selectionStart
+    currentCursorPosition.value = cursorOffset < newContent.length ? cursorOffset : currentCursorPosition.value
+
     let charOffset = 0
-    console.log(charDifference)
 
     if (charDifference > 0) {
       charOffset = newContent.length
@@ -325,7 +326,6 @@ function newHandleTextAreaInput(index : number, event : Event) : void {
           }
           else {
             newTokens[i].completionProb.content = newContent.substring(startCharOffset, cursorOffset)
-            console.log("new token1", newTokens[i].completionProb.content)
 
             let j = i + 1
             while(Math.abs(charDifference) > newTokens[j].completionProb.content.length) {
@@ -334,9 +334,8 @@ function newHandleTextAreaInput(index : number, event : Event) : void {
               j++
             }
 
-            newTokens[j].completionProb.content = newContent.substring(cursorOffset, cursorOffset + newTokens[j].completionProb.content.length)
+            newTokens[j].completionProb.content = newContent.substring(cursorOffset, cursorOffset + newTokens[j].completionProb.content.length + 1)
             charDifference = 0
-            console.log("newToken2, ", newTokens[j].completionProb.content, charDifference)
 
             break
 
