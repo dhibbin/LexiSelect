@@ -109,7 +109,6 @@ function generateOnNewBranch(index : number) : void {
 }
 
 function textAreaUpdateOutput(newTokens : TreeToken[], index : number) : void {
-  outputs.value[index] = newTokens
   typedTokens.value = [newTokens, index]
 }
 

@@ -168,7 +168,9 @@ const tokens : ComputedRef<TreeToken[]> = computed(() => {
   let newTokens : TreeToken[] = []
 
   if (props.previousTokens !== null) {
-    props.previousTokens.forEach((token : TreeToken) => newTokens.push(token))
+    props.previousTokens.forEach((token : TreeToken) => {
+      newTokens.push(token)
+    })
   }
 
   for (let i = 0; i < responses.value.length; i++) {
@@ -288,8 +290,7 @@ function toPercentage(num : number) : string {
 }
 
 function emptyTokens() : void {
-  responses.value
-  
+  responses.value = []
 }
 
 //TODO: Figure out why on first hover the lerp fails

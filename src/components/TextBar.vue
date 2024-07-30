@@ -173,6 +173,7 @@ const userPrompt : Ref<string> = ref("Write a story about a man named Stanley")
 const systemPrompt : Ref<string> = ref("You are a talented writing assistant. Always respond by incorporating the instructions into expertly written prose that is highly detailed, evocative, vivid and engaging.");
 const topLevelTab = ref("input")
 const outputs : Ref<outputData[]> = ref([])
+const previousOutputs : Ref<string[][]> = ref([])
 const systemTextArea = ref()
 
 const isDragging = ref(false)
@@ -209,10 +210,12 @@ watch(() => props.branchTokens, () => {
   outputs.value = []
   for (let i = 0; i < props.branchTokens.length; i++) {
     if (props.branchTokens[i] !== null) {
-      outputs.value.push(reactive({
+      let newOutput : outputData = reactive({
         content : props.branchTokens[i]!.map((t : TreeToken) => t.completionProb.content).join(''),
         loading : false
-      }))
+      })
+      outputs.value.push(newOutput)
+      previousOutputs.value.push([newOutput.content])
     }
   }
 })
@@ -269,6 +272,85 @@ function setLoading(isLoading : boolean, index : number = -1) : void {
   }
   else {
     startButtonLoading.value = isLoading 
+  }
+}
+
+function newHandleTextAreaInput(index : number, event : Event) : void {
+  let oldContent = previousOutputs.value[index].shift()
+  let newTokens : TreeToken[] = []
+  previousOutputs.value[index].push(outputs.value[index].content)
+
+  if (props.branchTokens[index] !== null && oldContent !== undefined) {
+    newTokens = JSON.parse(JSON.stringify(props.branchTokens[index])) 
+    let newContent = outputs.value[index].content
+    let charDifference = newContent.length - oldContent.length
+    let cursorOffset = (event.target as HTMLTextAreaElement).selectionStart
+    let charOffset = 0
+    console.log(charDifference)
+
+    if (charDifference > 0) {
+      charOffset = newContent.length
+      for (let i = newTokens.length; i > 0; i--) { 
+        let endCharOffset = charOffset
+        let tokenLength = newTokens[i].completionProb.content.length
+        charOffset -= tokenLength
+
+        if (charOffset <= cursorOffset && charDifference > 0) {
+          newTokens[i].completionProb.content = newContent.substring(endCharOffset - (tokenLength + charDifference), endCharOffset)
+          charOffset = endCharOffset - newTokens[i].completionProb.content.length
+          charDifference = 0
+          break
+        }
+      }
+    }
+    else {
+      for (let i = 0; i < newTokens.length; i++) {
+        let startCharOffset = charOffset
+        let tokenLength = newTokens[i].completionProb.content.length
+        charOffset += tokenLength
+
+        if (charOffset > newContent.length) {
+          newTokens[i].completionProb.content = newContent.substring(startCharOffset)
+          for (let j = i + 1; j < newTokens.length; j++) { 
+            newTokens[j].completionProb.content = ""
+          }
+          charDifference = 0
+          break
+        }
+        else if (charOffset > cursorOffset && charDifference < 0) {          
+          if(!(cursorOffset + Math.abs(charDifference) >= charOffset)) {
+            newTokens[i].completionProb.content = newContent.substring(startCharOffset, charOffset + charDifference)
+            charDifference = 0
+            break
+          }
+          else {
+            newTokens[i].completionProb.content = newContent.substring(startCharOffset, cursorOffset)
+            console.log("new token1", newTokens[i].completionProb.content)
+
+            let j = i + 1
+            while(Math.abs(charDifference) > newTokens[j].completionProb.content.length) {
+              charDifference += newTokens[j].completionProb.content.length
+              newTokens[j].completionProb.content = ""
+              j++
+            }
+
+            newTokens[j].completionProb.content = newContent.substring(cursorOffset, cursorOffset + newTokens[j].completionProb.content.length)
+            charDifference = 0
+            console.log("newToken2, ", newTokens[j].completionProb.content, charDifference)
+
+            break
+
+          }
+        }
+      }
+    }
+
+    if (charDifference == 0) {
+      emits("tokensUpdated", newTokens, index)
+    }
+    else {
+      console.log("Error : failed to locate changes in TextBar output textarea, index: ${index}")
+    }
   }
 }
 

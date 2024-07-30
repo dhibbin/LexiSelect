@@ -79,7 +79,18 @@ watch(() => branches.value, () => {
 }, {deep : true})
 
 watch(() => props.typedTokens, () => {
-  branches.value[props.typedTokens[1]].previousTokens = props.typedTokens[0]
+  let newTokens : TreeToken[] = []
+  
+  for (let i = 0; i < props.typedTokens[0].length; i++) {
+    if (props.typedTokens[0][i].completionProb.content.length != 0) {
+      newTokens.push(props.typedTokens[0][i])
+    }  
+    else {
+      console.log("purged empty token")
+    }
+  }
+
+  branches.value[props.typedTokens[1]].previousTokens = newTokens
   branches.value[props.typedTokens[1]].response = null
   branches.value[props.typedTokens[1]].triggerEmptyTokens = !branches.value[props.typedTokens[1]].triggerEmptyTokens
 }, {deep : true})
