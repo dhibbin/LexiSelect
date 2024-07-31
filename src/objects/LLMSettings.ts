@@ -64,8 +64,39 @@ export interface LLMSettings {
    * The tokens to use in the response template.
    */
   responseTemplateTokens : string[]
-}
 
+  // Sampling Settings
+
+  /** Randomness of the generated text */
+  temperature : number
+  
+  /** Range of the temperature */
+  dynatemp_range : number
+
+  /** Dynamic temperature exponent */
+  dynatemp_exponent : number
+
+  /** Top k of the request to /completion */
+  top_k : number
+
+  /** Top p of the request to /completion */
+  top_p : number
+
+  /** Min p of the request to /completion */
+  min_p : number
+
+  /** Control the repetition of token sequences in the generated text */
+  repeat_penalty : number
+  
+  /** Last n tokens to consider for penalizing repetition */
+  repeat_last_n : number
+
+  /** Repeat alpha presence penalty */
+  presence_penalty : number
+
+  /** Repeat alpha frequency penalty */
+  frequency_penalty : number
+}
 
 /**
  * Type used for declaring rules for settings within SettingsRules
@@ -115,7 +146,17 @@ export class LLMSettingsWrapper {
     ]),
     stoppingStrings : computed(() => [
       (v: string) : boolean | string => this.getJsonArray(v) !== false || 'Must be a valid array. Use square [] brackets and comma separated',
-    ])
+    ]),
+    temperature : this.createNumberRuleInRange(0, false, "Temperature", false),
+    dynatemp_range : this.createNumberRuleInRange(0, false, "Dynamic Temperature Range", false),
+    dynatemp_exponent : this.createNumberRuleInRange(false, false, "Dynamic Temperature Exponent", false),
+    top_k : this.createNumberRuleInRange(0, false, "top_k", false),
+    top_p : this.createNumberRuleInRange(0, 1, "top_p", false),
+    min_p : this.createNumberRuleInRange(0, 1, "min_p", false),
+    repeat_penalty : this.createNumberRuleInRange(0, false, "Repeat penalty", false),
+    repeat_last_n : this.createNumberRuleInRange(-1, false, "repeat_last_n", true),
+    presence_penalty : this.createNumberRuleInRange(0, false, "Presence penalty", false),
+    frequency_penalty : this.createNumberRuleInRange(0, false, "Frequency penalty", false),
   }
 
   public static readonly emptyRule : ComputedRef<((v: number) => boolean | string)[]> = computed(() => [
@@ -186,5 +227,14 @@ export class LLMSettingsWrapper {
       return false;
     }
   }
-  
+
+  public static createNumberRuleInRange(min : number | boolean, max : number | boolean, name : string, integerOnly : boolean = true) : RuleType {
+    return computed(() => [
+      (v: number) : boolean | string => 
+        ((typeof min !== 'boolean' ? v >= min : true) && 
+         (typeof max !== 'boolean' ? v <= max : true) && 
+         (!integerOnly || Number.isInteger(v))) || 
+         `${name} must be a ${integerOnly ? 'integer' : 'number'} ${typeof min !== 'boolean' ? ',greater than ' + min.toString + "," : ""}, ${typeof max !== 'boolean' ? ',less than ' + max.toString : ""}`,
+    ])
+  }
 }

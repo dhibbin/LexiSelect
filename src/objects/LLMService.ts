@@ -24,6 +24,16 @@ export class LLMService {
     userPrepend : "<|user|>" ,
     userPostpend : "<|end|>",
     responseTemplateTokens : ["<|assistant|>"],
+    temperature : 0.8,
+    dynatemp_range : 0.0,
+    dynatemp_exponent : 1.0,
+    top_k : 40,
+    top_p : 0.95,
+    min_p : 0.05,
+    repeat_penalty : 1.1,
+    repeat_last_n : 64,
+    presence_penalty : 0.0,
+    frequency_penalty : 0.0,
   }
 
   /**

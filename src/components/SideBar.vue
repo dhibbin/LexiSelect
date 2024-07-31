@@ -48,6 +48,20 @@
         />
       </v-expansion-panel-text>
     </v-expansion-panel>
+    <v-expansion-panel>
+      <v-expansion-panel-title>Prompt Template</v-expansion-panel-title>
+      <v-expansion-panel-text class="pa-0">
+        <v-text-field 
+          v-for="(value, key) in samplingHTML"
+          :key="key"
+          v-model="settings[key]"
+          class="rounded pa-0 ma-0"
+          :label="value.label"
+          :hint="value.hint"
+          :persistent-hint="value.presistentHint"
+        />
+      </v-expansion-panel-text>
+    </v-expansion-panel>
   </v-expansion-panels>
 </template>
 
@@ -83,18 +97,20 @@ const promptTemplateHTML :  { [key: string]: HTMLSettingsContents } = reactive({
   responseTemplateTokens : newContents("Response template token", "Tokens to remove from LLM response", true)
 })
 
-const settings : LLMSettings = reactive({
-  n_predict : 10,
-  n_probs : 5,
-  seed : seed.usedNumber,
-  ipAddress : "localhost:8080",
-  stoppingStrings : "[]",
-  systemPrepend : "<|system|>",
-  systemPostpend : "<|end|>",
-  userPrepend : "<|user|>" ,
-  userPostpend : "<|end|>",
-  responseTemplateTokens : ["<|assistant|>"],
+const samplingHTML : { [key: string]: HTMLSettingsContents } = reactive({
+  temperature : newContents("Temperature", "", false),
+  dynatemp_range : newContents("dynatemp_range", "", false),
+  dynatemp_exponent : newContents("dynatemp_exponent", "", false),
+  top_k : newContents("top_k", "", false),
+  top_p : newContents("top_p", "", false),
+  min_p : newContents("min_p", "", false),
+  repeat_penalty : newContents("Repeat Penalty", "", false),
+  repeat_last_n : newContents("Repeat last n", "", false),
+  presence_penalty : newContents("Presence Penalty", "", false),
+  frequency_penalty : newContents("Frequency Penalty", "", false),
 })
+
+const settings : LLMSettings = reactive(JSON.parse(JSON.stringify(LLMService.instance.settings)))
 
 const panel : Ref<number[]> = ref([0])
 
