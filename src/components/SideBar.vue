@@ -49,7 +49,7 @@
       </v-expansion-panel-text>
     </v-expansion-panel>
     <v-expansion-panel>
-      <v-expansion-panel-title>Prompt Template</v-expansion-panel-title>
+      <v-expansion-panel-title>Sampling Settings</v-expansion-panel-title>
       <v-expansion-panel-text class="pa-0">
         <v-text-field 
           v-for="(value, key) in samplingHTML"

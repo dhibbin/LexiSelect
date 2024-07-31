@@ -18,7 +18,7 @@ export class LLMService {
     n_probs : 5,
     seed : -1,
     ipAddress : "localhost:8080",
-    stoppingStrings : "",
+    stoppingStrings : "[]",
     systemPrepend : "<|system|>",
     systemPostpend : "<|end|>",
     userPrepend : "<|user|>" ,
