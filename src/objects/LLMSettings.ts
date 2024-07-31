@@ -33,6 +33,11 @@ export interface LLMSettings {
    */
   ipAddress : string
 
+  /**
+   * String of a JSON array of stopping strings
+   */
+  stoppingStrings : string
+
   // Prompt template settings
 
   /**
@@ -78,7 +83,8 @@ interface SettingsRules {
   n_predict : RuleType,
   n_probs : RuleType,
   seed : RuleType,
-  ipAddress : RuleType
+  ipAddress : RuleType,
+  stoppingStrings : RuleType
 }
 
 /**
@@ -107,7 +113,14 @@ export class LLMSettingsWrapper {
       (v: string) : boolean | string => !!v || 'IP address is required',
       (v: string) : boolean | string => LLMSettingsWrapper.validateIPAddress(v) || 'Invalid IP address',
     ]),
+    stoppingStrings : computed(() => [
+      (v: string) : boolean | string => this.getJsonArray(v) !== false || 'Must be a valid array. Use square [] brackets and comma separated',
+    ])
   }
+
+  public static readonly emptyRule : ComputedRef<((v: number) => boolean | string)[]> = computed(() => [
+    (v: number) : boolean | string => v !== undefined || 'Value must not be undefined',
+  ])
 
   /**
      * Validates an LLMSettings instance
@@ -158,5 +171,20 @@ export class LLMSettingsWrapper {
     // Return true if either regular expressions are satisfied
     return localPattern.test(ipAddress) || ipPattern.test(ipAddress);
   }
-}
+  
 
+  public static getJsonArray(str: string): boolean | string[] {
+    try {
+      const json = JSON.parse(str);
+      if (Array.isArray(json)) {
+        return json
+      }
+      else {
+        return false
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+  
+}

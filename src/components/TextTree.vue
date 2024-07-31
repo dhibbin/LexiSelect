@@ -68,7 +68,8 @@ watch(() => props.responseLLM, () => {
       newBranchFromResponse(props.responseLLM.response)
     }
     else {
-      branches.value[activeBranch.value].response = props.responseLLM.response
+      activeBranch.value = props.responseLLM.index
+      branches.value[props.responseLLM.index].response = props.responseLLM.response
     }
   }
 })

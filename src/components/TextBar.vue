@@ -253,6 +253,8 @@ async function requestGeneration(index : number = -1) : Promise<LlamaInterface> 
 }
 
 async function startGeneration(index : number = -1) : Promise<void> {
+  console.log(index)
+  
   setLoading(true, index)
 
   try {

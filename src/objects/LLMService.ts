@@ -18,6 +18,7 @@ export class LLMService {
     n_probs : 5,
     seed : -1,
     ipAddress : "localhost:8080",
+    stoppingStrings : "",
     systemPrepend : "<|system|>",
     systemPostpend : "<|end|>",
     userPrepend : "<|user|>" ,
@@ -114,13 +115,15 @@ export class LLMService {
     // Construct the prompt using the template tokens provided in the settings
     userPrompt = this.settings.userPrepend + userPrompt + this.settings.userPostpend;
     systemPrompt = this.settings.systemPrepend + systemPrompt + this.settings.systemPostpend;
-    const prompt = systemPrompt + userPrompt + previousGeneration;
+    const prompt = userPrompt + previousGeneration;
 
     // Return the JSON resposne from the Llama API
     return fetch("http://" + this.wrappedSettings.ipAddress + "/completion", {
       method: 'POST',
       body: JSON.stringify({
-        prompt,
+        prompt : prompt,
+        system_prompt : systemPrompt,
+        stop : LLMSettingsWrapper.getJsonArray(this.wrappedSettings.stoppingStrings),
         n_predict: this.wrappedSettings.n_predict,
         n_probs : this.wrappedSettings.n_probs,
         seed : this.wrappedSettings.seed
