@@ -221,6 +221,11 @@ watch(() => props.branchTokens, () => {
   }
 })
 
+watch(() => tabHeight.value, () => {
+  const pixelLineHeight = parseInt(window.getComputedStyle(systemTextArea.value?.$el).lineHeight, 10)
+  rows.value = Math.floor(tabHeight.value / pixelLineHeight) - 4
+})
+
 function removeBranch(index : number) : void {
   emits("removeBranch", index)
 }

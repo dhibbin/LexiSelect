@@ -3,28 +3,17 @@
     <v-expansion-panel>
       <v-expansion-panel-title>Settings</v-expansion-panel-title>
       <v-expansion-panel-text class="pa-0">
-        <v-text-field
-          v-model="settings.ipAddress"
-          label="IP Address"
-          :rules="LLMSettingsWrapper.rules.ipAddress.value"
+        <v-text-field 
+          v-for="(value, key) in settingsHTML"
+          :key="key"
+          v-model="settings[key]"
           class="rounded pa-1 ma-0"
+          :label="value.label"
+          :hint="value.hint"
+          :persistent-hint="value.presistentHint"
+          :rules="LLMSettingsWrapper.rules[key].value"
         />
-        <v-text-field
-          v-model.number="settings.n_predict"
-          class="rounded pa-1 ma-0"
-          label="n_predict"
-          persistent-hint
-          :rules="LLMSettingsWrapper.rules.n_predict.value"
-          hint="Number of tokens to predict per generation"
-        />
-        <v-text-field
-          v-model.number="settings.n_probs"
-          class="rounded pa-1 ma-0"
-          label="n_probs"
-          persistent-hint
-          hint="Maximum number of alternative tokens per token"
-          :rules="LLMSettingsWrapper.rules.n_probs.value"
-        />
+
         <v-text-field
           v-model.number="seed.displayedNumber"
           class="rounded pa-1 ma-0"
@@ -38,6 +27,19 @@
     <v-expansion-panel>
       <v-expansion-panel-title>Prompt Template</v-expansion-panel-title>
       <v-expansion-panel-text class="pa-0">
+        
+        
+        <v-text-field 
+          v-for="(value, key) in promptTemplateHTML"
+          :key="key"
+          v-model="settings[key]"
+          class="rounded pa-1 ma-0"
+          :label="value.label"
+          :hint="value.hint"
+          :persistent-hint="value.presistentHint"
+        />
+        
+        
         <v-text-field
           v-model="settings.systemPrepend"
           label="System prompt prepend"
@@ -70,6 +72,7 @@
           v-model="settings.responseTemplateTokens"
           label="Response template token "
           hint="Tokens to remove from LLM response"
+          class="rounded pa-1 ma-0"
           persistent-hint
           closable-chips
           chips
@@ -90,6 +93,39 @@ const seed = reactive({
   displayedNumber : -1,
   usedNumber : -1
 })
+
+interface HTMLSettingsContents {
+  label : string
+  hint : string
+  presistentHint : boolean
+}
+
+const settingsHTML : { [key: string]: HTMLSettingsContents } = reactive({
+  ipAddress : {
+    label : "IP Address",
+    hint : "",
+    presistentHint : false,
+  },
+  n_predict : {
+    label : "n_predict",
+    hint : "Number of tokens to predict per generation",
+    presistentHint : true,
+  },
+  n_probs : {
+    label : "n_probs",
+    hint : "Maximum number of alternative tokens per token",
+    presistentHint : true,
+  }
+})
+
+const promptTemplateHTML :  { [key: string]: HTMLSettingsContents } = reactive({
+  systemPrepend : {
+    label : "System prompt prepend",
+    hint : "Template token to prepend to system prompt",
+    presistentHint : true
+  }
+})
+
 
 const settings : LLMSettings = reactive({
   n_predict : 10,
