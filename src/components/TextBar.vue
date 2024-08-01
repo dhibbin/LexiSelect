@@ -110,6 +110,7 @@
                   style="width: 30%;"
                   class="bg-red"
                   rounded="lg"
+                  :disabled="outputs.some((value : outputData) => {return value.loading === true})"
                   @click="removeBranch(index)"
                 >
                   <v-icon
@@ -177,7 +178,6 @@ const outputs : Ref<outputData[]> = ref([])
 const previousOutputs : Ref<string[][]> = ref([])
 const systemTextArea = ref()
 const currentCursorPosition = ref(0)
-const currentTokens : Ref<TreeToken[]> = ref([])
 
 const isDragging = ref(false)
 const tabHeight = ref(280)
@@ -233,7 +233,9 @@ watch(() => tabHeight.value, () => {
 })
 
 function removeBranch(index : number) : void {
-  emits("removeBranch", index)
+  if (!outputs.value[index].loading) {
+    emits("removeBranch", index)
+  }
 }
 
 function dragMouseDown(event : MouseEvent) : void {
@@ -289,13 +291,7 @@ function setLoading(isLoading : boolean, index : number = -1) : void {
 }
 
 function onFocus(index : number, isFocused : boolean) : void {
-  if (props.branchTokens[index]) {
-    currentTokens.value = props.branchTokens[index]
-  }
   emits("editingTextArea", isFocused)
-  if (!isFocused) {
-    //emits("tokensUpdated", currentTokens.value, index)
-  }
 }
 
 function newHandleTextAreaInput(index : number, event : Event) : void {
@@ -304,7 +300,6 @@ function newHandleTextAreaInput(index : number, event : Event) : void {
   previousOutputs.value[index].push(outputs.value[index].content)
 
   if (props.branchTokens[index] !== null && oldContent !== undefined) {
-    //newTokens = JSON.parse(JSON.stringify(currentTokens.value)) as TreeToken[] 
     newTokens = props.branchTokens[index]
     let newContent = outputs.value[index].content
     let charDifference = newContent.length - oldContent.length
@@ -316,7 +311,6 @@ function newHandleTextAreaInput(index : number, event : Event) : void {
     let charOffset = 0
 
     if (charDifference > 0) {
-      //console.log("hello")
 
       charOffset = newContent.length
       for (let i = newTokens.length - 1; i > 0; i--) { 
@@ -375,7 +369,6 @@ function newHandleTextAreaInput(index : number, event : Event) : void {
     }
 
     if (charDifference == 0) {
-      currentTokens.value = newTokens
       emits("tokensUpdated", newTokens, index)
     }
     else {
