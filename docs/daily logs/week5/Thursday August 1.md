@@ -1,0 +1,12 @@
+Tasks completed
+- Fixed editing textareas
+	- Prevented the recursive dependency by only sending back updated tokens from branches to the textBar when textareas are unfocused
+	- Updated the `newHandleTextAreaInput()` to give expected output
+- Fixed deleting branches during generation
+	- Continuing generation on a branch and then deleting a branch would cause updates to be sent to the wrong index
+	- Branches can no longer be deleted whilst generation is being requested
+- Fixed alternative menu lerping
+	- After trying to get the lerping to work using the previous system for a few hours, I decided to change the way the height of the alternative token list is calculated
+	- Instead an example text field and list item are used to calculate the height needed for a list of alternative tokens
+- Changed dragging button
+	- Changed the dragging button to a button with a different icon and moved its position 
