@@ -166,7 +166,7 @@
 
 <script setup lang="ts">
 import type { Completionprobability, LlamaInterface, Prob } from '@/objects/LlamaInterface';
-import { computed, onMounted, onUpdated, reactive, ref, watch, type ComputedRef, type Ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch, type ComputedRef, type Ref } from 'vue'
 import gsap from 'gsap'
 import { MutableDOMRect } from '@/objects/MutableDOMRect';
 import type { VCard, VListItemTitle, VTextField } from 'vuetify/components';
@@ -284,24 +284,6 @@ onMounted(() => {
   //heightDelayedCall = gsap.to(menuHeight, {duration : 0, ease : "power1.inOut", value : 0})
   setExpand(true)
   setExpand(false)
-})
-
-onUpdated(() => {
-  // let targetHeight : number = virtualTokenMenu.value?.$el.getBoundingClientRect().height
-  
-  // if (!expand.value) {
-  //   return
-  // }
-  
-  // if (Math.abs(menuHeight.value - targetHeight) >= 1) {
-  //   if (heightDelayedCall?.isActive() == false || heightDelayedCall?.vars.value != targetHeight ) {
-  //     console.log("CHANGING HEIGHT RN", targetHeight)
-
-  //     heightDelayedCall?.kill()
-  //     //heightDelayedCall = gsap.to(menuHeight, {duration : 0.1, ease : "power1.inOut", value : targetHeight})
-  //     heightDelayedCall = gsap.delayedCall(0.3, () => {console.log("finished up", targetHeight); menuHeight.value = targetHeight})
-  //   }
-  // }
 })
 
 defineExpose({

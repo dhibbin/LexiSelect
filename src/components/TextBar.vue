@@ -133,6 +133,10 @@
     class="d-flex"
     flat
   >
+    <v-btn
+      icon="mdi-format-align-justify"
+      @mousedown="dragMouseDown($event)"
+    />
     <v-tabs
       v-model="topLevelTab"
       bg-color="blue"
@@ -140,14 +144,6 @@
       rounded="lg"
       style="width: 100%;"
     >
-      <v-fab
-        class="ms-4"
-        icon="mdi-plus"
-        location="start"
-        size="small"
-        offset
-        @mousedown="dragMouseDown($event)"
-      />
       <v-tab value="input">
         Input
       </v-tab>
@@ -374,56 +370,6 @@ function newHandleTextAreaInput(index : number, event : Event) : void {
     else {
       console.log("Error : failed to locate changes in TextBar output textarea, index: ${index}")
     }
-  }
-}
-
-function handleTextAreaInput(index : number) : void {
-  // Create copy of textarea contents and empty TreeToken array
-  let textContent = outputs.value[index].content
-  let newTokens : TreeToken[] = []
-  if (props.branchTokens[index] !== null) {
-    // If not null, copy array contents and start iteration
-    newTokens = JSON.parse(JSON.stringify(props.branchTokens[index])) 
-    
-    for (let n = 0; n < props.branchTokens[index].length; n++) {
-      // Get current token from token list and current word from text area
-      let currentToken = props.branchTokens[index][n].completionProb.content
-      let currentWord = textContent.slice(0, currentToken.length)
-      
-      // If not at end of token array, iterate over text area until next token found
-      if (n < props.branchTokens[index].length - 1) { 
-        if(currentWord != currentToken) {
-          //TODO : Rewrite this to check against all tokens ahead of current token
-          let nextToken = props.branchTokens[index][n+1].completionProb.content
-          
-          for (let m = 0; m < textContent.length; m++) {
-            // If next token found, update contents of token array and remove contents from textarea
-            if (nextToken == textContent.slice(m, m + nextToken.length)) {
-              newTokens[n].completionProb.content = textContent.slice(0, m)
-              textContent = textContent.slice(m)
-              break
-            }
-          }
-        }
-        else {
-          // If current token and word match, remove current word from textarea
-          newTokens[n].completionProb.content = currentWord
-          textContent = textContent.slice(currentToken.length)
-        }
-      }
-      else {
-        // If at end of token array, add remaining text area to final token and remove contents from textarea
-        newTokens[n].completionProb.content = textContent
-        textContent = textContent.slice(textContent.length)
-      }
-    }
-  }
-
-  if (textContent.length == 0) {
-    emits("tokensUpdated", newTokens, index)
-  }
-  else {
-    console.log("Error : failed to locate changes in TextBar output textarea, index: ${index}")
   }
 }
 
