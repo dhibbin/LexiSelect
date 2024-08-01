@@ -90,6 +90,7 @@
                   :rows="rows"
                   no-resize
                   hide-details
+                  @update:focused="onFocus(index, $event)"
                   @input="newHandleTextAreaInput(index, $event)"
                 /> 
               </v-row>  
@@ -176,6 +177,7 @@ const outputs : Ref<outputData[]> = ref([])
 const previousOutputs : Ref<string[][]> = ref([])
 const systemTextArea = ref()
 const currentCursorPosition = ref(0)
+const currentTokens : Ref<TreeToken[]> = ref([])
 
 const isDragging = ref(false)
 const tabHeight = ref(280)
@@ -187,6 +189,7 @@ const emits = defineEmits<{
   generationFailed : []
   tokensUpdated : [tokens : TreeToken[], index : number]
   removeBranch : [index : number]
+  editingTextArea : [isEditing : boolean]
 }>()
 
 const props = defineProps<{
@@ -216,7 +219,10 @@ watch(() => props.branchTokens, () => {
         loading : false
       })
       outputs.value.push(newOutput)
-      previousOutputs.value.push([newOutput.content])
+      if (i == previousOutputs.value.length) {
+        previousOutputs.value.push([])
+      }
+      previousOutputs.value[i].push(newOutput.content)
     }
   }
 })
@@ -282,28 +288,44 @@ function setLoading(isLoading : boolean, index : number = -1) : void {
   }
 }
 
+function onFocus(index : number, isFocused : boolean) : void {
+  if (props.branchTokens[index]) {
+    currentTokens.value = props.branchTokens[index]
+  }
+  emits("editingTextArea", isFocused)
+  if (!isFocused) {
+    //emits("tokensUpdated", currentTokens.value, index)
+  }
+}
+
 function newHandleTextAreaInput(index : number, event : Event) : void {
   let oldContent = previousOutputs.value[index].shift()
   let newTokens : TreeToken[] = []
   previousOutputs.value[index].push(outputs.value[index].content)
 
   if (props.branchTokens[index] !== null && oldContent !== undefined) {
-    newTokens = JSON.parse(JSON.stringify(props.branchTokens[index])) 
+    //newTokens = JSON.parse(JSON.stringify(currentTokens.value)) as TreeToken[] 
+    newTokens = props.branchTokens[index]
     let newContent = outputs.value[index].content
     let charDifference = newContent.length - oldContent.length
     let cursorOffset = (event.target as HTMLTextAreaElement).selectionStart
     currentCursorPosition.value = cursorOffset < newContent.length ? cursorOffset : currentCursorPosition.value
 
+    console.log(index)
+    console.log(charDifference)
     let charOffset = 0
 
     if (charDifference > 0) {
+      //console.log("hello")
+
       charOffset = newContent.length
-      for (let i = newTokens.length; i > 0; i--) { 
+      for (let i = newTokens.length - 1; i > 0; i--) { 
         let endCharOffset = charOffset
         let tokenLength = newTokens[i].completionProb.content.length
         charOffset -= tokenLength
 
         if (charOffset <= cursorOffset && charDifference > 0) {
+          console.log(newTokens[i-1].completionProb.content)
           newTokens[i].completionProb.content = newContent.substring(endCharOffset - (tokenLength + charDifference), endCharOffset)
           charOffset = endCharOffset - newTokens[i].completionProb.content.length
           charDifference = 0
@@ -341,7 +363,8 @@ function newHandleTextAreaInput(index : number, event : Event) : void {
               j++
             }
 
-            newTokens[j].completionProb.content = newContent.substring(cursorOffset, cursorOffset + newTokens[j].completionProb.content.length + 1)
+            newTokens[j].completionProb.content = newContent.substring(cursorOffset, cursorOffset + newTokens[j].completionProb.content.length)
+            console.log(newTokens[j].completionProb.content)
             charDifference = 0
 
             break
@@ -352,6 +375,7 @@ function newHandleTextAreaInput(index : number, event : Event) : void {
     }
 
     if (charDifference == 0) {
+      currentTokens.value = newTokens
       emits("tokensUpdated", newTokens, index)
     }
     else {

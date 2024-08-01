@@ -43,6 +43,7 @@ const scrollOffset : Ref<number> = ref(0)
 const props = defineProps<{
   responseLLM : BranchResposne
   typedTokens : [TreeToken[], number]
+  textBarIsFocused : boolean
 }>()
 
 const emits = defineEmits<{
@@ -76,7 +77,10 @@ watch(() => props.responseLLM, () => {
 
 watch(() => branches.value, () => {
   let outputs : (TreeToken[] | null)[] = branches.value.map((v : BranchParameters) => v.totalTokens);
-  emits("updateOutputs", outputs)
+  
+  if (!props.textBarIsFocused) {
+    emits("updateOutputs", outputs)
+  }
 }, {deep : true})
 
 watch(() => props.typedTokens, () => {
@@ -130,6 +134,8 @@ function updateTokens(tokens : TreeToken[], index : number) : void {
 function removeBranch(index : number) : void {
   branches.value.splice(index, 1)
   console.log(branches.value[1])
+  let outputs : (TreeToken[] | null)[] = branches.value.map((v : BranchParameters) => v.totalTokens);
+  emits("updateOutputs", outputs)
 }
 
 

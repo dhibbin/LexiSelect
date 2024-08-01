@@ -26,6 +26,7 @@
       @on-generation-recieved="onGenerationRecieved"
       @generation-failed="onGenerationFailed"
       @remove-branch="textTree?.removeBranch"
+      @editing-text-area="(isEditing : boolean) => {editingTextArea = isEditing}"
     />
  
 
@@ -58,6 +59,7 @@
         ref="textTree"
         :response-l-l-m="latestResponse"
         :typed-tokens="typedTokens"
+        :text-bar-is-focused="editingTextArea"
         @generate-on-new-branch="generateOnNewBranch"
         @update-outputs="updateOutputs"
       />
@@ -84,6 +86,7 @@ const outputs : Ref<(TreeToken[] | null)[]> = ref([])
 const showSnackbar = ref(false)
 const textBar = ref()
 const textTree = ref<InstanceType<typeof TextTree> | null>(null)
+const editingTextArea = ref(false) 
 
 function onGenerationRecieved(newReponse : BranchResposne) : void {
   latestResponse.value = newReponse
