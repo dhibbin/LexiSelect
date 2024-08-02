@@ -3,120 +3,103 @@
     <v-expansion-panel>
       <v-expansion-panel-title>Settings</v-expansion-panel-title>
       <v-expansion-panel-text class="pa-0">
-        <v-text-field 
-          v-for="(value, key) in settingsHTML"
-          :key="key"
-          v-model="settings[key]"
-          class="rounded pa-1 ma-0"
-          :label="value.label"
-          :hint="value.hint"
-          :persistent-hint="value.presistentHint"
-          :rules="key in LLMSettingsWrapper.rules ? LLMSettingsWrapper.rules[key].value : LLMSettingsWrapper.emptyRule.value"
-        />
+        <v-text-field v-for="(value, key) in settingsHTML" :key="key" v-model="settings[key]" class="rounded pa-1 ma-0"
+          :label="value.label" :hint="value.hint" :persistent-hint="value.presistentHint"
+          :rules="key in LLMSettingsWrapper.rules ? LLMSettingsWrapper.rules[key].value : LLMSettingsWrapper.emptyRule.value" />
 
-        <v-text-field
-          v-model.number="seed.displayedNumber"
-          class="rounded pa-1 ma-0"
-          :label="`Seed | Current Seed : ` + seed.usedNumber.toString()"
-          persistent-hint
+        <v-text-field v-model.number="seed.displayedNumber" class="rounded pa-1 ma-0"
+          :label="`Seed | Current Seed : ` + seed.usedNumber.toString()" persistent-hint
           hint="RNG seed for LLM, -1 selects and keeps a random seed on first generation, -2 selects a random seed upon every generation"
-          :rules="LLMSettingsWrapper.rules.seed.value"
-        />
+          :rules="LLMSettingsWrapper.rules.seed.value" />
       </v-expansion-panel-text>
     </v-expansion-panel>
     <v-expansion-panel>
       <v-expansion-panel-title>Prompt Template</v-expansion-panel-title>
       <v-expansion-panel-text class="pa-0">
-        <v-text-field 
-          v-for="(value, key) in promptTemplateHTML"
-          :key="key"
-          v-model="settings[key]"
-          class="rounded pa-1 ma-0"
-          :label="value.label"
-          :hint="value.hint"
-          :persistent-hint="value.presistentHint"
-        />
-        <v-combobox
-          v-model="settings.responseTemplateTokens"
-          label="Response template token "
-          hint="Tokens to remove from LLM response"
-          class="rounded pa-1 ma-0"
-          persistent-hint
-          closable-chips
-          chips
-          multiple
-        />
+        <v-text-field v-for="(value, key) in promptTemplateHTML" :key="key" v-model="settings[key]"
+          class="rounded pa-1 ma-0" :label="value.label" :hint="value.hint" :persistent-hint="value.presistentHint" />
+        <v-combobox v-model="settings.responseTemplateTokens" label="Response template token "
+          hint="Tokens to remove from LLM response" class="rounded pa-1 ma-0" persistent-hint closable-chips chips
+          multiple />
       </v-expansion-panel-text>
     </v-expansion-panel>
     <v-expansion-panel>
       <v-expansion-panel-title>Sampling Settings</v-expansion-panel-title>
       <v-expansion-panel-text class="pa-0">
-        <v-text-field 
-          v-for="(value, key) in samplingHTML"
-          :key="key"
-          v-model="settings[key]"
-          class="rounded pa-0 ma-0"
-          :label="value.label"
-          :hint="value.hint"
-          :persistent-hint="value.presistentHint"
-        />
+        <v-text-field v-for="(value, key) in samplingHTML" :key="key" v-model="settings[key]" class="rounded pa-0 ma-0"
+          :label="value.label" :hint="value.hint" :persistent-hint="value.presistentHint" />
       </v-expansion-panel-text>
     </v-expansion-panel>
   </v-expansion-panels>
 </template>
 
 <script setup lang="ts">
-import { ref, type Ref, reactive, watch } from 'vue'
+import { ref, type Ref, reactive, watch, onMounted } from 'vue'
 import { LLMService } from '@/objects/LLMService';
 import { type LLMSettings, LLMSettingsWrapper } from '@/objects/LLMSettings'
 
+/*******************
+ * Reactive varaible declarations
+ *******************/
 
 const seed = reactive({
-  displayedNumber : -1,
-  usedNumber : -1
+  displayedNumber: -1,
+  usedNumber: -1
 })
 
 interface HTMLSettingsContents {
-  label : string
-  hint : string
-  presistentHint : boolean
+  label: string
+  hint: string
+  presistentHint: boolean
 }
 
-const settingsHTML : { [key: string]: HTMLSettingsContents } = reactive({
-  ipAddress : newContents("IP Address", "", false),
-  n_predict : newContents("n_predict", "Number of tokens to predict per generation", true),
-  n_probs : newContents("n_probs", "Maximum number of alternative tokens per token", true),
-  stoppingStrings : newContents("Stopping Strings", "JSON array of stopping strings. Default value = []", true)
+const settingsHTML: { [key: string]: HTMLSettingsContents } = reactive({
+  ipAddress: newContents("IP Address", "", false),
+  n_predict: newContents("n_predict", "Number of tokens to predict per generation", true),
+  n_probs: newContents("n_probs", "Maximum number of alternative tokens per token", true),
+  stoppingStrings: newContents("Stopping Strings", "JSON array of stopping strings. Default value = []", true)
 })
 
-const promptTemplateHTML :  { [key: string]: HTMLSettingsContents } = reactive({
-  systemPrepend : newContents("System prompt prepend", "Template token to prepend to system prompt", true),
-  systemPostpend : newContents("System prompt postpend", "Template token to postpend to system prompt", true),
-  userPrepend : newContents("User prompt prepend", "Template token to prepend to user prompt", true),
-  userPostpend : newContents("User prompt postpend", "Template token to postpend to user prompt", true),
-  responseTemplateTokens : newContents("Response template token", "Tokens to remove from LLM response", true)
+const promptTemplateHTML: { [key: string]: HTMLSettingsContents } = reactive({
+  systemPrepend: newContents("System prompt prepend", "Template token to prepend to system prompt", true),
+  systemPostpend: newContents("System prompt postpend", "Template token to postpend to system prompt", true),
+  userPrepend: newContents("User prompt prepend", "Template token to prepend to user prompt", true),
+  userPostpend: newContents("User prompt postpend", "Template token to postpend to user prompt", true),
+  responseTemplateTokens: newContents("Response template token", "Tokens to remove from LLM response", true)
 })
 
-const samplingHTML : { [key: string]: HTMLSettingsContents } = reactive({
-  temperature : newContents("Temperature", "", false),
-  dynatemp_range : newContents("dynatemp_range", "", false),
-  dynatemp_exponent : newContents("dynatemp_exponent", "", false),
-  top_k : newContents("top_k", "", false),
-  top_p : newContents("top_p", "", false),
-  min_p : newContents("min_p", "", false),
-  repeat_penalty : newContents("Repeat Penalty", "", false),
-  repeat_last_n : newContents("Repeat last n", "", false),
-  presence_penalty : newContents("Presence Penalty", "", false),
-  frequency_penalty : newContents("Frequency Penalty", "", false),
+const samplingHTML: { [key: string]: HTMLSettingsContents } = reactive({
+  temperature: newContents("Temperature", "", false),
+  dynatemp_range: newContents("dynatemp_range", "", false),
+  dynatemp_exponent: newContents("dynatemp_exponent", "", false),
+  top_k: newContents("top_k", "", false),
+  top_p: newContents("top_p", "", false),
+  min_p: newContents("min_p", "", false),
+  repeat_penalty: newContents("Repeat Penalty", "", false),
+  repeat_last_n: newContents("Repeat last n", "", false),
+  presence_penalty: newContents("Presence Penalty", "", false),
+  frequency_penalty: newContents("Frequency Penalty", "", false),
 })
 
-const settings : LLMSettings = reactive(JSON.parse(JSON.stringify(LLMService.instance.settings)))
+const settings: LLMSettings = reactive(JSON.parse(JSON.stringify(LLMService.instance.settings)))
 
-const panel : Ref<number[]> = ref([0])
+const panel: Ref<number[]> = ref([0])
+
+/*******************
+ * Lifecycle hooks
+ *******************/
+
+onMounted(() => {
+  LLMService.instance.addListener(updateSeed.bind(this))
+})
+
+/*******************
+ * Watchers
+ *******************/
 
 watch(settings, () => {
   LLMService.instance.settings = settings
-}, {deep : true})
+}, { deep: true })
 
 watch(() => seed.displayedNumber, () => {
   switch (seed.displayedNumber) {
@@ -125,26 +108,40 @@ watch(() => seed.displayedNumber, () => {
       seed.usedNumber = -1
       break
     default:
-      seed.usedNumber = seed.displayedNumber 
+      seed.usedNumber = seed.displayedNumber
   }
 })
 
-function updateSeed(newSeed : number) : void {
+/*******************
+ * Function Definitions
+ *******************/
+
+/**
+ * Updates the seed if the provided seed is -1 and it hasn't been updated yet
+ *
+ * @param newSeed - The new seed
+ */
+function updateSeed(newSeed: number): void {
   if (seed.displayedNumber == -1 && seed.usedNumber == -1) {
     seed.usedNumber = newSeed
   }
 }
 
-function newContents(label : string, hint : string, presistentHint : boolean) : HTMLSettingsContents {
-  let newSettingsContents : HTMLSettingsContents = {
-    label : label,
-    hint : hint,
-    presistentHint : presistentHint
+/**
+ * Creates a new HTMLSettingsContents interface
+ *
+ * @param label - The label for the HTML setting
+ * @param hint - The hint for the HTML setting
+ * @param presistentHint - A boolean representing if the hint is presistent
+ * @returns A new HTMLSettingsContents interface with the provided label, hint, and persistentHint.
+ */
+function newContents(label: string, hint: string, presistentHint: boolean): HTMLSettingsContents {
+  let newSettingsContents: HTMLSettingsContents = {
+    label: label,
+    hint: hint,
+    presistentHint: presistentHint
   }
   return newSettingsContents
 }
-
-LLMService.instance.addListener(updateSeed.bind(this))
-
 
 </script>

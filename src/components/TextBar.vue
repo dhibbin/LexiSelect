@@ -209,7 +209,7 @@ onUnmounted(() => {
 watch(() => props.branchTokens, () => {
   outputs.value = []
   for (let i = 0; i < props.branchTokens.length; i++) {
-    if (props.branchTokens[i] !== null) {
+    if (props.branchTokens[i] !== null && props.branchTokens[i] !== undefined) {
       let newOutput : outputData = reactive({
         content : props.branchTokens[i]!.map((t : TreeToken) => t.completionProb.content).join(''),
         loading : false
