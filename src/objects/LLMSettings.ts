@@ -197,14 +197,14 @@ export class LLMSettingsWrapper {
   }
 
   /**
-     * Validates an IP address.
-     *
-     * This function checks if the given IP address is valid. It supports both local and remote IP addresses.
-     * For remote IP addresses, it supports optional port numbers.
-     *
-     * @param ipAddress - The IP address to validate.
-     * @returns Returns true if the IP address is valid, false otherwise.
-     */
+   * Validates an IP address.
+   *
+   * This function checks if the given IP address is valid. It supports both local and remote IP addresses.
+   * For remote IP addresses, it supports optional port numbers.
+   *
+   * @param ipAddress - The IP address to validate.
+   * @returns Returns true if the IP address is valid, false otherwise.
+   */
   public static validateIPAddress(ipAddress: string) : boolean {
     // Ipv4 and localhost address regular expressions
     const ipPattern : RegExp = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(:\d{1,5})?$/;
@@ -212,8 +212,13 @@ export class LLMSettingsWrapper {
     // Return true if either regular expressions are satisfied
     return localPattern.test(ipAddress) || ipPattern.test(ipAddress);
   }
-  
 
+  /**
+   * Turns a string of a JSON array into a string array
+   *
+   * @param ipAddress - The string to turn into a string array
+   * @returns Returns a string array if successful and false if not successful
+   */
   public static getJsonArray(str: string): boolean | string[] {
     try {
       const json = JSON.parse(str);
@@ -228,6 +233,15 @@ export class LLMSettingsWrapper {
     }
   }
 
+  /**
+   * Creates a rule for a number given four parameters
+   *
+   * @param min - Minimum (inclusive) allowed numerical value, provide boolean to ignore
+   * @param max - Maximum (inclusive) allowed numerical value, provide boolean to ignore
+   * @param name - Name of value, to be used in the error message return by rule
+   * @param integerOnly - Determines if number must be an integer or not
+   * @returns Returns a rule of type RuleType that corresponds with the parameters
+   */
   public static createNumberRuleInRange(min : number | boolean, max : number | boolean, name : string, integerOnly : boolean = true) : RuleType {
     return computed(() => [
       (v: number) : boolean | string => 
