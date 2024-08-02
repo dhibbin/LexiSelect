@@ -42,17 +42,29 @@ import { type LLMSettings, LLMSettingsWrapper } from '@/objects/LLMSettings'
  * Reactive varaible declarations
  *******************/
 
+
+/** Defines and instantiates a reactive seed interface */
 const seed = reactive({
+  /** Number displayed within the seed's text-field */
   displayedNumber: -1,
+
+  /** Seed used within LLMService.instance.sendPrompt() */
   usedNumber: -1
 })
 
+/** Interface used to create v-text-fields for settings values */
 interface HTMLSettingsContents {
+  /** Label of the v-text-field */
   label: string
+
+  /** Hint of the v-text-field */
   hint: string
+
+  /** If the v-text-field has a persitent hint */
   presistentHint: boolean
 }
 
+/** Defines the contents of the input fields for the settings expansion panel */
 const settingsHTML: { [key: string]: HTMLSettingsContents } = reactive({
   ipAddress: newContents("IP Address", "", false),
   n_predict: newContents("n_predict", "Number of tokens to predict per generation", true),
@@ -60,6 +72,7 @@ const settingsHTML: { [key: string]: HTMLSettingsContents } = reactive({
   stoppingStrings: newContents("Stopping Strings", "JSON array of stopping strings. Default value = []", true)
 })
 
+/** Defines the contents of the input fields for the prompt template expansion panel */
 const promptTemplateHTML: { [key: string]: HTMLSettingsContents } = reactive({
   systemPrepend: newContents("System prompt prepend", "Template token to prepend to system prompt", true),
   systemPostpend: newContents("System prompt postpend", "Template token to postpend to system prompt", true),
@@ -68,6 +81,7 @@ const promptTemplateHTML: { [key: string]: HTMLSettingsContents } = reactive({
   responseTemplateTokens: newContents("Response template token", "Tokens to remove from LLM response", true)
 })
 
+/** Defines the contents of the input fields for the sampling expansion panel */
 const samplingHTML: { [key: string]: HTMLSettingsContents } = reactive({
   temperature: newContents("Temperature", "", false),
   dynatemp_range: newContents("dynatemp_range", "", false),
@@ -81,14 +95,19 @@ const samplingHTML: { [key: string]: HTMLSettingsContents } = reactive({
   frequency_penalty: newContents("Frequency Penalty", "", false),
 })
 
+/** Settings interface updated by all of the input fields within the SideBar */
 const settings: LLMSettings = reactive(JSON.parse(JSON.stringify(LLMService.instance.settings)))
 
+/** Index for the currently open expansion panel  */
 const panel: Ref<number[]> = ref([0])
 
 /*******************
  * Lifecycle hooks
  *******************/
 
+/**
+* Adds a listener to the LLMService singleton to update the seed when a response is recieved
+*/
 onMounted(() => {
   LLMService.instance.addListener(updateSeed.bind(this))
 })
@@ -97,10 +116,22 @@ onMounted(() => {
  * Watchers
  *******************/
 
+/**
+ * Watches the settings values of this SideBar component
+ *
+ * When the settings are updated, the settings on the LLMService singleton are updated
+ */
 watch(settings, () => {
   LLMService.instance.settings = settings
 }, { deep: true })
 
+/**
+ * Watches the seed's displayed number
+ *
+ * When seed.displayedNumber changes, this watcher updates seed.usedNumber based on the following rules:
+ * - If seed.displayedNumber is -1 or -2, seed.usedNumber is set to -1
+ * - For any other value of seed.displayedNumber`, seed.usedNumber is set to seed.displayedNumber
+ */
 watch(() => seed.displayedNumber, () => {
   switch (seed.displayedNumber) {
     case -1:
@@ -117,7 +148,7 @@ watch(() => seed.displayedNumber, () => {
  *******************/
 
 /**
- * Updates the seed if the provided seed is -1 and it hasn't been updated yet
+ * Updates seed.usedNumber if both seed properties are -1 and seed.usedNumber hasn't been updated yet
  *
  * @param newSeed - The new seed
  */
