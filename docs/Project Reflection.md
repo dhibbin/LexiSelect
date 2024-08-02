@@ -1,0 +1,9 @@
+# Project Reflection
+
+When the project idea was first discussed, I thought it wouldn't take particularly long to complete. However, over the course of this project I learned that development can take significantly longer than expected. 
+
+First, the prototype took slightly longer than expected to complete. I thought it would be completed by the end of the first week, instead prototype development bled into the second week. This is because I wanted to complete a feature of the prototype that I didn't fully finish in the first week. Whilst it only took one day longer to complete, I think this was the first case of a problem that I encountered fairly frequently over the course of the project. I would often focus on fully developing a feature over trying to deliver a complete application. 
+
+I discussed this problem with David Harris and he disagreed that this was an issue. He argued that switching to another task to give yourself a break will leave you with a lingering feeling that you need to complete the original task. In the future I will need to try out switching between tasks to see which method is more time efficient.
+
+Second, the full project took significantly longer than expected. The aim was to develop a MVP and use it to decide what additional features should be added. However this didn't really happen due to many unforeseen roadbumps during the second and third weeks. The second week was plagued by decision fatigue and struggling to setup ESLint. In the third week I struggled with HTML and fighting with Vuetify's layout engine. However, by the fourth week I had become more productive since I was more familiar with Vue's and HTML's quirks. By the end of the fourth week the projectile was arguably at the point of being an MVP. This meant that the fifth week was primarily focused on  
