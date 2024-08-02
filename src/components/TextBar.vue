@@ -1,121 +1,44 @@
-<template>  
-  <v-app-bar
-    color="surface"
-    :height="tabHeight"
-    location="bottom"
-    flat
-  >
-    <v-container
-      class="pa-0"
-    >
-      <v-tabs-window
-        v-model="topLevelTab"
-        class="pa-0"
-      >
-        <v-tabs-window-item
-          value="input"
-        >        
-          <v-row
-            no-gutters
-            align="start"
-          >
-            <v-col
-              cols="6"
-              align-self="start"
-            >
-              <v-textarea
-                ref="systemTextArea"
-                v-model="systemPrompt"
-                class="fill-height d-flex flex-column pa-2"
-                label="System Prompt"
-                no-resize
-                :rows="rows"
-                hide-details
-              />
+<template>
+  <v-app-bar color="surface" :height="tabHeight" location="bottom" flat>
+    <v-container class="pa-0">
+      <v-tabs-window v-model="topLevelTab" class="pa-0">
+        <v-tabs-window-item value="input">
+          <v-row no-gutters align="start">
+            <v-col cols="6" align-self="start">
+              <v-textarea ref="systemTextArea" v-model="systemPrompt" class="fill-height d-flex flex-column pa-2"
+                label="System Prompt" no-resize :rows="rows" hide-details />
             </v-col>
-            <v-col 
-              cols="6"
-              align-self="end"
-            >
-              <v-textarea
-                v-model="userPrompt"
-                class="fill-height d-flex flex-column pa-2"
-                label="User Prompt"
-                :rows="rows"
-                no-resize
-                hide-details
-              />
+            <v-col cols="6" align-self="end">
+              <v-textarea v-model="userPrompt" class="fill-height d-flex flex-column pa-2" label="User Prompt"
+                :rows="rows" no-resize hide-details />
             </v-col>
           </v-row>
           <v-row no-gutters>
-            <v-col
-              cols="12"
-              class="px-2"
-            >
-              <v-btn
-                :loading="startButtonLoading"
-                block
-                class="pa-4"
-                color="blue"
-                base-color="blue"
-                variant="elevated"
-                rounded="lg"
-                @click="startGeneration(-1)"
-              >
+            <v-col cols="12" class="px-2">
+              <v-btn :loading="startButtonLoading" block class="pa-4" color="blue" base-color="blue" variant="elevated"
+                rounded="lg" @click="startGeneration(-1)">
                 Generate New Response
               </v-btn>
             </v-col>
           </v-row>
         </v-tabs-window-item>
-        <v-tabs-window-item
-          value="output"
-          class="pa-0"
-        >
-          <v-sheet
-            class="d-flex flex-nowrap bg-surface pa-0"
-            style="overflow-x: scroll;"
-          >
-            <v-col
-              v-for="(_, index) in outputs"
-              :key="index"
-              class="pa-1"
-              cols="auto"
-              align-self="end"
-            >
-              <v-row no-gutters> 
-                <v-textarea
-                  v-model="outputs[index].content"
-                  class="fill-height d-flex flex-column pa-2"
-                  :label="'Output ' + (index + 1).toString()"
-                  :rows="rows"
-                  no-resize
-                  hide-details
-                  @update:focused="onFocus(index, $event)"
-                  @input="newHandleTextAreaInput(index, $event)"
-                /> 
-              </v-row>  
+        <v-tabs-window-item value="output" class="pa-0">
+          <v-sheet class="d-flex flex-nowrap bg-surface pa-0" style="overflow-x: scroll;">
+            <v-col v-for="(_, index) in outputs" :key="index" class="pa-1" cols="auto" align-self="end">
               <v-row no-gutters>
-                <v-btn
-                  style="width: 70%;"
-                  :loading="outputs[index].loading"
-                  :timeout="100"
-                  color="blue"
-                  variant="elevated"
-                  rounded="lg"
-                  @click="startGeneration(index)"
-                >
+                <v-textarea v-model="outputs[index].content" class="fill-height d-flex flex-column pa-2"
+                  :label="'Output ' + (index + 1).toString()" :rows="rows" no-resize hide-details
+                  @update:focused="onFocus(index, $event)" @input="newHandleTextAreaInput(index, $event)" />
+              </v-row>
+              <v-row no-gutters>
+                <v-btn style="width: 70%;" :loading="outputs[index].loading" :timeout="100" color="blue"
+                  variant="elevated" rounded="lg" @click="startGeneration(index)">
                   Continue Generation
                 </v-btn>
-                <v-btn
-                  style="width: 30%;"
-                  class="bg-red"
-                  rounded="lg"
-                  :disabled="outputs.some((value : outputData) => {return value.loading === true})"
-                  @click="removeBranch(index)"
-                >
-                  <v-icon
-                    icon="mdi-minus-circle"
-                  />
+                <v-btn style="width: 30%;" class="bg-red" rounded="lg"
+                  :disabled="outputs.some((value: outputData) => { return value.loading === true })"
+                  @click="removeBranch(index)">
+                  <v-icon icon="mdi-minus-circle" />
                   Remove
                 </v-btn>
               </v-row>
@@ -123,27 +46,12 @@
           </v-sheet>
         </v-tabs-window-item>
       </v-tabs-window>
-    </v-container>  
+    </v-container>
   </v-app-bar>
 
-  <v-app-bar
-    color="grey-lighten-2"
-    height="30"
-    location="bottom"
-    class="d-flex"
-    flat
-  >
-    <v-btn
-      icon="mdi-format-align-justify"
-      @mousedown="dragMouseDown($event)"
-    />
-    <v-tabs
-      v-model="topLevelTab"
-      bg-color="blue"
-      center-active
-      rounded="lg"
-      style="width: 100%;"
-    >
+  <v-app-bar color="grey-lighten-2" height="30" location="bottom" class="d-flex" flat>
+    <v-btn icon="mdi-format-align-justify" @mousedown="dragMouseDown($event)" />
+    <v-tabs v-model="topLevelTab" bg-color="blue" center-active rounded="lg" style="width: 100%;">
       <v-tab value="input">
         Input
       </v-tab>
@@ -153,68 +61,147 @@
     </v-tabs>
   </v-app-bar>
 </template>
-  
+
 <script setup lang="ts">
-import { LLMService  } from '@/objects/LLMService';
+import { LLMService } from '@/objects/LLMService';
 import { ref, type Ref, watch, reactive, onMounted, onUnmounted } from 'vue';
 import type { TreeToken } from './TextBranch.vue'
 import { type LlamaInterface } from '../objects/LlamaInterface';
 import { type BranchResposne } from './TextTree.vue';
 
+/*******************
+ * Reactive varaible declarations
+ *******************/
+
+/** Defines interface for containing data output from the LLM */
 interface outputData {
-  content : string 
-  loading : boolean
+  content: string
+  loading: boolean
 }
 
-const startButtonLoading : Ref<boolean> = ref(false)
-const userPrompt : Ref<string> = ref("Write a story about a man named Stanley")
-const systemPrompt : Ref<string> = ref("You are a talented writing assistant. Always respond by incorporating the instructions into expertly written prose that is highly detailed, evocative, vivid and engaging.");
-const topLevelTab = ref("input")
-const outputs : Ref<outputData[]> = ref([])
-const previousOutputs : Ref<string[][]> = ref([])
+// Reactive varaibles used for the input tab
+/** Boolean that sets the loading parameter of the new generation button */
+const startButtonLoading: Ref<boolean> = ref(false)
+/** Reference to the systemTextArea HTML element */
 const systemTextArea = ref()
-const currentCursorPosition = ref(0)
+/** Contents of the userPrompt textarea */
+const userPrompt: Ref<string> = ref("Write a story about a man named Stanley")
+/** Contents of the systemPrompt textarea */
+const systemPrompt: Ref<string> = ref("You are a talented writing assistant. Always respond by incorporating the instructions into expertly written prose that is highly detailed, evocative, vivid and engaging.");
 
+
+/** Tracks the current tab */
+const topLevelTab = ref("input")
+
+
+// Reactive varaibles used for tracking changes to the outputs
+/** Contains the strings and loading values of all the ouput textareas */
+const outputs: Ref<outputData[]> = ref([])
+/** Contains a list of string queues, with the oldest outputs at the start of each array
+ * Indexes correspond with outputs
+ */
+const previousOutputs: Ref<string[][]> = ref([])
+
+
+// Reactive varaibles used for dragging the menu up and down
+/** Is the dragging button being held down currently */
 const isDragging = ref(false)
+/** The height of the window that contains the tab contents */
 const tabHeight = ref(280)
+/** Tracks the mouse offest from the drag menu button */
 const mouseOffset = ref(0)
+/** Tracks how many rows are used by the textareas within the tabs */
 const rows = ref(8)
 
+/*******************
+ * Emits, props and expose definitions
+ *******************/
+
 const emits = defineEmits<{
-  onGenerationRecieved : [output : BranchResposne]
-  generationFailed : []
-  tokensUpdated : [tokens : TreeToken[], index : number]
-  removeBranch : [index : number]
-  editingTextArea : [isEditing : boolean]
+  /** Emitted when a new generation is recieved from LLMService 
+   * 
+   * @param output Response from the LLMService
+  */
+  onGenerationRecieved: [output: BranchResposne]
+
+  /** Emitted when a new generation fails */
+  generationFailed: []
+
+  /** Emitted when the tokens are updated by the user 
+   * 
+   * @param tokens Updated tokens
+   * @param index Branch index being updated
+  */
+  tokensUpdated: [tokens: TreeToken[], index: number]
+
+  /** Emitted when a branch is removed by the user
+   * 
+   * @param index Index of branch to remove
+   */
+  removeBranch: [index: number]
+
+  /** Emitted when a textarea is focuses or unfocuses 
+   * 
+   * @param isEditing Boolean representing if the textarea is being updated or not
+  */
+  editingTextArea: [isEditing: boolean]
 }>()
 
 const props = defineProps<{
-  branchTokens : (TreeToken[] | null)[]
+  /** Latest tokens within each TextBranch */
+  branchTokens: (TreeToken[] | null)[]
 }>()
 
 defineExpose({
   startGeneration
 })
 
+/*******************
+ * Lifecycle hooks
+ *******************/
+
+/**
+* Adds event listeners for tracking if the mouse moves or mouse 1 is let go
+*/
 onMounted(() => {
   window.addEventListener('mousemove', dragMouseMove)
-  window.addEventListener('mouseup', () => {isDragging.value = false})
+  window.addEventListener('mouseup', () => { isDragging.value = false })
 });
 
+/**
+* Removes event listeners for tracking if the mouse moves or mouse 1 is let go
+*/
 onUnmounted(() => {
   window.removeEventListener('mousemove', dragMouseMove);
-  window.removeEventListener('mouseup', () => {isDragging.value = false})
+  window.removeEventListener('mouseup', () => { isDragging.value = false })
 });
 
+/*******************
+ * Watchers
+ *******************/
+
+/**
+ * Watches the branchtokens prop
+ *
+ * When prop.branchtokens are updated, the outputs and previous outputs of the TexBar are updated accordingly
+ */
 watch(() => props.branchTokens, () => {
   outputs.value = []
+
+  // For each token list in branchtokens
   for (let i = 0; i < props.branchTokens.length; i++) {
+    // If the current token list isn't null or undefined
     if (props.branchTokens[i] !== null && props.branchTokens[i] !== undefined) {
-      let newOutput : outputData = reactive({
-        content : props.branchTokens[i]!.map((t : TreeToken) => t.completionProb.content).join(''),
-        loading : false
+      // Create a new outputData interface with a string of all token contents
+      let newOutput: outputData = reactive({
+        content: props.branchTokens[i]!.map((t: TreeToken) => t.completionProb.content).join(''),
+        loading: false
       })
+
+      // Push the new outputData to the list of outputs
       outputs.value.push(newOutput)
+
+      // Push the new outputData to the previous responses, extending the list if it is too short
       if (i == previousOutputs.value.length) {
         previousOutputs.value.push([])
       }
@@ -228,25 +215,25 @@ watch(() => tabHeight.value, () => {
   rows.value = Math.floor(tabHeight.value / pixelLineHeight) - 4
 })
 
-function removeBranch(index : number) : void {
+function removeBranch(index: number): void {
   if (!outputs.value[index].loading) {
     emits("removeBranch", index)
   }
 }
 
-function dragMouseDown(event : MouseEvent) : void {
-  let element : HTMLElement = event.currentTarget as HTMLElement
+function dragMouseDown(event: MouseEvent): void {
+  let element: HTMLElement = event.currentTarget as HTMLElement
   mouseOffset.value = (window.innerHeight - event.clientY) - (window.innerHeight - element.getBoundingClientRect().bottom)
   isDragging.value = true
 }
 
-function dragMouseMove(event : MouseEvent) : void {
+function dragMouseMove(event: MouseEvent): void {
   if (isDragging.value) {
     tabHeight.value = (window.innerHeight - event.clientY) - mouseOffset.value
   }
 }
 
-async function requestGeneration(index : number = -1) : Promise<LlamaInterface> {
+async function requestGeneration(index: number = -1): Promise<LlamaInterface> {
   let previousOutput = ""
   if (index !== -1) {
     previousOutput = outputs.value[index].content
@@ -256,19 +243,19 @@ async function requestGeneration(index : number = -1) : Promise<LlamaInterface> 
     userPrompt.value, systemPrompt.value, previousOutput)
 }
 
-async function startGeneration(index : number = -1) : Promise<void> {
+async function startGeneration(index: number = -1): Promise<void> {
   console.log(index)
-  
+
   setLoading(true, index)
 
   try {
     let output = await requestGeneration(index)
     emits("onGenerationRecieved", reactive({
-      response : output,
-      index : index
+      response: output,
+      index: index
     }))
   }
-  catch(error) {
+  catch (error) {
     console.log(error)
     emits("generationFailed")
   }
@@ -277,22 +264,22 @@ async function startGeneration(index : number = -1) : Promise<void> {
   }
 }
 
-function setLoading(isLoading : boolean, index : number = -1) : void {
+function setLoading(isLoading: boolean, index: number = -1): void {
   if (index != -1) {
     outputs.value[index].loading = isLoading
   }
   else {
-    startButtonLoading.value = isLoading 
+    startButtonLoading.value = isLoading
   }
 }
 
-function onFocus(index : number, isFocused : boolean) : void {
+function onFocus(index: number, isFocused: boolean): void {
   emits("editingTextArea", isFocused)
 }
 
-function newHandleTextAreaInput(index : number, event : Event) : void {
+function newHandleTextAreaInput(index: number, event: Event): void {
   let oldContent = previousOutputs.value[index].shift()
-  let newTokens : TreeToken[] = []
+  let newTokens: TreeToken[] = []
   previousOutputs.value[index].push(outputs.value[index].content)
 
   if (props.branchTokens[index] !== null && oldContent !== undefined) {
@@ -300,7 +287,6 @@ function newHandleTextAreaInput(index : number, event : Event) : void {
     let newContent = outputs.value[index].content
     let charDifference = newContent.length - oldContent.length
     let cursorOffset = (event.target as HTMLTextAreaElement).selectionStart
-    currentCursorPosition.value = cursorOffset < newContent.length ? cursorOffset : currentCursorPosition.value
 
     console.log(index)
     console.log(charDifference)
@@ -309,13 +295,13 @@ function newHandleTextAreaInput(index : number, event : Event) : void {
     if (charDifference > 0) {
 
       charOffset = newContent.length
-      for (let i = newTokens.length - 1; i > 0; i--) { 
+      for (let i = newTokens.length - 1; i > 0; i--) {
         let endCharOffset = charOffset
         let tokenLength = newTokens[i].completionProb.content.length
         charOffset -= tokenLength
 
         if (charOffset <= cursorOffset && charDifference > 0) {
-          console.log(newTokens[i-1].completionProb.content)
+          console.log(newTokens[i - 1].completionProb.content)
           newTokens[i].completionProb.content = newContent.substring(endCharOffset - (tokenLength + charDifference), endCharOffset)
           charOffset = endCharOffset - newTokens[i].completionProb.content.length
           charDifference = 0
@@ -331,14 +317,14 @@ function newHandleTextAreaInput(index : number, event : Event) : void {
 
         if (charOffset > newContent.length) {
           newTokens[i].completionProb.content = newContent.substring(startCharOffset)
-          for (let j = i + 1; j < newTokens.length; j++) { 
+          for (let j = i + 1; j < newTokens.length; j++) {
             newTokens[j].completionProb.content = ""
           }
           charDifference = 0
           break
         }
-        else if (charOffset > cursorOffset && charDifference < 0) {          
-          if(!(cursorOffset + Math.abs(charDifference) >= charOffset)) {
+        else if (charOffset > cursorOffset && charDifference < 0) {
+          if (!(cursorOffset + Math.abs(charDifference) >= charOffset)) {
             newTokens[i].completionProb.content = newContent.substring(startCharOffset, charOffset + charDifference)
             charDifference = 0
             break
@@ -347,7 +333,7 @@ function newHandleTextAreaInput(index : number, event : Event) : void {
             newTokens[i].completionProb.content = newContent.substring(startCharOffset, cursorOffset)
 
             let j = i + 1
-            while(Math.abs(charDifference) > newTokens[j].completionProb.content.length) {
+            while (Math.abs(charDifference) > newTokens[j].completionProb.content.length) {
               charDifference += newTokens[j].completionProb.content.length
               newTokens[j].completionProb.content = ""
               j++
