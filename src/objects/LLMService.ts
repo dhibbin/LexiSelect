@@ -17,7 +17,7 @@ export class LLMService {
     n_predict : 10,
     n_probs : 5,
     seed : -1,
-    ipAddress : "localhost:8080",
+    ipAddress : "http://localhost:8080",
     stoppingStrings : "[]",
     systemPrepend : "<|system|>",
     systemPostpend : "<|end|>",
@@ -100,14 +100,11 @@ export class LLMService {
    */
   public async sendPrompt(userPrompt : string, systemPrompt : string, 
     previousGeneration : string = "") : Promise<LlamaInterface> 
-  {
-    console.log(typeof this.wrappedSettings.n_probs)
-    
+  {    
     // Get the response and call the SideBar listener with the updated seed
     const latestReposne = await this.wrappedSendPrompt(userPrompt, systemPrompt, previousGeneration)
     this.callListeners(latestReposne.generation_settings.seed)
     
-    console.log("ello")
     // Return the response
     return latestReposne
   }
@@ -131,7 +128,7 @@ export class LLMService {
     const prompt = userPrompt + previousGeneration;
 
     // Return the JSON resposne from the Llama API
-    return fetch("http://" + this.wrappedSettings.ipAddress + "/completion", {
+    return fetch(this.wrappedSettings.ipAddress + "/completion", {
       method: 'POST',
       body: JSON.stringify({
         prompt : prompt,

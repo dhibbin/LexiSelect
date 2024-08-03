@@ -82,9 +82,6 @@ watch(() => props.typedTokens, () => {
     if (props.typedTokens[0][i].completionProb.content.length != 0) {
       newTokens.push(props.typedTokens[0][i])
     }
-    else {
-      console.log("purged empty token")
-    }
   }
 
   branches.value[props.typedTokens[1]].previousTokens = newTokens
@@ -93,7 +90,6 @@ watch(() => props.typedTokens, () => {
 }, { deep: true })
 
 function newBranchFromTokens(tokens: TreeToken[]): void {
-  console.log("Recieved ", tokens.length, " tokens")
   branches.value.push(reactive({
     response: null,
     previousTokens: tokens,
@@ -125,7 +121,6 @@ function updateTokens(tokens: TreeToken[], index: number): void {
 
 function removeBranch(index: number): void {
   branches.value.splice(index, 1)
-  console.log(branches.value[1])
   let outputs: (TreeToken[] | null)[] = branches.value.map((v: BranchParameters) => v.totalTokens);
   emits("updateOutputs", outputs)
 }

@@ -37,7 +37,6 @@
 import { ref, type Ref, reactive, watch, onMounted } from 'vue'
 import { LLMService } from '@/objects/LLMService';
 import { type LLMSettings, LLMSettingsWrapper } from '@/objects/LLMSettings'
-import type { Type } from 'typescript';
 
 /*******************
  * Reactive varaible declarations
@@ -67,7 +66,7 @@ interface HTMLSettingsContents {
 
 /** Defines the contents of the input fields for the settings expansion panel */
 const settingsHTML: { [key: string]: HTMLSettingsContents } = reactive({
-  ipAddress: newContents("IP Address", "", false),
+  ipAddress: newContents("LLM Server Address", "HTTP address to send a /completion request to", true),
   n_predict: newContents("n_predict", "Number of tokens to predict per generation", true),
   n_probs: newContents("n_probs", "Maximum number of alternative tokens per token", true),
   stoppingStrings: newContents("Stopping Strings", "JSON array of stopping strings. Default value = []", true)

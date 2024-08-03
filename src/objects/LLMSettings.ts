@@ -142,7 +142,7 @@ export class LLMSettingsWrapper {
     ]),
     ipAddress : computed(() => [
       (v: string) : boolean | string => !!v || 'IP address is required',
-      (v: string) : boolean | string => LLMSettingsWrapper.validateIPAddress(v) || 'Invalid IP address',
+      (v: string) : boolean | string => LLMSettingsWrapper.validateIPAddress(v) || 'Invalid IP address, must start with http:// or https://',
     ]),
     stoppingStrings : computed(() => [
       (v: string) : boolean | string => this.getJsonArray(v) !== false || 'Must be a valid array. Use square [] brackets and comma separated',
@@ -206,6 +206,15 @@ export class LLMSettingsWrapper {
    * @returns Returns true if the IP address is valid, false otherwise.
    */
   public static validateIPAddress(ipAddress: string) : boolean {
+    const httpPattern = "http://"
+    const httpsPattern = "https://"
+
+    if (!(ipAddress.startsWith(httpPattern) || ipAddress.startsWith(httpsPattern))) {
+      return false
+    }
+
+    ipAddress = ipAddress.slice(ipAddress.indexOf("://") + 3) 
+    
     // Ipv4 and localhost address regular expressions
     const ipPattern : RegExp = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(:\d{1,5})?$/;
     const localPattern : RegExp = /^(localhost):\d{1,5}$/;

@@ -244,13 +244,10 @@ async function requestGeneration(index: number = -1): Promise<LlamaInterface> {
 }
 
 async function startGeneration(index: number = -1): Promise<void> {
-  console.log(index)
-
   setLoading(true, index)
 
   try {
     let output = await requestGeneration(index)
-    console.log(output)
     emits("onGenerationRecieved", reactive({
       response: output,
       index: index
@@ -289,8 +286,6 @@ function newHandleTextAreaInput(index: number, event: Event): void {
     let charDifference = newContent.length - oldContent.length
     let cursorOffset = (event.target as HTMLTextAreaElement).selectionStart
 
-    console.log(index)
-    console.log(charDifference)
     let charOffset = 0
 
     if (charDifference > 0) {
@@ -302,7 +297,6 @@ function newHandleTextAreaInput(index: number, event: Event): void {
         charOffset -= tokenLength
 
         if (charOffset <= cursorOffset && charDifference > 0) {
-          console.log(newTokens[i - 1].completionProb.content)
           newTokens[i].completionProb.content = newContent.substring(endCharOffset - (tokenLength + charDifference), endCharOffset)
           charOffset = endCharOffset - newTokens[i].completionProb.content.length
           charDifference = 0
@@ -341,7 +335,6 @@ function newHandleTextAreaInput(index: number, event: Event): void {
             }
 
             newTokens[j].completionProb.content = newContent.substring(cursorOffset, cursorOffset + newTokens[j].completionProb.content.length)
-            console.log(newTokens[j].completionProb.content)
             charDifference = 0
 
             break
@@ -355,7 +348,7 @@ function newHandleTextAreaInput(index: number, event: Event): void {
       emits("tokensUpdated", newTokens, index)
     }
     else {
-      console.log("Error : failed to locate changes in TextBar output textarea, index: ${index}")
+      console.log(`Error : failed to locate changes in TextBar output textarea, index: ${index}`)
     }
   }
 }
