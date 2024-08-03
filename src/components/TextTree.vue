@@ -207,6 +207,4 @@ function removeBranch(index: number): void {
   emits("updateOutputs", outputs)
 }
 
-
-
 </script>

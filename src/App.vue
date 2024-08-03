@@ -47,21 +47,53 @@ import type { TreeToken } from './components/TextBranch.vue'
 import { type BranchResposne } from './components/TextTree.vue';
 import gsap from 'gsap'
 
+/*******************
+ * Reactive varaible declarations
+ *******************/
 
+/** Boolean tracking if the drawer is open */
 const drawer: Ref<boolean> = ref(true)
+
+/** The latest response from the LLM server */
 const latestResponse: Ref<BranchResposne> = ref({ response: defaultLlamaInterface(), index: -1 })
+
+/** Tokens updated by the user and the corresponding branch index */
 const typedTokens = ref<[TreeToken[], number]>([[], 0])
+
+/** List of tokens in every branch */
 const outputs: Ref<(TreeToken[] | null)[]> = ref([])
+
+/** Boolean tracking if the error snackbar is shown */
 const showSnackbar = ref(false)
+
+/** Reference to the textBar DOM object */
 const textBar = ref()
+
+/** Reference to the textTree DOM object */
 const textTree = ref<InstanceType<typeof TextTree> | null>(null)
+
+/** Boolean tracking if a textarea is being edited */
 const editingTextArea = ref(false)
+
+/** Number setting the target width of the sidebar */
 const sidebarWidth = ref(400)
 
+/*******************
+ * Function Definitions
+ *******************/
+
+/**
+ * Called on new generation being recieved from the TextBar
+ *
+ * @param newResponse - The newest resposne from the LLM server
+ */
 function onGenerationRecieved(newReponse: BranchResposne): void {
   latestResponse.value = newReponse
 }
 
+/**
+ * Sends a pre-made test response to the TextTree component
+ */
 function sendTestJson(): void {
   latestResponse.value = reactive({
     response: JSON.parse(JSON.stringify(testResponse)),
@@ -69,18 +101,37 @@ function sendTestJson(): void {
   })
 }
 
+/**
+ * Updates textbar's outputs with the latest branch tokens
+ *
+ * @param newOutputs - The latest tokens from the TextTree's branches
+ */
 function updateOutputs(newOutputs: (TreeToken[] | null)[]): void {
   outputs.value = newOutputs
 }
 
+/**
+ * Shows the snackbar when the generation fails
+ */
 function onGenerationFailed(): void {
   showSnackbar.value = true
 }
 
+/**
+ * Starts generation for a new branch
+ *
+ * @param index - The index of the branch to start generation for
+ */
 function generateOnNewBranch(index: number): void {
   gsap.delayedCall(0.1, () => { textBar.value.startGeneration(index) })
 }
 
+/**
+ * Updates the typedTokens of the TextTree using new input from the user
+ *
+ * @param newTokens - The new tokens updated by the user
+ * @param index - The index of the branch to update
+ */
 function textAreaUpdateOutput(newTokens: TreeToken[], index: number): void {
   typedTokens.value = [newTokens, index]
 }
