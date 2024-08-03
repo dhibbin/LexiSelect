@@ -434,12 +434,12 @@ function handleTextAreaInput(index: number, event: Event): void {
             newTokens[j].completionProb.content = newContent.substring(cursorOffset, cursorOffset + newTokens[j].completionProb.content.length)
             charDifference = 0
             break
-
           }
         }
       }
     }
 
+    // If the character difference has been reduced to 0, then the algorithm has worked, otherwise print an error to the console
     if (charDifference == 0) {
       emits("tokensUpdated", newTokens, index)
     }
