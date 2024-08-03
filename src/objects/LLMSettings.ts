@@ -132,10 +132,10 @@ export class LLMSettingsWrapper {
      */
   public static readonly rules : SettingsRules = {
     n_predict : computed(() => [
-      (v: number) : boolean | string => v >= 0 || 'n_probs must be non-negative integer',
+      (v: number) : boolean | string => v >= 0 || 'n_predict must be non-negative integer',
     ]),
     n_probs : computed(() => [
-      (v: number) : boolean | string => (v >= 0 && Number.isInteger(v)) || 'n_probs must be non-negative integer',
+      (v: number) : boolean | string => v >= 0 || 'n_probs must be non-negative integer',
     ]),
     seed : computed(() => [
       (v: number) : boolean | string => Number.isInteger(v) || 'seed must be an integer',
