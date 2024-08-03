@@ -4,7 +4,7 @@ An AI frontend that allows users precise control over output tokens.
 
 Developed during the course of an internship with [Electric Azimuth](https://www.electric-azimuth.co.uk)
 
-Currently deployed using GitHub pages: https://dhibbin.github.io/LexiSelect/ (using localhost only works on Chrome)
+Currently deployed using GitHub pages: https://dhibbin.github.io/LexiSelect/ (using `localhost` only works on Chrome)
 
 # Overview
 
