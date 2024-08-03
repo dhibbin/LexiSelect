@@ -1,20 +1,11 @@
 <template>
-  <div
-    ref="root"
-    style="position: relative; width: 100%; height: 100%; overflow: auto;"
-    @scroll="handleScroll($event.currentTarget)"
-  >
-    <TextBranch 
-      v-for="(branch, index) in branches"
-      :key="index"
-      :response-l-l-m="branch.response"
-      :previous-tokens="branch.previousTokens"
-      :trigger-new-token="branch.triggerEmptyTokens"
-      :scroll-offset="scrollOffset"
-      :is-active="activeBranch == index"
-      @new-branch="newBranchFromTokens"
-      @update-tokens="updateTokens($event, index)"
-    />  
+  <div ref="root" style="position: relative; width: 100%; height: 100%; overflow: auto;"
+    @scroll="handleScroll($event.currentTarget)">
+    <TextBranch v-for="(branch, index) in branches" :key="index" :response-l-l-m="branch.response"
+      :previous-tokens="branch.previousTokens" :trigger-new-token="branch.triggerEmptyTokens"
+      :scroll-offset="scrollOffset" :is-active="activeBranch == index" @new-branch="newBranchFromTokens"
+      :parent-div-width="root.$el?.getBoundingClientRect().width" @update-tokens="updateTokens($event, index)"
+      :sidebar-width="props.sidebarWidth" />
   </div>
 </template>
 
@@ -25,30 +16,32 @@ import type { TreeToken } from './TextBranch.vue'
 import type { LlamaInterface } from '@/objects/LlamaInterface';
 
 interface BranchParameters {
-  response : LlamaInterface | null
-  previousTokens : TreeToken[] | null
-  totalTokens : TreeToken[] | null
-  triggerEmptyTokens : boolean
+  response: LlamaInterface | null
+  previousTokens: TreeToken[] | null
+  totalTokens: TreeToken[] | null
+  triggerEmptyTokens: boolean
 }
 
 export interface BranchResposne {
-  response : LlamaInterface
-  index : number
+  response: LlamaInterface
+  index: number
 }
 
-const branches : Ref<BranchParameters[]> = ref([])
-const activeBranch : Ref<number> = ref(0)
-const scrollOffset : Ref<number> = ref(0)
+const branches: Ref<BranchParameters[]> = ref([])
+const activeBranch: Ref<number> = ref(0)
+const scrollOffset: Ref<number> = ref(0)
+const root = ref()
 
 const props = defineProps<{
-  responseLLM : BranchResposne
-  typedTokens : [TreeToken[], number]
-  textBarIsFocused : boolean
+  responseLLM: BranchResposne
+  typedTokens: [TreeToken[], number]
+  textBarIsFocused: boolean
+  sidebarWidth: number
 }>()
 
 const emits = defineEmits<{
-  updateOutputs : [outputs : (TreeToken[] | null)[]]
-  generateOnNewBranch : [index : number]
+  updateOutputs: [outputs: (TreeToken[] | null)[]]
+  generateOnNewBranch: [index: number]
 }>()
 
 defineExpose({
@@ -58,10 +51,10 @@ defineExpose({
 watch(() => props.responseLLM, () => {
   if (branches.value.length <= 0) {
     branches.value.push(reactive({
-      response : props.responseLLM.response,
-      previousTokens : null,
-      totalTokens : null,
-      triggerEmptyTokens : false
+      response: props.responseLLM.response,
+      previousTokens: null,
+      totalTokens: null,
+      triggerEmptyTokens: false
     }))
   }
   else {
@@ -76,20 +69,20 @@ watch(() => props.responseLLM, () => {
 })
 
 watch(() => branches.value, () => {
-  let outputs : (TreeToken[] | null)[] = branches.value.map((v : BranchParameters) => v.totalTokens);
-  
+  let outputs: (TreeToken[] | null)[] = branches.value.map((v: BranchParameters) => v.totalTokens);
+
   if (!props.textBarIsFocused) {
     emits("updateOutputs", outputs)
   }
-}, {deep : true})
+}, { deep: true })
 
 watch(() => props.typedTokens, () => {
-  let newTokens : TreeToken[] = []
-  
+  let newTokens: TreeToken[] = []
+
   for (let i = 0; i < props.typedTokens[0].length; i++) {
     if (props.typedTokens[0][i].completionProb.content.length != 0) {
       newTokens.push(props.typedTokens[0][i])
-    }  
+    }
     else {
       console.log("purged empty token")
     }
@@ -98,43 +91,43 @@ watch(() => props.typedTokens, () => {
   branches.value[props.typedTokens[1]].previousTokens = newTokens
   branches.value[props.typedTokens[1]].response = null
   branches.value[props.typedTokens[1]].triggerEmptyTokens = !branches.value[props.typedTokens[1]].triggerEmptyTokens
-}, {deep : true})
+}, { deep: true })
 
-function newBranchFromTokens(tokens : TreeToken[]) : void {
+function newBranchFromTokens(tokens: TreeToken[]): void {
   console.log("Recieved ", tokens.length, " tokens")
   branches.value.push(reactive({
-    response : null,
-    previousTokens : tokens,
-    totalTokens : null,
-    triggerEmptyTokens : false
+    response: null,
+    previousTokens: tokens,
+    totalTokens: null,
+    triggerEmptyTokens: false
   }))
   activeBranch.value = branches.value.length - 1
   emits("generateOnNewBranch", activeBranch.value)
 }
 
-function newBranchFromResponse(response : LlamaInterface) : void {
+function newBranchFromResponse(response: LlamaInterface): void {
   branches.value.push(reactive({
-    response : response,
-    previousTokens : null,
-    totalTokens : null,
-    triggerEmptyTokens : false
+    response: response,
+    previousTokens: null,
+    totalTokens: null,
+    triggerEmptyTokens: false
   }))
   activeBranch.value = branches.value.length - 1
 }
 
-function handleScroll(target : EventTarget | null) : void {
-  let element : HTMLElement = target as HTMLElement
+function handleScroll(target: EventTarget | null): void {
+  let element: HTMLElement = target as HTMLElement
   scrollOffset.value = element.scrollLeft
 }
 
-function updateTokens(tokens : TreeToken[], index : number) : void {
+function updateTokens(tokens: TreeToken[], index: number): void {
   branches.value[index].totalTokens = tokens
 }
 
-function removeBranch(index : number) : void {
+function removeBranch(index: number): void {
   branches.value.splice(index, 1)
   console.log(branches.value[1])
-  let outputs : (TreeToken[] | null)[] = branches.value.map((v : BranchParameters) => v.totalTokens);
+  let outputs: (TreeToken[] | null)[] = branches.value.map((v: BranchParameters) => v.totalTokens);
   emits("updateOutputs", outputs)
 }
 

@@ -105,6 +105,7 @@ export class LLMService {
     const latestReposne = await this.wrappedSendPrompt(userPrompt, systemPrompt, previousGeneration)
     this.callListeners(latestReposne.generation_settings.seed)
     
+    console.log("ello")
     // Return the response
     return latestReposne
   }

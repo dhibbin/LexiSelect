@@ -12,10 +12,9 @@
   <v-expand-transition v-if="tokens.length > 0" :rounded="false" :style="{ height: menuHeight + 'px' }">
     <v-card v-show="expand" ref="tokenMenu" :style="{
       position: 'relative', top: 0 + 'px', fontFamily: 'monospace',
-      left: (currTokPosition.left + currElementOffset - currWindow.innerWidth / 2) + 100 + 'px',
+      left: (currTokPosition.left + currElementOffset - (currWindow.innerWidth / 2) - (props.sidebarWidth / 2)) + 100 + 'px',
       height: 'min-content'
-    }" class="mx-auto animated-element" width="200"
-      @mouseleave="setExpand(false, 0.5)" @mouseenter="setExpand(true)">
+    }" class="mx-auto animated-element" width="200" @mouseleave="setExpand(false, 0.5)" @mouseenter="setExpand(true)">
       <v-list class="pa-0" dense="true">
         <v-text-field v-model="customTokenInput" label="New Token" hide-details
           @keydown.enter="newBranch(currTokIndex, customTokenInput)" />
@@ -83,6 +82,7 @@ const props = defineProps<{
   scrollOffset: number
   isActive: boolean
   triggerNewToken: boolean
+  sidebarWidth: number
 }>()
 
 const expand = ref(false)
@@ -141,7 +141,6 @@ const tokens: ComputedRef<TreeToken[]> = computed(() => {
       const listItemPadding = getVerticalPadding(exampleTokenListItem.value.$el)
       let currListHeight = exampleTextField.value?.$el.getBoundingClientRect().height + textFieldPadding +
         ((exampleTokenListItem.value?.$el.getBoundingClientRect().height + listItemPadding) * completionProbFilter(currToken).length)
-      console.log("is this a number", (completionProbFilter(currToken).length))
 
 
       if (!LLMService.instance.settings.responseTemplateTokens.includes(currToken.content)) {
@@ -156,6 +155,7 @@ const tokens: ComputedRef<TreeToken[]> = computed(() => {
   }
   return newTokens
 })
+
 
 watch(() => props.responseLLM, () => {
   if (props.responseLLM !== null) {
@@ -172,9 +172,6 @@ watch(() => props.triggerNewToken, () => {
 })
 
 onMounted(() => {
-  console.log("textarea height", exampleTextField.value?.$el.getBoundingClientRect().height)
-  console.log("v-list height", exampleTokenListItem.value?.$el.getBoundingClientRect().height)
-
   emits("updateTokens", tokens.value)
   //heightDelayedCall = gsap.to(menuHeight, {duration : 0, ease : "power1.inOut", value : 0})
   setExpand(true)
@@ -220,15 +217,12 @@ function setExpand(newValue: boolean, delay: number = 0.1): void {
   if (newValue) {
     expand.value = newValue
     expandDelayedCall?.kill()
-    console.log("expand true now")
   }
   else {
     expandDelayedCall = gsap.delayedCall(delay, function () {
       expand.value = newValue
       expandDelayedCall = null
     })
-    console.log("expand flase now")
-
   }
 }
 
