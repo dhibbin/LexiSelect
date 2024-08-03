@@ -37,6 +37,7 @@
 import { ref, type Ref, reactive, watch, onMounted } from 'vue'
 import { LLMService } from '@/objects/LLMService';
 import { type LLMSettings, LLMSettingsWrapper } from '@/objects/LLMSettings'
+import type { Type } from 'typescript';
 
 /*******************
  * Reactive varaible declarations
@@ -170,7 +171,7 @@ function newContents(label: string, hint: string, presistentHint: boolean): HTML
   let newSettingsContents: HTMLSettingsContents = {
     label: label,
     hint: hint,
-    presistentHint: presistentHint
+    presistentHint: presistentHint,
   }
   return newSettingsContents
 }

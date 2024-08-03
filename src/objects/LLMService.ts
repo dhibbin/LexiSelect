@@ -101,6 +101,8 @@ export class LLMService {
   public async sendPrompt(userPrompt : string, systemPrompt : string, 
     previousGeneration : string = "") : Promise<LlamaInterface> 
   {
+    console.log(typeof this.wrappedSettings.n_probs)
+    
     // Get the response and call the SideBar listener with the updated seed
     const latestReposne = await this.wrappedSendPrompt(userPrompt, systemPrompt, previousGeneration)
     this.callListeners(latestReposne.generation_settings.seed)
@@ -135,9 +137,9 @@ export class LLMService {
         prompt : prompt,
         system_prompt : systemPrompt,
         stop : LLMSettingsWrapper.getJsonArray(this.wrappedSettings.stoppingStrings),
-        n_predict: this.wrappedSettings.n_predict,
-        n_probs : this.wrappedSettings.n_probs,
-        seed : this.wrappedSettings.seed
+        n_predict: Number(this.wrappedSettings.n_predict),
+        n_probs : Number(this.wrappedSettings.n_probs) ,
+        seed : Number(this.wrappedSettings.seed)
       })
     })
       .then(async (response : Response) => {

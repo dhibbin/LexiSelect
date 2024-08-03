@@ -4,8 +4,7 @@
     <TextBranch v-for="(branch, index) in branches" :key="index" :response-l-l-m="branch.response"
       :previous-tokens="branch.previousTokens" :trigger-new-token="branch.triggerEmptyTokens"
       :scroll-offset="scrollOffset" :is-active="activeBranch == index" @new-branch="newBranchFromTokens"
-      :parent-div-width="root.$el?.getBoundingClientRect().width" @update-tokens="updateTokens($event, index)"
-      :sidebar-width="props.sidebarWidth" />
+      @update-tokens="updateTokens($event, index)" :sidebar-width="props.sidebarWidth" />
   </div>
 </template>
 

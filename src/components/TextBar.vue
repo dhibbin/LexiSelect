@@ -250,6 +250,7 @@ async function startGeneration(index: number = -1): Promise<void> {
 
   try {
     let output = await requestGeneration(index)
+    console.log(output)
     emits("onGenerationRecieved", reactive({
       response: output,
       index: index
