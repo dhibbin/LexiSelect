@@ -202,10 +202,13 @@ watch(() => props.branchTokens, () => {
       outputs.value.push(newOutput)
 
       // Push the new outputData to the previous responses, extending the list if it is too short
-      if (i == previousOutputs.value.length) {
+      if (i == previousOutputs.value.length || previousOutputs.value[i].length == 0) {
         previousOutputs.value.push([])
+        previousOutputs.value[i].push(newOutput.content)
       }
-      previousOutputs.value[i].push(newOutput.content)
+      else {
+        previousOutputs.value[i] = [newOutput.content]
+      }
     }
   }
 })
@@ -276,6 +279,8 @@ function onFocus(index: number, isFocused: boolean): void {
 }
 
 function newHandleTextAreaInput(index: number, event: Event): void {
+  console.log(previousOutputs.value)
+
   let oldContent = previousOutputs.value[index].shift()
   let newTokens: TreeToken[] = []
   previousOutputs.value[index].push(outputs.value[index].content)
@@ -287,6 +292,9 @@ function newHandleTextAreaInput(index: number, event: Event): void {
     let cursorOffset = (event.target as HTMLTextAreaElement).selectionStart
 
     let charOffset = 0
+
+
+    console.log(charDifference)
 
     if (charDifference > 0) {
 
