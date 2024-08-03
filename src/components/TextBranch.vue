@@ -255,9 +255,6 @@ function setMenuHeight(index: number): void {
   }
 }
 
-//TODO: Figure out why on first hover the lerp fails
-
-
 </script>
 
 <style scoped>
