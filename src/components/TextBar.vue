@@ -279,8 +279,6 @@ function onFocus(index: number, isFocused: boolean): void {
 }
 
 function newHandleTextAreaInput(index: number, event: Event): void {
-  console.log(previousOutputs.value)
-
   let oldContent = previousOutputs.value[index].shift()
   let newTokens: TreeToken[] = []
   previousOutputs.value[index].push(outputs.value[index].content)
@@ -292,9 +290,6 @@ function newHandleTextAreaInput(index: number, event: Event): void {
     let cursorOffset = (event.target as HTMLTextAreaElement).selectionStart
 
     let charOffset = 0
-
-
-    console.log(charDifference)
 
     if (charDifference > 0) {
 
