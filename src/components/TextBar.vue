@@ -283,7 +283,7 @@ function newHandleTextAreaInput(index: number, event: Event): void {
   previousOutputs.value[index].push(outputs.value[index].content)
 
   if (props.branchTokens[index] !== null && oldContent !== undefined) {
-    newTokens = props.branchTokens[index]
+    newTokens = props.branchTokens[index]!
     let newContent = outputs.value[index].content
     let charDifference = newContent.length - oldContent.length
     let cursorOffset = (event.target as HTMLTextAreaElement).selectionStart

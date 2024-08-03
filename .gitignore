@@ -29,7 +29,7 @@ Temporary Items
 
 # VueJS Gitignore from https://erresen.github.io/vue/js/git/2020/07/08/vue-js-gitigore.html
 node_modules
-/dist
+#/dist
 
 # local env files
 .env.local
