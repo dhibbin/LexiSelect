@@ -28,7 +28,7 @@
               <v-row no-gutters>
                 <v-textarea v-model="outputs[index].content" class="fill-height d-flex flex-column pa-2"
                   :label="'Output ' + (index + 1).toString()" :rows="rows" no-resize hide-details
-                  @update:focused="onFocus(index, $event)" @input="newHandleTextAreaInput(index, $event)" />
+                  @update:focused="onFocus($event)" @input="handleTextAreaInput(index, $event)" />
               </v-row>
               <v-row no-gutters>
                 <v-btn style="width: 70%;" :loading="outputs[index].loading" :timeout="100" color="blue"
@@ -64,7 +64,7 @@
 
 <script setup lang="ts">
 import { LLMService } from '@/objects/LLMService';
-import { ref, type Ref, watch, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, type Ref, watch, reactive, onMounted, onUnmounted, onUpdated } from 'vue';
 import type { TreeToken } from './TextBranch.vue'
 import { type LlamaInterface } from '../objects/LlamaInterface';
 import { type BranchResposne } from './TextTree.vue';
@@ -176,6 +176,10 @@ onUnmounted(() => {
   window.removeEventListener('mouseup', () => { isDragging.value = false })
 });
 
+onUpdated(() => {
+  console.log(mouseOffset.value)
+})
+
 /*******************
  * Watchers
  *******************/
@@ -213,43 +217,84 @@ watch(() => props.branchTokens, () => {
   }
 })
 
+/**
+ * Watches the tabheight
+ *
+ * When the tabheight changes, update the lines shown within the textarea
+ */
 watch(() => tabHeight.value, () => {
+  // Calculate how many lines can fit within the pixel height of the textarea
   const pixelLineHeight = parseInt(window.getComputedStyle(systemTextArea.value?.$el).lineHeight, 10)
   rows.value = Math.floor(tabHeight.value / pixelLineHeight) - 4
 })
 
+/*******************
+ * Function Definitions
+ *******************/
+
+/**
+ * Emits removeBranch with the provided index if that branch isn't loading
+ *
+ * @param index - The index of the branch to remove
+ */
 function removeBranch(index: number): void {
   if (!outputs.value[index].loading) {
     emits("removeBranch", index)
   }
 }
 
+/**
+ * Calculate the offset of the mouse from the drag button and set isDragging to true
+ *
+ * @param event : Mouse event from the dragging button
+ */
 function dragMouseDown(event: MouseEvent): void {
   let element: HTMLElement = event.currentTarget as HTMLElement
   mouseOffset.value = (window.innerHeight - event.clientY) - (window.innerHeight - element.getBoundingClientRect().bottom)
   isDragging.value = true
 }
 
+/**
+ * Change the tabheight as the mouse moves
+ *
+ * @param event : Mouse event from the dragging button
+ */
 function dragMouseMove(event: MouseEvent): void {
   if (isDragging.value) {
     tabHeight.value = (window.innerHeight - event.clientY) - mouseOffset.value
   }
 }
 
+/**
+ * Request generation from LLMService 
+ *
+ * @param index - The index of the branch to use as previousOutput in the sendPrompt function call
+ * - -1 Sets previousOutput to an empty string
+ */
 async function requestGeneration(index: number = -1): Promise<LlamaInterface> {
+  // Get the previous output of the branch if continuing generation
   let previousOutput = ""
   if (index !== -1) {
     previousOutput = outputs.value[index].content
   }
 
+  // Return the response from the LLMService singleton
   return await LLMService.instance.sendPrompt(
     userPrompt.value, systemPrompt.value, previousOutput)
 }
 
+/**
+ * Start LLM generation for a branch
+ *
+ * @param index - The index of the branch to start generation for
+ * - -1 Creates a new branch
+ */
 async function startGeneration(index: number = -1): Promise<void> {
+  // Change that branch's generation button to the loading state
   setLoading(true, index)
 
   try {
+    // Emit the new response if successful
     let output = await requestGeneration(index)
     emits("onGenerationRecieved", reactive({
       response: output,
@@ -257,14 +302,22 @@ async function startGeneration(index: number = -1): Promise<void> {
     }))
   }
   catch (error) {
+    // If unsuccessful print the error to the console
     console.log(error)
     emits("generationFailed")
   }
   finally {
+    // Set loading to false once generation fails or completes
     setLoading(false, index)
   }
 }
 
+/**
+ * Sets loading to true on the pressed generation button 
+ *
+ * @param index - The branch index of the button to change the loading value of
+ * - -1 Sets loading of the new generation button in the Input tab to true 
+ */
 function setLoading(isLoading: boolean, index: number = -1): void {
   if (index != -1) {
     outputs.value[index].loading = isLoading
@@ -274,32 +327,56 @@ function setLoading(isLoading: boolean, index: number = -1): void {
   }
 }
 
-function onFocus(index: number, isFocused: boolean): void {
+/**
+ * Emits editingTextArea with the provided boolean value
+ *
+ * @param isFocused - The value to provide with the emit
+ */
+function onFocus(isFocused: boolean): void {
   emits("editingTextArea", isFocused)
 }
 
-function newHandleTextAreaInput(index: number, event: Event): void {
+/**
+ * Handles interaction between editing the textarea and changing the contents of the corresponding TextBranch
+ *
+ * @param index - The index of the branch that is being edited
+ * @param event - The event from the textarea
+ */
+function handleTextAreaInput(index: number, event: Event): void {
+  // Initialise variables for the previous content and list of new tokens
   let oldContent = previousOutputs.value[index].shift()
   let newTokens: TreeToken[] = []
+
+  // Push the new content of the textarea to previousOutputs
   previousOutputs.value[index].push(outputs.value[index].content)
 
+  // If the associated branchtokens aren't null
   if (props.branchTokens[index] !== null && oldContent !== undefined) {
+    // Set newtokens to the associated tokens within this component's props
     newTokens = props.branchTokens[index]!
+
+    // Get the new content of the textarea and the character difference between this and the old content
     let newContent = outputs.value[index].content
     let charDifference = newContent.length - oldContent.length
-    let cursorOffset = (event.target as HTMLTextAreaElement).selectionStart
 
+    // Get the cursor offset within the textarea (used to locate change) and initalise the character offset
+    let cursorOffset = (event.target as HTMLTextAreaElement).selectionStart
     let charOffset = 0
 
     if (charDifference > 0) {
-
+      // If new content has been added to the textarea set the offset to start at the end of the new content
       charOffset = newContent.length
+
+      // Move backwards through the tokens of the textarea
       for (let i = newTokens.length - 1; i > 0; i--) {
+        // Move the offset to the start of the currrent token 
         let endCharOffset = charOffset
         let tokenLength = newTokens[i].completionProb.content.length
         charOffset -= tokenLength
 
+        // If the cursor offset is ahead of the character offset, then the change is within this token
         if (charOffset <= cursorOffset && charDifference > 0) {
+          // Change the token content to a substring starting at the beginning of the token - character difference and ending at the offset at the start of this iteration of the for loop
           newTokens[i].completionProb.content = newContent.substring(endCharOffset - (tokenLength + charDifference), endCharOffset)
           charOffset = endCharOffset - newTokens[i].completionProb.content.length
           charDifference = 0
@@ -308,28 +385,44 @@ function newHandleTextAreaInput(index: number, event: Event): void {
       }
     }
     else {
+      // If content has been removed from the textarea, parse through the content starting at index 0
       for (let i = 0; i < newTokens.length; i++) {
+        // Move the offset to the end of the current token
         let startCharOffset = charOffset
         let tokenLength = newTokens[i].completionProb.content.length
         charOffset += tokenLength
 
+        // If the offset moves beyond the length of the new content
         if (charOffset > newContent.length) {
+          // Set the current content to the remainder of the new content
           newTokens[i].completionProb.content = newContent.substring(startCharOffset)
+
+          // Set all subsequent tokens to empty strings
           for (let j = i + 1; j < newTokens.length; j++) {
             newTokens[j].completionProb.content = ""
           }
+
+          // Break out of for loop
           charDifference = 0
           break
         }
         else if (charOffset > cursorOffset && charDifference < 0) {
+          // If the cursor offset is within the current token content then we have found the change
+
+          // If the negative change is contained within the current token
           if (!(cursorOffset + Math.abs(charDifference) >= charOffset)) {
+            // Change the current token's contents and break the for loop
             newTokens[i].completionProb.content = newContent.substring(startCharOffset, charOffset + charDifference)
             charDifference = 0
             break
           }
           else {
+            // Otherwise the negative change occurs between multiple tokens
+
+            // Set the current token content from its start to the beginning of the negative changes
             newTokens[i].completionProb.content = newContent.substring(startCharOffset, cursorOffset)
 
+            // Decrease the absolute character difference using token lengths until the character difference is less than the current token length
             let j = i + 1
             while (Math.abs(charDifference) > newTokens[j].completionProb.content.length) {
               charDifference += newTokens[j].completionProb.content.length
@@ -337,9 +430,9 @@ function newHandleTextAreaInput(index: number, event: Event): void {
               j++
             }
 
+            // Once the final changed token has been found, set the content to a substring between the cursor offset and that token's length 
             newTokens[j].completionProb.content = newContent.substring(cursorOffset, cursorOffset + newTokens[j].completionProb.content.length)
             charDifference = 0
-
             break
 
           }
